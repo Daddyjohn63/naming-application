@@ -4,10 +4,10 @@ import { v } from "convex/values"
 export default defineSchema({
   users: defineTable({
     clerkUserId: v.string(),
-    firstName: v.string(),
-    lastName: v.string(),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
     email: v.string(),
-    imageUrl: v.string(),
+    imageUrl: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_clerkUserId", ["clerkUserId"]),
@@ -26,5 +26,7 @@ export default defineSchema({
     catImageUrl: v.optional(v.id("_storage")),
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_userId_createdAt", ["userId", "createdAt"]),
+  })
+    .index("by_userId_createdAt", ["userId", "createdAt"])
+    .index("by_userId_slug", ["userId", "slug"]),
 })
