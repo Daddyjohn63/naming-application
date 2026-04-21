@@ -36,7 +36,7 @@ export default function RootLayout({
     >
       <body>
         <ClerkProvider>
-          {/* <header className="flex h-16 items-center justify-end gap-4 p-4">
+          <header className="flex h-16 items-center justify-end gap-4 p-4">
             <Show when="signed-out">
               <SignInButton />
               <SignUpButton>
@@ -48,7 +48,7 @@ export default function RootLayout({
             <Show when="signed-in">
               <UserButton />
             </Show>
-          </header> */}
+          </header>
           <Providers>{children}</Providers>
         </ClerkProvider>
       </body>
