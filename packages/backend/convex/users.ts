@@ -81,6 +81,21 @@ export const upsertFromClerk = internalMutation({
   },
 })
 
+export const deleteFromClerk = internalMutation({
+  args: { clerkUserId: v.string() },
+  async handler(ctx, { clerkUserId }) {
+    const user = await userByClerkUserId(ctx, clerkUserId)
+
+    if (user !== null) {
+      await ctx.db.delete(user._id)
+    } else {
+      console.warn(
+        `Can't delete user, there is none for Clerk user ID: ${clerkUserId}`
+      )
+    }
+  },
+})
+
 export async function getCurrentUserOrThrow(ctx: QueryCtx) {
   const userRecord = await getCurrentUser(ctx)
   if (!userRecord) throw new Error("Can't get current user")
