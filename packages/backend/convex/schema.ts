@@ -23,7 +23,7 @@ export default defineSchema({
     familyContext: v.string(),
     uniqueContext: v.string(),
     effableContext: v.string(),
-    catImageUrl: v.optional(v.id("_storage")),
+    catImageId: v.optional(v.id("_storage")),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
