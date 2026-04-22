@@ -7,6 +7,7 @@ import {
   useUIMessages,
   type UIMessage,
 } from "@convex-dev/agent/react"
+import { stripDisplayMarkdown } from "@/lib/strip-markdown"
 import { cn } from "@workspace/ui/lib/utils"
 import { useMutation } from "convex/react"
 import { useState } from "react"
@@ -143,7 +144,9 @@ function ThreadChat({ threadId }: { threadId: string }) {
 
 function ChatBubble({ message }: { message: UIMessage }) {
   const isUser = message.role === "user"
-  const [visibleText] = useSmoothText(message.text, {
+  const rawText = message.text
+  const textForDisplay = isUser ? rawText : stripDisplayMarkdown(rawText)
+  const [visibleText] = useSmoothText(textForDisplay, {
     startStreaming: message.status === "streaming",
   })
 

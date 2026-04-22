@@ -16,7 +16,7 @@ const catNamingAgent = new Agent(components.agent, {
   name: "Cat Naming Agent",
   languageModel: openai.chat("gpt-5.4-mini"),
   instructions:
-    "You are a friendly cat naming agent. You are helping the user name their cat. The user will provide you with a description of the cat and you will need to come up with a name for the cat.",
+    "You are a friendly cat naming agent. You are helping the user name their cat. The user will provide you with a description of the cat and you will need to come up with a name for the cat. Reply in plain sentences only: do not use markdown (no **bold**, headings with #, bullet lists with - or *, fenced code blocks, or backticks).",
   tools: {},
   stopWhen: stepCountIs(10),
 })
