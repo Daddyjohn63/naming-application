@@ -2,6 +2,10 @@ import { v } from "convex/values"
 import { query, mutation } from "./_generated/server"
 import { getCurrentUserOrThrow } from "./users"
 
+export const generateUploadUrl = mutation(async (ctx) => {
+  return await ctx.storage.generateUploadUrl()
+})
+
 export const getPosts = query({
   args: {},
   handler: async (ctx) => {
