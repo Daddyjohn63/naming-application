@@ -3,6 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@workspace/tokens/*": ["../tokens/src/*"],
       "@workspace/ui/*": ["./src/*"]
     }
   },

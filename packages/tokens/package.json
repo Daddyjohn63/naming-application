@@ -1,0 +1,25 @@
+{
+  "name": "@workspace/tokens",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "generate-css": "tsx scripts/generate-semantic-css.ts",
+    "lint": "eslint",
+    "format": "prettier --write \"**/*.{ts,mjs}\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^25.1.0",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "eslint": "^9.39.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "exports": {
+    "./semantic": "./src/semantic.ts",
+    "./generated/semantic-variables.css": "./src/generated/semantic-variables.css",
+    "./generated/*": "./src/generated/*.css"
+  }
+}
