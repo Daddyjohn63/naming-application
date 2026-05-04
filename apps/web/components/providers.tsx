@@ -5,6 +5,8 @@ import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
 import { ConvexReactClient } from "convex/react"
 import { ConvexProviderWithClerk } from "convex/react-clerk"
 import { useAuth } from "@clerk/nextjs"
+import { TooltipProvider } from "@workspace/ui/components/tooltip"
+import { Toaster } from "@workspace/ui/components/sonner"
 
 if (!process.env.NEXT_PUBLIC_CONVEX_URL) {
   throw new Error("NEXT_PUBLIC_CONVEX_URL is not set")
@@ -26,7 +28,10 @@ function Providers({
         {...props}
       >
         <ThemeHotkey />
-        {children}
+        <TooltipProvider>
+          {children}
+          <Toaster />
+        </TooltipProvider>
       </NextThemesProvider>
     </ConvexProviderWithClerk>
   )
