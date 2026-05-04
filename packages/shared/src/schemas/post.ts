@@ -6,7 +6,7 @@ import {
   MAX_POST_NAME_LENGTH,
   MAX_POST_SLUG_LENGTH,
   MAX_POST_TITLE_LENGTH,
-} from "../constants/limits.js"
+} from "../constants/limits"
 
 /** Shared validation for Convex `posts` string fields (forms, APIs, agents). */
 export const postFieldsSchema = z.object({
