@@ -2,9 +2,8 @@
 
 import * as React from "react"
 
+import { NavCats } from "@workspace/ui/components/nav-cats"
 import { NavMain } from "@workspace/ui/components/nav-main"
-import { NavProjects } from "@workspace/ui/components/nav-projects"
-import { NavUser } from "@workspace/ui/components/nav-user"
 import { TeamSwitcher } from "@workspace/ui/components/team-switcher"
 import {
   Sidebar,
@@ -13,38 +12,33 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@workspace/ui/components/sidebar"
-import { GalleryVerticalEndIcon, AudioLinesIcon, TerminalIcon, TerminalSquareIcon, BotIcon, BookOpenIcon, Settings2Icon, FrameIcon, PieChartIcon, MapIcon } from "lucide-react"
+import {
+  BotIcon,
+  BookOpenIcon,
+  Cat,
+  GalleryVerticalEndIcon,
+  AudioLinesIcon,
+  TerminalIcon,
+  TerminalSquareIcon,
+  Settings2Icon,
+} from "lucide-react"
 
-// This is sample data.
+// Sample data for sidebar shell (teams + nav). User profile comes from `footerSlot`.
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   teams: [
     {
       name: "Acme Inc",
-      logo: (
-        <GalleryVerticalEndIcon
-        />
-      ),
+      logo: <GalleryVerticalEndIcon />,
       plan: "Enterprise",
     },
     {
       name: "Acme Corp.",
-      logo: (
-        <AudioLinesIcon
-        />
-      ),
+      logo: <AudioLinesIcon />,
       plan: "Startup",
     },
     {
       name: "Evil Corp.",
-      logo: (
-        <TerminalIcon
-        />
-      ),
+      logo: <TerminalIcon />,
       plan: "Free",
     },
   ],
@@ -52,10 +46,7 @@ const data = {
     {
       title: "Playground",
       url: "#",
-      icon: (
-        <TerminalSquareIcon
-        />
-      ),
+      icon: <TerminalSquareIcon />,
       isActive: true,
       items: [
         {
@@ -75,10 +66,7 @@ const data = {
     {
       title: "Models",
       url: "#",
-      icon: (
-        <BotIcon
-        />
-      ),
+      icon: <BotIcon />,
       items: [
         {
           title: "Genesis",
@@ -97,10 +85,7 @@ const data = {
     {
       title: "Documentation",
       url: "#",
-      icon: (
-        <BookOpenIcon
-        />
-      ),
+      icon: <BookOpenIcon />,
       items: [
         {
           title: "Introduction",
@@ -123,10 +108,7 @@ const data = {
     {
       title: "Settings",
       url: "#",
-      icon: (
-        <Settings2Icon
-        />
-      ),
+      icon: <Settings2Icon />,
       items: [
         {
           title: "General",
@@ -147,47 +129,64 @@ const data = {
       ],
     },
   ],
-  projects: [
+  /** Placeholder cat rows when `catsSlot` is not provided (e.g. Storybook / design preview). */
+  cats: [
     {
-      name: "Design Engineering",
+      name: "Whiskers",
       url: "#",
-      icon: (
-        <FrameIcon
-        />
-      ),
+      icon: <Cat className="size-4 shrink-0" />,
     },
     {
-      name: "Sales & Marketing",
+      name: "Mittens",
       url: "#",
-      icon: (
-        <PieChartIcon
-        />
-      ),
+      icon: <Cat className="size-4 shrink-0" />,
     },
     {
-      name: "Travel",
+      name: "Luna",
       url: "#",
-      icon: (
-        <MapIcon
-        />
-      ),
+      icon: <Cat className="size-4 shrink-0" />,
     },
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+/**
+ * Props for the shell sidebar. Everything except `footerSlot` is forwarded to `Sidebar`.
+ *
+ * Why `footerSlot` exists:
+ * - This file lives in `packages/ui`, which intentionally does NOT depend on `@clerk/nextjs`
+ *   (or other app-specific SDKs).
+ * - The Next.js app (`apps/web`) *does* have Clerk installed, so it passes React nodes here —
+ *   that pattern is sometimes called a "slot" or "render prop": the design system owns layout;
+ *   the app injects auth/UI that only the app can import.
+ */
+export type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
+  /**
+   * Footer content (profile / auth). Passed from the app so `packages/ui` never imports Clerk.
+   * Example: Clerk user row with `<UserButton />` + name/email from `useUser()`.
+   */
+  footerSlot?: React.ReactNode
+  /**
+   * Replaces the default sample “Cats” block under main nav — pass Convex-backed lists or other
+   * custom sidebar content without pulling data dependencies into `@workspace/ui`.
+   */
+  catsSlot?: React.ReactNode
+}
+
+export function AppSidebar({
+  footerSlot,
+  catsSlot,
+  ...sidebarProps
+}: AppSidebarProps) {
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" {...sidebarProps}>
       <SidebarHeader>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        {catsSlot ?? <NavCats cats={data.cats} />}
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
+      <SidebarFooter>{footerSlot}</SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )

@@ -502,6 +502,9 @@ function SidebarMenuButton({
 } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const Comp = asChild ? Slot.Root : "button"
   const { isMobile, state } = useSidebar()
+  /** Radix Tooltip + Portal can desync SSR vs client IDs; mount tooltips after hydrate. */
+  const [tooltipMounted, setTooltipMounted] = React.useState(false)
+  React.useEffect(() => setTooltipMounted(true), [])
 
   const button = (
     <Comp
@@ -514,7 +517,7 @@ function SidebarMenuButton({
     />
   )
 
-  if (!tooltip) {
+  if (!tooltip || !tooltipMounted) {
     return button
   }
 
@@ -587,10 +590,8 @@ function SidebarMenuSkeleton({
 }: React.ComponentProps<"div"> & {
   showIcon?: boolean
 }) {
-  // Random width between 50 to 90%.
-  const [width] = React.useState(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`
-  })
+  // Fixed width — `Math.random()` in state caused different server vs client HTML during hydration.
+  const skeletonTextWidth = "70%"
 
   return (
     <div
@@ -610,7 +611,7 @@ function SidebarMenuSkeleton({
         data-sidebar="menu-skeleton-text"
         style={
           {
-            "--skeleton-width": width,
+            "--skeleton-width": skeletonTextWidth,
           } as React.CSSProperties
         }
       />

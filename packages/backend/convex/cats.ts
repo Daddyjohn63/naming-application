@@ -1,6 +1,6 @@
 import { v } from "convex/values"
 import { query, mutation, type QueryCtx } from "./_generated/server"
-import { getCurrentUserOrThrow } from "./users"
+import { getCurrentUser, getCurrentUserOrThrow } from "./users"
 import type { Doc } from "./_generated/dataModel"
 
 async function catWithStorageUrls(ctx: QueryCtx, cat: Doc<"cats">) {
@@ -41,6 +41,42 @@ export const getCats = query({
         const user = await ctx.db.get(cat.userId)
         const withUrls = await catWithStorageUrls(ctx, cat)
         return { ...withUrls, user }
+      }),
+    )
+  },
+})
+
+/** Current user's cats for dashboard sidebar (lightweight; optional resolved photo URL). */
+export const getCatsForSidebar = query({
+  args: {},
+  handler: async (ctx) => {
+    const currentUser = await getCurrentUser(ctx)
+    if (currentUser === null) {
+      return []
+    }
+
+    const cats = await ctx.db
+      .query("cats")
+      .withIndex("by_userId_createdAt", (q) => q.eq("userId", currentUser._id))
+      .collect()
+
+    return Promise.all(
+      cats.map(async (cat) => {
+        const rawPhotoUrl =
+          cat.photoStorageId !== undefined
+            ? await ctx.storage.getUrl(cat.photoStorageId)
+            : undefined
+        const photoUrl =
+          rawPhotoUrl !== undefined && rawPhotoUrl !== ""
+            ? rawPhotoUrl
+            : undefined
+
+        return {
+          _id: cat._id,
+          name: cat.title,
+          slug: cat.slug,
+          ...(photoUrl !== undefined ? { photoUrl } : {}),
+        }
       }),
     )
   },

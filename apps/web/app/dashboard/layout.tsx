@@ -2,6 +2,8 @@
 
 import Link from "next/link"
 
+import { SidebarCatsNav } from "@/components/sidebar-cats-nav"
+import { UserButtonClerk } from "@/components/userbutton"
 import { AppSidebar } from "@workspace/ui/components/app-sidebar"
 import {
   Breadcrumb,
@@ -25,7 +27,14 @@ export default function DashboardLayout({
 }>) {
   return (
     <SidebarProvider>
-      <AppSidebar />
+      {/*
+        AppSidebar lives in `@workspace/ui` and cannot import Clerk.
+        Passing `footerSlot` injects Clerk's user control from this app layer.
+      */}
+      <AppSidebar
+        footerSlot={<UserButtonClerk />}
+        catsSlot={<SidebarCatsNav />}
+      />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4">
