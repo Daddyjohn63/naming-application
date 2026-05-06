@@ -23,6 +23,7 @@ export const DashboardLayout = async ({
           <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
             <SidebarTrigger />
           </header>
+
           <div className="flex flex-1 flex-col">{children}</div>
         </SidebarInset>
       </SidebarProvider>
