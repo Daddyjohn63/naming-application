@@ -53,32 +53,24 @@ export const DashboardSidebar = () => {
   }
 
   return (
-    <Sidebar className="group" collapsible="icon">
-      {/* <SidebarTrigger /> */}
+    <Sidebar collapsible="icon">
       <SidebarHeader>
-        <SidebarContent>
-          {/* User support items */}
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {sidebarHeaderItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive(item.url)}
-                      tooltip={item.title}
-                    >
-                      <Link href={item.url}>
-                        <item.icon className="size-8" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
+        <SidebarMenu>
+          {sidebarHeaderItems.map((item) => (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive(item.url)}
+                tooltip={item.title}
+              >
+                <Link href={item.url}>
+                  <item.icon />
+                  <span>{item.title}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         {/* User support items */}
@@ -94,7 +86,7 @@ export const DashboardSidebar = () => {
                     tooltip={item.title}
                   >
                     <Link href={item.url}>
-                      <item.icon className="size-8" />
+                      <item.icon />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -111,7 +103,7 @@ export const DashboardSidebar = () => {
               {cats === undefined ? (
                 <SidebarMenuItem>
                   <SidebarMenuButton disabled className="opacity-60">
-                    <Cat className="size-8 shrink-0" aria-hidden />
+                    <Cat aria-hidden />
                     <span>Loading…</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -119,7 +111,7 @@ export const DashboardSidebar = () => {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip="New cat">
                     <Link href="/dashboard/cats/new-cat">
-                      <Cat className="size-8 shrink-0" aria-hidden />
+                      <Cat aria-hidden />
                       <span>Add a cat</span>
                     </Link>
                   </SidebarMenuButton>
@@ -146,10 +138,7 @@ export const DashboardSidebar = () => {
                               className="size-8 shrink-0 rounded object-cover"
                             />
                           ) : (
-                            <Cat
-                              className="size-8 shrink-0"
-                              aria-hidden
-                            />
+                            <Cat aria-hidden />
                           )}
                           <span className="truncate">{cat.name}</span>
                         </Link>

@@ -1,11 +1,8 @@
 import { AuthGuard } from "@/modules/auth/ui/components/auth-guard"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@workspace/ui/components/sidebar"
-import { cookies } from "next/headers"
+import { DashboardHeader } from "@/modules/dashboard/ui/components/dashboard-header"
 import { DashboardSidebar } from "@/modules/dashboard/ui/components/dashboard-sidebar"
+import { SidebarInset, SidebarProvider } from "@workspace/ui/components/sidebar"
+import { cookies } from "next/headers"
 
 export const DashboardLayout = async ({
   children,
@@ -20,10 +17,7 @@ export const DashboardLayout = async ({
       <SidebarProvider defaultOpen={defaultOpen}>
         <DashboardSidebar />
         <SidebarInset className="flex flex-1 flex-col">
-          <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger />
-          </header>
-
+          <DashboardHeader />
           <div className="flex flex-1 flex-col">{children}</div>
         </SidebarInset>
       </SidebarProvider>

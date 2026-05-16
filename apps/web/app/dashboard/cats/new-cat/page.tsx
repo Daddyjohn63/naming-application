@@ -67,9 +67,7 @@ export default function NewCatPage() {
               name="title"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field
-                  data-invalid={fieldState.invalid ? true : undefined}
-                >
+                <Field data-invalid={fieldState.invalid ? true : undefined}>
                   <FieldLabel htmlFor="new-cat-title">Name</FieldLabel>
                   <Input
                     {...field}
@@ -92,9 +90,7 @@ export default function NewCatPage() {
               name="description"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field
-                  data-invalid={fieldState.invalid ? true : undefined}
-                >
+                <Field data-invalid={fieldState.invalid ? true : undefined}>
                   <FieldLabel htmlFor="new-cat-description">
                     About this cat
                   </FieldLabel>
@@ -120,9 +116,7 @@ export default function NewCatPage() {
               name="slug"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field
-                  data-invalid={fieldState.invalid ? true : undefined}
-                >
+                <Field data-invalid={fieldState.invalid ? true : undefined}>
                   <FieldLabel htmlFor="new-cat-slug">
                     URL slug (optional)
                   </FieldLabel>
@@ -134,8 +128,8 @@ export default function NewCatPage() {
                     aria-invalid={fieldState.invalid}
                   />
                   <FieldDescription>
-                    Lowercase letters, numbers, and hyphens only. Leave empty
-                    to skip.
+                    Lowercase letters, numbers, and hyphens only. Leave empty to
+                    skip.
                   </FieldDescription>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
