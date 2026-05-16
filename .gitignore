@@ -36,3 +36,21 @@ npm-debug.log*
 *.pem
 
 NOTES/
+
+# Cursor
+.cursor/
+
+# Cursor Skills
+.cursor/skills/
+
+#plans/
+plans/
+
+#requirements/
+requirements/
+
+#domain/
+domain/
+
+#notes/
+notes/
