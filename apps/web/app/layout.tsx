@@ -29,12 +29,12 @@ export default function RootLayout({
         geist.variable
       )}
     >
-      <body>
+      <body className="flex min-h-svh flex-col">
         <ClerkProvider>
           <Providers>
             <ConditionalRootHeader />
 
-            {children}
+            <div className="flex flex-1 flex-col">{children}</div>
           </Providers>
         </ClerkProvider>
       </body>

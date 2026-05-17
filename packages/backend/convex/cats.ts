@@ -46,6 +46,60 @@ export const getCats = query({
   },
 })
 
+/** Skeleton description for drafts until KB‑003 collects the real story client-side. */
+const DRAFT_DESCRIPTION_PLACEHOLDER =
+  "Add your cat portrait and story in the next steps. You can replace this anytime before the summary is approved."
+
+/** Current user's cats for dashboard cards — ordered newest first with optional photo URL. */
+export const listMyCatsForDashboard = query({
+  args: {},
+  handler: async (ctx) => {
+    const currentUser = await getCurrentUser(ctx)
+    if (currentUser === null) {
+      return []
+    }
+
+    const cats = await ctx.db
+      .query("cats")
+      .withIndex("by_userId_createdAt", (q) =>
+        q.eq("userId", currentUser._id),
+      )
+      .collect()
+
+    cats.sort((a, b) => b.createdAt - a.createdAt)
+
+    return Promise.all(
+      cats.map(async (cat) => {
+        const withUrls = await catWithStorageUrls(ctx, cat)
+        return {
+          _id: withUrls._id,
+          title: withUrls.title,
+          ceremonyStep: withUrls.ceremonyStep,
+          createdAt: withUrls.createdAt,
+          updatedAt: withUrls.updatedAt,
+          ...(withUrls.photoUrl !== undefined ? { photoUrl: withUrls.photoUrl } : {}),
+        }
+      }),
+    )
+  },
+})
+
+/** Full cat doc for `/cats/[catId]` when the signed-in user owns it. Otherwise `null`. */
+export const getCatByIdForOwner = query({
+  args: { catId: v.id("cats") },
+  handler: async (ctx, { catId }) => {
+    const currentUser = await getCurrentUser(ctx)
+    if (currentUser === null) {
+      return null
+    }
+    const cat = await ctx.db.get(catId)
+    if (cat === null || cat.userId !== currentUser._id) {
+      return null
+    }
+    return await catWithStorageUrls(ctx, cat)
+  },
+})
+
 /** Current user's cats for dashboard sidebar (lightweight; optional resolved photo URL). */
 export const getCatsForSidebar = query({
   args: {},
@@ -172,6 +226,35 @@ export const createCat = mutation({
       description: args.description,
       slug: args.slug,
       photoStorageId: args.photoStorageId,
+      ceremonyStep: "draft",
+      portraitRegenerationsUsed: 0,
+      createdAt: now,
+      updatedAt: now,
+    })
+  },
+})
+
+/**
+ * One-shot draft row for KB-002 (“Add a cat” without KB-003 form). Navigates to `/cats/[id]`.
+ */
+export const createDraftCat = mutation({
+  args: {},
+  handler: async (ctx): Promise<Doc<"cats">["_id"]> => {
+    const currentUser = await getCurrentUserOrThrow(ctx)
+    const now = Date.now()
+    const siblings = await ctx.db
+      .query("cats")
+      .withIndex("by_userId_createdAt", (q) =>
+        q.eq("userId", currentUser._id),
+      )
+      .collect()
+    const n = siblings.length + 1
+    const title =
+      n === 1 ? "Your first naming ceremony" : `Naming ceremony ${n}`
+    return await ctx.db.insert("cats", {
+      userId: currentUser._id,
+      title,
+      description: DRAFT_DESCRIPTION_PLACEHOLDER,
       ceremonyStep: "draft",
       portraitRegenerationsUsed: 0,
       createdAt: now,

@@ -23,10 +23,7 @@ export function SidebarCatsNav() {
   }
 
   const cats: NavCatItem[] = catsFromApi.map((cat) => {
-    const url =
-      cat.slug !== undefined && cat.slug !== ""
-        ? `/dashboard/cats/${encodeURIComponent(cat.slug)}`
-        : "/dashboard/cats"
+    const url = `/cats/${encodeURIComponent(cat._id)}`
 
     return {
       id: cat._id,
