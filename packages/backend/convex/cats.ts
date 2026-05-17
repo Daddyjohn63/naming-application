@@ -1,21 +1,29 @@
 import { v } from "convex/values"
 import { query, mutation, type QueryCtx } from "./_generated/server"
 import { getCurrentUser, getCurrentUserOrThrow } from "./users"
-import type { Doc } from "./_generated/dataModel"
+import type { Doc, Id } from "./_generated/dataModel"
+
+async function resolveStoragePublicUrl(
+  ctx: QueryCtx,
+  storageId: Id<"_storage"> | undefined,
+): Promise<string | undefined> {
+  if (storageId === undefined) {
+    return undefined
+  }
+  const url = (await ctx.storage.getUrl(storageId)) ?? ""
+  return url === "" ? undefined : url
+}
 
 async function catWithStorageUrls(ctx: QueryCtx, cat: Doc<"cats">) {
-  const photoUrl =
-    cat.photoStorageId !== undefined
-      ? ((await ctx.storage.getUrl(cat.photoStorageId)) ?? "")
-      : undefined
-  const characterImageUrl =
-    cat.characterImageStorageId !== undefined
-      ? ((await ctx.storage.getUrl(cat.characterImageStorageId)) ?? "")
-      : undefined
-  const certificateUrl =
-    cat.certificateStorageId !== undefined
-      ? ((await ctx.storage.getUrl(cat.certificateStorageId)) ?? "")
-      : undefined
+  const photoUrl = await resolveStoragePublicUrl(ctx, cat.photoStorageId)
+  const characterImageUrl = await resolveStoragePublicUrl(
+    ctx,
+    cat.characterImageStorageId,
+  )
+  const certificateUrl = await resolveStoragePublicUrl(
+    ctx,
+    cat.certificateStorageId,
+  )
 
   return {
     ...cat,
@@ -70,16 +78,15 @@ export const listMyCatsForDashboard = query({
 
     return Promise.all(
       cats.map(async (cat) => {
-        const withUrls = await catWithStorageUrls(ctx, cat)
+        const photoRaw = await resolveStoragePublicUrl(ctx, cat.photoStorageId)
         return {
-          _id: withUrls._id,
-          title: withUrls.title,
-          ceremonyStep: withUrls.ceremonyStep,
-          createdAt: withUrls.createdAt,
-          updatedAt: withUrls.updatedAt,
-          ...(typeof withUrls.photoUrl === "string" &&
-          withUrls.photoUrl.trim().length > 0
-            ? { photoUrl: withUrls.photoUrl.trim() }
+          _id: cat._id,
+          title: cat.title,
+          ceremonyStep: cat.ceremonyStep,
+          createdAt: cat.createdAt,
+          updatedAt: cat.updatedAt,
+          ...(typeof photoRaw === "string" && photoRaw.trim().length > 0
+            ? { photoUrl: photoRaw.trim() }
             : {}),
         }
       }),
