@@ -28,9 +28,10 @@ const STEP_LABELS: Record<CeremonyStepLiteral, string> = {
   ceremony_complete: "Certificate",
 }
 
+/** Index of step in funnel, or `-1` when the server value isn’t mapped (unexpected / drift). */
 export function ceremonyStepIndex(step: string): number {
   const i = (CEREMONY_STEP_SEQUENCE as readonly string[]).indexOf(step)
-  return i === -1 ? 0 : i
+  return i
 }
 
 export function ceremonyStepsForUi(): readonly {

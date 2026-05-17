@@ -10,6 +10,7 @@ export function useCreateDraftCeremony() {
   const router = useRouter()
   const createDraftCat = useMutation(api.cats.createDraftCat)
 
+  const isExecutingRef = React.useRef(false)
   const [pending, setPending] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
@@ -18,6 +19,10 @@ export function useCreateDraftCeremony() {
   }, [])
 
   async function execute() {
+    if (isExecutingRef.current) {
+      return
+    }
+    isExecutingRef.current = true
     setError(null)
     setPending(true)
     try {
@@ -28,6 +33,7 @@ export function useCreateDraftCeremony() {
         err instanceof Error ? err.message : "Could not create ceremony.",
       )
     } finally {
+      isExecutingRef.current = false
       setPending(false)
     }
   }

@@ -77,7 +77,10 @@ export const listMyCatsForDashboard = query({
           ceremonyStep: withUrls.ceremonyStep,
           createdAt: withUrls.createdAt,
           updatedAt: withUrls.updatedAt,
-          ...(withUrls.photoUrl !== undefined ? { photoUrl: withUrls.photoUrl } : {}),
+          ...(typeof withUrls.photoUrl === "string" &&
+          withUrls.photoUrl.trim().length > 0
+            ? { photoUrl: withUrls.photoUrl.trim() }
+            : {}),
         }
       }),
     )
@@ -86,13 +89,17 @@ export const listMyCatsForDashboard = query({
 
 /** Full cat doc for `/cats/[catId]` when the signed-in user owns it. Otherwise `null`. */
 export const getCatByIdForOwner = query({
-  args: { catId: v.id("cats") },
+  args: { catId: v.string() },
   handler: async (ctx, { catId }) => {
     const currentUser = await getCurrentUser(ctx)
     if (currentUser === null) {
       return null
     }
-    const cat = await ctx.db.get(catId)
+    const id = ctx.db.normalizeId("cats", catId)
+    if (id === null) {
+      return null
+    }
+    const cat = await ctx.db.get(id)
     if (cat === null || cat.userId !== currentUser._id) {
       return null
     }

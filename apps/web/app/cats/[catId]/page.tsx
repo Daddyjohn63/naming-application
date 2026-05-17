@@ -5,7 +5,6 @@ import Link from "next/link"
 import { useParams } from "next/navigation"
 
 import { api } from "@workspace/backend/_generated/api"
-import type { Id } from "@workspace/backend/_generated/dataModel"
 import { CeremonyStepper } from "@/modules/ceremony/ui/components/ceremony-stepper"
 import { ceremonyStepShortLabel } from "@/modules/ceremony/lib/ceremony-progress"
 import { Badge } from "@workspace/ui/components/badge"
@@ -38,9 +37,7 @@ export default function CatCeremonyPage() {
 
   const cat = useQuery(
     api.cats.getCatByIdForOwner,
-    catIdParam !== undefined
-      ? { catId: catIdParam as Id<"cats"> }
-      : "skip",
+    catIdParam !== undefined ? { catId: catIdParam } : "skip",
   )
 
   if (catIdParam === undefined) {

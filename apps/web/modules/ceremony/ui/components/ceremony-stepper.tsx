@@ -24,6 +24,7 @@ export function CeremonyStepper({
 }: CeremonyStepperProps) {
   const steps = ceremonyStepsForUi()
   const activeIndex = ceremonyStepIndex(currentStep)
+  const unknownStep = activeIndex < 0
 
   return (
     <div
@@ -32,17 +33,27 @@ export function CeremonyStepper({
         className,
       )}
     >
+      {unknownStep ? (
+        <p
+          className="text-destructive/90 px-3 pb-2 text-xs leading-snug font-medium"
+          role="note"
+        >
+          Ceremony step from the server couldn&apos;t be mapped to this progress
+          tracker. Refresh or continue if the rest of the page looks fine.
+        </p>
+      ) : null}
       <ol
         className="text-muted-foreground flex min-w-0 items-stretch gap-2 px-1 text-xs font-medium md:gap-3 md:text-sm"
         aria-label="Naming ceremony progress"
       >
         {steps.map((step, index) => {
-          const isComplete = index < activeIndex
-          const isCurrent = index === activeIndex
+          const isComplete = !unknownStep && index < activeIndex
+          const isCurrent = !unknownStep && index === activeIndex
 
           return (
             <li
               key={step.id}
+              aria-current={isCurrent ? "step" : undefined}
               className={cn(
                 "border-border/80 flex min-w-[7.5rem] shrink-0 flex-col gap-1 rounded-lg border bg-background/80 px-2 py-2 md:min-w-[8.25rem] md:px-3",
                 isCurrent &&
