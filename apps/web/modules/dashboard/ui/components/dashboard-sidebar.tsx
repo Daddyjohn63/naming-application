@@ -1,9 +1,12 @@
 "use client"
 
 import { UserButton } from "@clerk/nextjs"
-import { Cat, HomeIcon, UsersIcon, SettingsIcon } from "lucide-react"
+import { Cat, HomeIcon, PlusCircle, SettingsIcon, UsersIcon } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useEffect } from "react"
+
+import { useCreateDraftCeremony } from "@/modules/cats/ui/hooks/use-create-draft-ceremony"
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +21,7 @@ import {
   SidebarRail,
 } from "@workspace/ui/components/sidebar"
 import { api } from "@workspace/backend/_generated/api"
+import { toast } from "@workspace/ui/components/sonner"
 import { useQuery } from "convex/react"
 
 const userSupportItems = [
@@ -41,6 +45,34 @@ const sidebarHeaderItems = [
     url: "/dashboard",
   },
 ]
+
+function SidebarAddCatMenuItem() {
+  const { execute, pending, error, clearError } = useCreateDraftCeremony()
+
+  useEffect(() => {
+    if (error === null || error === "") {
+      return
+    }
+    toast.error(error)
+    clearError()
+  }, [error, clearError])
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        disabled={pending}
+        tooltip={pending === true ? undefined : "Add a cat"}
+        onClick={() => {
+          void execute()
+        }}
+      >
+        <PlusCircle aria-hidden />
+        <span>{pending ? "Starting…" : "Add a cat"}</span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  )
+}
+
 export const DashboardSidebar = () => {
   const pathname = usePathname()
   const cats = useQuery(api.cats.getCatsForSidebar)
@@ -108,44 +140,37 @@ export const DashboardSidebar = () => {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ) : cats.length === 0 ? (
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="New cat">
-                    <Link href="/dashboard/cats/new-cat">
-                      <Cat aria-hidden />
-                      <span>Add a cat</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <SidebarAddCatMenuItem />
               ) : (
-                cats.map((cat) => {
-                  const href =
-                    cat.slug !== undefined && cat.slug !== ""
-                      ? `/dashboard/cats/${encodeURIComponent(cat.slug)}`
-                      : "/dashboard/cats"
-                  return (
-                    <SidebarMenuItem key={cat._id}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathname === href}
-                        tooltip={cat.name}
-                      >
-                        <Link href={href}>
-                          {cat.photoUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element -- Convex storage URL
-                            <img
-                              src={cat.photoUrl}
-                              alt=""
-                              className="size-8 shrink-0 rounded object-cover"
-                            />
-                          ) : (
-                            <Cat aria-hidden />
-                          )}
-                          <span className="truncate">{cat.name}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )
-                })
+                <>
+                  {cats.map((cat) => {
+                    const href = `/cats/${encodeURIComponent(cat._id)}`
+                    return (
+                      <SidebarMenuItem key={cat._id}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={pathname === href}
+                          tooltip={cat.name}
+                        >
+                          <Link href={href}>
+                            {cat.photoUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element -- Convex storage URL
+                              <img
+                                src={cat.photoUrl}
+                                alt=""
+                                className="size-8 shrink-0 rounded object-cover"
+                              />
+                            ) : (
+                              <Cat aria-hidden />
+                            )}
+                            <span className="truncate">{cat.name}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    )
+                  })}
+                  <SidebarAddCatMenuItem />
+                </>
               )}
             </SidebarMenu>
           </SidebarGroupContent>

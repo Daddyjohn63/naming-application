@@ -1,21 +1,29 @@
 import { v } from "convex/values"
 import { query, mutation, type QueryCtx } from "./_generated/server"
 import { getCurrentUser, getCurrentUserOrThrow } from "./users"
-import type { Doc } from "./_generated/dataModel"
+import type { Doc, Id } from "./_generated/dataModel"
+
+async function resolveStoragePublicUrl(
+  ctx: QueryCtx,
+  storageId: Id<"_storage"> | undefined,
+): Promise<string | undefined> {
+  if (storageId === undefined) {
+    return undefined
+  }
+  const url = (await ctx.storage.getUrl(storageId)) ?? ""
+  return url === "" ? undefined : url
+}
 
 async function catWithStorageUrls(ctx: QueryCtx, cat: Doc<"cats">) {
-  const photoUrl =
-    cat.photoStorageId !== undefined
-      ? ((await ctx.storage.getUrl(cat.photoStorageId)) ?? "")
-      : undefined
-  const characterImageUrl =
-    cat.characterImageStorageId !== undefined
-      ? ((await ctx.storage.getUrl(cat.characterImageStorageId)) ?? "")
-      : undefined
-  const certificateUrl =
-    cat.certificateStorageId !== undefined
-      ? ((await ctx.storage.getUrl(cat.certificateStorageId)) ?? "")
-      : undefined
+  const photoUrl = await resolveStoragePublicUrl(ctx, cat.photoStorageId)
+  const characterImageUrl = await resolveStoragePublicUrl(
+    ctx,
+    cat.characterImageStorageId,
+  )
+  const certificateUrl = await resolveStoragePublicUrl(
+    ctx,
+    cat.certificateStorageId,
+  )
 
   return {
     ...cat,
@@ -43,6 +51,66 @@ export const getCats = query({
         return { ...withUrls, user }
       }),
     )
+  },
+})
+
+/** Skeleton description for drafts until KB‑003 collects the real story client-side. */
+const DRAFT_DESCRIPTION_PLACEHOLDER =
+  "Add your cat portrait and story in the next steps. You can replace this anytime before the summary is approved."
+
+/** Current user's cats for dashboard cards — ordered newest first with optional photo URL. */
+export const listMyCatsForDashboard = query({
+  args: {},
+  handler: async (ctx) => {
+    const currentUser = await getCurrentUser(ctx)
+    if (currentUser === null) {
+      return []
+    }
+
+    const cats = await ctx.db
+      .query("cats")
+      .withIndex("by_userId_createdAt", (q) =>
+        q.eq("userId", currentUser._id),
+      )
+      .collect()
+
+    cats.sort((a, b) => b.createdAt - a.createdAt)
+
+    return Promise.all(
+      cats.map(async (cat) => {
+        const photoRaw = await resolveStoragePublicUrl(ctx, cat.photoStorageId)
+        return {
+          _id: cat._id,
+          title: cat.title,
+          ceremonyStep: cat.ceremonyStep,
+          createdAt: cat.createdAt,
+          updatedAt: cat.updatedAt,
+          ...(typeof photoRaw === "string" && photoRaw.trim().length > 0
+            ? { photoUrl: photoRaw.trim() }
+            : {}),
+        }
+      }),
+    )
+  },
+})
+
+/** Full cat doc for `/cats/[catId]` when the signed-in user owns it. Otherwise `null`. */
+export const getCatByIdForOwner = query({
+  args: { catId: v.string() },
+  handler: async (ctx, { catId }) => {
+    const currentUser = await getCurrentUser(ctx)
+    if (currentUser === null) {
+      return null
+    }
+    const id = ctx.db.normalizeId("cats", catId)
+    if (id === null) {
+      return null
+    }
+    const cat = await ctx.db.get(id)
+    if (cat === null || cat.userId !== currentUser._id) {
+      return null
+    }
+    return await catWithStorageUrls(ctx, cat)
   },
 })
 
@@ -172,6 +240,35 @@ export const createCat = mutation({
       description: args.description,
       slug: args.slug,
       photoStorageId: args.photoStorageId,
+      ceremonyStep: "draft",
+      portraitRegenerationsUsed: 0,
+      createdAt: now,
+      updatedAt: now,
+    })
+  },
+})
+
+/**
+ * One-shot draft row for KB-002 (“Add a cat” without KB-003 form). Navigates to `/cats/[id]`.
+ */
+export const createDraftCat = mutation({
+  args: {},
+  handler: async (ctx): Promise<Doc<"cats">["_id"]> => {
+    const currentUser = await getCurrentUserOrThrow(ctx)
+    const now = Date.now()
+    const siblings = await ctx.db
+      .query("cats")
+      .withIndex("by_userId_createdAt", (q) =>
+        q.eq("userId", currentUser._id),
+      )
+      .collect()
+    const n = siblings.length + 1
+    const title =
+      n === 1 ? "Your first naming ceremony" : `Naming ceremony ${n}`
+    return await ctx.db.insert("cats", {
+      userId: currentUser._id,
+      title,
+      description: DRAFT_DESCRIPTION_PLACEHOLDER,
       ceremonyStep: "draft",
       portraitRegenerationsUsed: 0,
       createdAt: now,
