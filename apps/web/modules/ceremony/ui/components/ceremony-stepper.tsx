@@ -19,23 +19,27 @@ type CeremonyStepperProps = {
  * Completed steps read as subdued checks; current is dominant; future uses lock metaphor.
  */
 export function CeremonyStepper({
+  // as per what server is telling us is current step
   currentStep,
   className,
 }: CeremonyStepperProps) {
   const steps = ceremonyStepsForUi()
+  // active index is the index of the current step in the ceremony steps sequence. source of truth is currentStep prop from server.
   const activeIndex = ceremonyStepIndex(currentStep)
+  // if the active index is less than 0, that means the current step is not in the ceremony steps sequence and something has gone wrong.
+  // TODO: we should probably handle this case more gracefully and do checks on the db to re-align the current step with the ceremony steps sequence.
   const unknownStep = activeIndex < 0
 
   return (
     <div
       className={cn(
-        "border-border/60 bg-muted/20 w-full overflow-x-auto border-y py-3",
-        className,
+        "w-full overflow-x-auto border-y border-border/60 bg-muted/20 py-3",
+        className
       )}
     >
       {unknownStep ? (
         <p
-          className="text-destructive/90 px-3 pb-2 text-xs leading-snug font-medium"
+          className="px-3 pb-2 text-xs leading-snug font-medium text-destructive/90"
           role="note"
         >
           Ceremony step from the server couldn&apos;t be mapped to this progress
@@ -43,7 +47,7 @@ export function CeremonyStepper({
         </p>
       ) : null}
       <ol
-        className="text-muted-foreground flex min-w-0 items-stretch gap-2 px-1 text-xs font-medium md:gap-3 md:text-sm"
+        className="flex min-w-0 items-stretch gap-2 px-1 text-xs font-medium text-muted-foreground md:gap-3 md:text-sm"
         aria-label="Naming ceremony progress"
       >
         {steps.map((step, index) => {
@@ -55,22 +59,22 @@ export function CeremonyStepper({
               key={step.id}
               aria-current={isCurrent ? "step" : undefined}
               className={cn(
-                "border-border/80 flex min-w-[7.5rem] shrink-0 flex-col gap-1 rounded-lg border bg-background/80 px-2 py-2 md:min-w-[8.25rem] md:px-3",
+                "flex min-w-30 shrink-0 flex-col gap-1 rounded-lg border border-border/80 bg-background/80 px-2 py-2 md:min-w-33 md:px-3",
                 isCurrent &&
-                  "border-primary/50 text-foreground ring-primary/25 ring-2",
+                  "border-primary/50 text-foreground ring-2 ring-primary/25",
                 isComplete && "border-transparent bg-transparent opacity-80",
-                index > activeIndex && "opacity-60",
+                index > activeIndex && "opacity-60"
               )}
             >
               <span className="flex items-center gap-1.5">
                 {isComplete ? (
                   <CheckCircle2
-                    className="text-primary size-4 shrink-0"
+                    className="size-4 shrink-0 text-primary"
                     aria-hidden
                   />
                 ) : isCurrent ? (
                   <CircleDot
-                    className="text-primary size-4 shrink-0"
+                    className="size-4 shrink-0 text-primary"
                     aria-hidden
                   />
                 ) : (

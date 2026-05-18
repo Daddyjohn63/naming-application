@@ -43,8 +43,8 @@ function DashboardCatsSkeletonGrid() {
     >
       {DASHBOARD_SKELETON_CARD_KEYS.map((k) => (
         <li key={k} className="min-w-0">
-          <div className="border-border rounded-xl border p-4">
-            <Skeleton className="aspect-[4/3] w-full rounded-lg" />
+          <div className="rounded-xl border border-border p-4">
+            <Skeleton className="aspect-4/3 w-full rounded-lg" />
             <Skeleton className="mt-4 h-4 w-2/3" />
             <Skeleton className="mt-2 h-3 w-full" />
             <Skeleton className="mt-4 h-6 w-20 rounded-full" />
@@ -57,6 +57,7 @@ function DashboardCatsSkeletonGrid() {
 
 /** KB-002: avoid layout-shift empty flash while Convex + Clerk hydrate. */
 function ConvexAuthHydrationGate({ children }: { children: React.ReactNode }) {
+  //checks if the user is loading and checks if users is signed in or not.
   const { isLoading } = useConvexAuth()
 
   if (isLoading) {
@@ -91,11 +92,11 @@ function CatCeremonyCard({ cat }: CatCeremonyCardProps) {
       <Link
         href={href}
         prefetch
-        className="group hover:border-primary/25 focus-visible:ring-ring block h-full rounded-xl focus-visible:ring-2 focus-visible:outline-none"
+        className="group block h-full rounded-xl hover:border-primary/25 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
       >
-        <Card className="border-border/80 hover:border-primary/40 h-full transition-[box-shadow,border-color] duration-150 group-hover:shadow-md">
+        <Card className="h-full border-border/80 transition-[box-shadow,border-color] duration-150 group-hover:shadow-md hover:border-primary/40">
           <CardHeader className="gap-0 pb-3">
-            <div className="bg-muted relative aspect-[4/3] overflow-hidden rounded-lg">
+            <div className="relative aspect-4/3 overflow-hidden rounded-lg bg-muted">
               {cat.photoUrl !== undefined ? (
                 // eslint-disable-next-line @next/next/no-img-element -- Convex-resolved HTTPS storage URL.
                 <img
@@ -105,7 +106,7 @@ function CatCeremonyCard({ cat }: CatCeremonyCardProps) {
                   loading="lazy"
                 />
               ) : (
-                <div className="text-muted-foreground flex size-full items-center justify-center">
+                <div className="flex size-full items-center justify-center text-muted-foreground">
                   <Cat className="size-12 opacity-40" aria-hidden />
                 </div>
               )}
@@ -161,7 +162,7 @@ function DashboardAddCeremonyLead() {
           <h1 className="font-sans text-3xl font-semibold tracking-tight">
             Your naming ceremonies
           </h1>
-          <p className="text-muted-foreground leading-relaxed text-pretty">
+          <p className="leading-relaxed text-pretty text-muted-foreground">
             Each cat owns its own funnel and unlock record. Naming Buddy keeps a
             single ceremony column per dashboard card so jumping between cats
             stays calm.
@@ -209,14 +210,14 @@ function DashboardCatsLoaded() {
           <h2 id="cat-grid-heading" className="sr-only">
             Ceremony cards
           </h2>
-          <ul className="grid grid-cols-1 list-none gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid list-none grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {cats.map((cat) => (
               <CatCeremonyCard key={cat._id} cat={cat} />
             ))}
           </ul>
         </section>
       ) : (
-        <Empty className="border-border/70 bg-muted/15 border-solid">
+        <Empty className="border-solid border-border/70 bg-muted/15">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <Cat aria-hidden />
