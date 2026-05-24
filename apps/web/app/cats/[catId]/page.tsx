@@ -17,6 +17,9 @@ import {
 } from "@workspace/ui/components/card"
 import { Skeleton } from "@workspace/ui/components/skeleton"
 
+import { CatProfileForm } from "@/modules/cats/ui/components/cat-profile-form"
+import { isCatProfileEditableStep } from "@workspace/shared/constants/cat-profile"
+
 function CatCeremonySkeleton() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-8 lg:max-w-4xl">
@@ -107,27 +110,25 @@ export default function CatCeremonyPage() {
           </p>
         </div>
 
-        <Card>
-          <CardHeader className="border-b">
-            <CardTitle className="text-base">Portrait &amp; profile</CardTitle>
-            <CardDescription>
-              Photo upload, validation, and summary generation are the next
-              layers on this page. For now you can read the draft story below and
-              return from the dashboard whenever you need a break.
-            </CardDescription>
-          </CardHeader>
-          <div className="px-4 pb-4">
-            <p className="text-foreground whitespace-pre-wrap text-sm leading-relaxed">
-              {cat.description}
-            </p>
-          </div>
-        </Card>
-
-        <div className="flex flex-wrap gap-3">
-          <Button variant="outline" asChild>
-            <Link href="/dashboard">Save &amp; exit to dashboard</Link>
-          </Button>
-        </div>
+        {isCatProfileEditableStep(cat.ceremonyStep) ? (
+          <CatProfileForm cat={cat} />
+        ) : (
+          <>
+            <Card>
+              <CardHeader className="border-b">
+                <CardTitle className="text-base">Cat profile</CardTitle>
+                <CardDescription>
+                  This step is complete. Continue from the ceremony progress above.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <div className="flex flex-wrap gap-3">
+              <Button variant="outline" asChild>
+                <Link href="/dashboard">Back to dashboard</Link>
+              </Button>
+            </div>
+          </>
+        )}
       </main>
     </>
   )

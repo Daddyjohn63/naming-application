@@ -23,7 +23,7 @@ export function LandingView() {
             Naming Buddy helps you honour your cat with three deliberate names.
           </h1>
           <p className="text-muted-foreground max-w-2xl text-base leading-relaxed text-pretty md:text-lg">
-            Walk through portrait, discovery, style, preview, and unlocking — from
+            Walk through profile, summary, style, preview, and unlocking — from
             a practical family name to a bolder cat-world name and finally the
             quiet, ineffable one only your cat knows. Phase 1 is driven by what
             you write; your photo validates in the funnel and anchors the vibe.

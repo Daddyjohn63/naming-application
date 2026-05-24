@@ -224,7 +224,7 @@ function DashboardCatsLoaded() {
             </EmptyMedia>
             <EmptyTitle>You haven&apos;t opened a ceremony yet.</EmptyTitle>
             <EmptyDescription>
-              Start when you are ready — portraits, summaries, previews, unlock,
+              Start when you are ready — profile, summary, preview, unlock,
               and certificates land in dedicated steps guided by Naming Buddy.
             </EmptyDescription>
           </EmptyHeader>
