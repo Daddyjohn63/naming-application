@@ -1,4 +1,7 @@
-import { v } from "convex/values"
+import { ConvexError, v } from "convex/values"
+import { catCreateFieldsSchema } from "@workspace/shared/schemas/cat"
+import { DRAFT_CAT_DESCRIPTION_PLACEHOLDER } from "@workspace/shared/constants/cat-profile"
+
 import { query, mutation, type QueryCtx } from "./_generated/server"
 import { getCurrentUser, getCurrentUserOrThrow } from "./users"
 import type { Doc, Id } from "./_generated/dataModel"
@@ -16,10 +19,6 @@ async function resolveStoragePublicUrl(
 
 async function catWithStorageUrls(ctx: QueryCtx, cat: Doc<"cats">) {
   const photoUrl = await resolveStoragePublicUrl(ctx, cat.photoStorageId)
-  const characterImageUrl = await resolveStoragePublicUrl(
-    ctx,
-    cat.characterImageStorageId,
-  )
   const certificateUrl = await resolveStoragePublicUrl(
     ctx,
     cat.certificateStorageId,
@@ -28,7 +27,6 @@ async function catWithStorageUrls(ctx: QueryCtx, cat: Doc<"cats">) {
   return {
     ...cat,
     ...(photoUrl !== undefined ? { photoUrl } : {}),
-    ...(characterImageUrl !== undefined ? { characterImageUrl } : {}),
     ...(certificateUrl !== undefined ? { certificateUrl } : {}),
   }
 }
@@ -53,10 +51,6 @@ export const getCats = query({
     )
   },
 })
-
-/** Skeleton description for drafts until KB‑003 collects the real story client-side. */
-const DRAFT_DESCRIPTION_PLACEHOLDER =
-  "Add your cat portrait and story in the next steps. You can replace this anytime before the summary is approved."
 
 /** Current user's cats for dashboard cards — ordered newest first with optional photo URL. */
 export const listMyCatsForDashboard = query({
@@ -233,15 +227,24 @@ export const createCat = mutation({
   },
   handler: async (ctx, args) => {
     const currentUser = await getCurrentUserOrThrow(ctx)
+    const parsed = catCreateFieldsSchema.safeParse({
+      title: args.title,
+      description: args.description,
+      slug: args.slug ?? "",
+    })
+    if (!parsed.success) {
+      throw new ConvexError(parsed.error.flatten())
+    }
     const now = Date.now()
     return await ctx.db.insert("cats", {
       userId: currentUser._id,
-      title: args.title,
-      description: args.description,
-      slug: args.slug,
+      title: parsed.data.title,
+      description: parsed.data.description,
+      slug: parsed.data.slug,
       photoStorageId: args.photoStorageId,
       ceremonyStep: "draft",
-      portraitRegenerationsUsed: 0,
+      summaryRegenerationsUsed: 0,
+      profileSubmitsUsed: 0,
       createdAt: now,
       updatedAt: now,
     })
@@ -268,9 +271,10 @@ export const createDraftCat = mutation({
     return await ctx.db.insert("cats", {
       userId: currentUser._id,
       title,
-      description: DRAFT_DESCRIPTION_PLACEHOLDER,
+      description: DRAFT_CAT_DESCRIPTION_PLACEHOLDER,
       ceremonyStep: "draft",
-      portraitRegenerationsUsed: 0,
+      summaryRegenerationsUsed: 0,
+      profileSubmitsUsed: 0,
       createdAt: now,
       updatedAt: now,
     })
