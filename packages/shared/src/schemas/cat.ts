@@ -14,11 +14,9 @@ const catSlugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 const optionalTrimmedProfileField = z
   .string()
+  .trim()
   .max(MAX_CAT_OPTIONAL_FIELD_LENGTH)
-  .transform((s) => {
-    const t = s.trim()
-    return t === "" ? undefined : t
-  })
+  .transform((s) => (s === "" ? undefined : s))
   .optional()
 
 /**

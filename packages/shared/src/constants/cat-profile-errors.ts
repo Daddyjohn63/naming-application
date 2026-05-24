@@ -53,7 +53,7 @@ export function catProfileSubmitErrorMessage(
   code: string | undefined,
   fallback = "Something went wrong. Please try again.",
 ): string {
-  if (code !== undefined && code in MESSAGES) {
+  if (code !== undefined && Object.hasOwn(MESSAGES, code)) {
     return MESSAGES[code as CatProfileSubmitErrorCode]
   }
   return fallback

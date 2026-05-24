@@ -129,10 +129,12 @@ export const submitCatProfile = action({
     try {
       await validateCatPhotoBuffer(buffer)
     } catch (error) {
-      try {
-        await ctx.storage.delete(photoStorageId)
-      } catch {
-        // Best-effort cleanup of rejected upload.
+      if (photoStorageId !== cat.photoStorageId) {
+        try {
+          await ctx.storage.delete(photoStorageId)
+        } catch {
+          // Best-effort cleanup of rejected upload.
+        }
       }
       throw error
     }
@@ -146,7 +148,6 @@ export const submitCatProfile = action({
       age: fields.age,
       breed: fields.breed,
       photoStorageId,
-      previousPhotoStorageId: cat.photoStorageId,
     })
   },
 })
@@ -206,10 +207,12 @@ export const saveCatProfileDraft = action({
       try {
         await validateCatPhotoBuffer(buffer)
       } catch (error) {
-        try {
-          await ctx.storage.delete(photoStorageId)
-        } catch {
-          // Best-effort cleanup of rejected upload.
+        if (photoStorageId !== cat.photoStorageId) {
+          try {
+            await ctx.storage.delete(photoStorageId)
+          } catch {
+            // Best-effort cleanup of rejected upload.
+          }
         }
         throw error
       }
@@ -224,7 +227,6 @@ export const saveCatProfileDraft = action({
       age: fields.age,
       breed: fields.breed,
       photoStorageId,
-      previousPhotoStorageId: cat.photoStorageId,
     })
   },
 })

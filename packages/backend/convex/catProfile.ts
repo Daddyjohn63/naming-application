@@ -24,7 +24,6 @@ export const applyCatProfileSubmit = internalMutation({
     age: v.optional(v.string()),
     breed: v.optional(v.string()),
     photoStorageId: v.id("_storage"),
-    previousPhotoStorageId: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
     const cat = await ctx.db.get(args.catId)
@@ -57,17 +56,7 @@ export const applyCatProfileSubmit = internalMutation({
       })
     }
 
-    const previousPhotoId = args.previousPhotoStorageId
-    if (
-      previousPhotoId !== undefined &&
-      previousPhotoId !== args.photoStorageId
-    ) {
-      try {
-        await ctx.storage.delete(previousPhotoId)
-      } catch {
-        // Best-effort orphan cleanup; submit still succeeds.
-      }
-    }
+    const previousPhotoId = cat.photoStorageId
 
     const now = Date.now()
     const hadSummaryProgress =
@@ -91,6 +80,17 @@ export const applyCatProfileSubmit = internalMutation({
           }
         : {}),
     })
+
+    if (
+      previousPhotoId !== undefined &&
+      previousPhotoId !== args.photoStorageId
+    ) {
+      try {
+        await ctx.storage.delete(previousPhotoId)
+      } catch {
+        // Best-effort orphan cleanup; submit still succeeds.
+      }
+    }
   },
 })
 
@@ -104,7 +104,6 @@ export const applyCatProfileDraftSave = internalMutation({
     age: v.optional(v.string()),
     breed: v.optional(v.string()),
     photoStorageId: v.optional(v.id("_storage")),
-    previousPhotoStorageId: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
     const cat = await ctx.db.get(args.catId)
@@ -124,18 +123,7 @@ export const applyCatProfileDraftSave = internalMutation({
       })
     }
 
-    const previousPhotoId = args.previousPhotoStorageId
-    if (
-      args.photoStorageId !== undefined &&
-      previousPhotoId !== undefined &&
-      previousPhotoId !== args.photoStorageId
-    ) {
-      try {
-        await ctx.storage.delete(previousPhotoId)
-      } catch {
-        // Best-effort orphan cleanup; draft save still succeeds.
-      }
-    }
+    const previousPhotoId = cat.photoStorageId
 
     const now = Date.now()
     await ctx.db.patch(args.catId, {
@@ -149,6 +137,18 @@ export const applyCatProfileDraftSave = internalMutation({
         : {}),
       updatedAt: now,
     })
+
+    if (
+      args.photoStorageId !== undefined &&
+      previousPhotoId !== undefined &&
+      previousPhotoId !== args.photoStorageId
+    ) {
+      try {
+        await ctx.storage.delete(previousPhotoId)
+      } catch {
+        // Best-effort orphan cleanup; draft save still succeeds.
+      }
+    }
   },
 })
 
