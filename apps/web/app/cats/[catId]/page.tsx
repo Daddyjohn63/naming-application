@@ -1,6 +1,15 @@
 "use client"
 
-import { useQuery } from "convex/react"
+/**
+ * KB-004 ceremony shell — one route that swaps UI panels by `cat.ceremonyStep`.
+ *
+ * Renders profile form, AI loading states, photo quality review, or summary editor
+ * without separate URLs per substate. Reactive Convex queries update when background
+ * actions finish.
+ */
+
+import * as React from "react"
+import { useMutation, useQuery } from "convex/react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 
@@ -16,10 +25,18 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card"
 import { Skeleton } from "@workspace/ui/components/skeleton"
+import { isCatProfileEditableStep } from "@workspace/shared/constants/cat-profile"
+import { isCatSummaryCeremonyStep } from "@workspace/shared/constants/cat-summary"
 
 import { CatProfileForm } from "@/modules/cats/ui/components/cat-profile-form"
-import { isCatProfileEditableStep } from "@workspace/shared/constants/cat-profile"
+import { CatPhotoQualityReview } from "@/modules/cats/ui/components/cat-photo-quality-review"
+import {
+  CatPhotoBlockAlert,
+  CatSummaryPipelineStatus,
+} from "@/modules/cats/ui/components/cat-summary-pipeline-status"
+import { CatSummaryReview } from "@/modules/cats/ui/components/cat-summary-review"
 
+/** Placeholder layout while the cat query is loading. */
 function CatCeremonySkeleton() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-8 lg:max-w-4xl">
@@ -42,6 +59,22 @@ export default function CatCeremonyPage() {
     api.cats.getCatByIdForOwner,
     catIdParam !== undefined ? { catId: catIdParam } : "skip",
   )
+  const retryPipeline = useMutation(api.catSummary.retrySummaryPipeline)
+  const returnToProfile = useMutation(api.catSummary.returnToProfileForPhotoReplace)
+  /** True while the Retry button mutation is in flight. */
+  const [retrying, setRetrying] = React.useState(false)
+  /** True while returnToProfileForPhotoReplace is in flight. */
+  const [returningToProfile, setReturningToProfile] = React.useState(false)
+  /** When true at summary_review, show profile form instead of summary editor. */
+  const [editingProfileFromSummary, setEditingProfileFromSummary] =
+    React.useState(false)
+
+  // Leaving summary_review clears the "edit profile from summary" overlay.
+  React.useEffect(() => {
+    if (cat !== undefined && cat !== null && cat.ceremonyStep !== "summary_review") {
+      setEditingProfileFromSummary(false)
+    }
+  }, [cat?.ceremonyStep, cat])
 
   if (catIdParam === undefined) {
     return (
@@ -72,6 +105,53 @@ export default function CatCeremonyPage() {
         </div>
       </main>
     )
+  }
+
+  // --- Panel visibility: derived from server ceremonyStep (single source of truth) ---
+
+  /** KB-003 form — draft, or summary_review when user clicks "Edit profile". */
+  const showProfileForm =
+    isCatProfileEditableStep(cat.ceremonyStep) &&
+    (cat.ceremonyStep !== "summary_review" || editingProfileFromSummary)
+
+  /** Spinner while photo validation or summary generation runs in the background. */
+  const showSummaryPipeline =
+    isCatSummaryCeremonyStep(cat.ceremonyStep) &&
+    (cat.ceremonyStep === "awaiting_photo_validation" ||
+      cat.ceremonyStep === "awaiting_summary")
+
+  /** Warn outcome — user must continue or replace photo before summary runs. */
+  const showPhotoQualityReview = cat.ceremonyStep === "photo_quality_review"
+
+  /** Editable AI summary textarea with Save / Submit. */
+  const showSummaryReview =
+    cat.ceremonyStep === "summary_review" && !editingProfileFromSummary
+
+  /** Block outcome — validation failed; show alert above profile form at draft step. */
+  const photoBlockMessage =
+    cat.ceremonyStep === "draft" && cat.photoValidation !== undefined
+      ? cat.photoValidation.userMessage.trim() ||
+        "That photo doesn't look like a cat. Please upload a photo of your cat."
+      : null
+
+  /** Re-schedule validateCatPhoto or generateCatSummary after summaryGenerationError. */
+  const onRetryPipeline = async () => {
+    setRetrying(true)
+    try {
+      await retryPipeline({ catId: cat._id })
+    } finally {
+      setRetrying(false)
+    }
+  }
+
+  /** From quality review — mutation sets ceremonyStep back to draft for new upload. */
+  const onReplacePhoto = async () => {
+    setReturningToProfile(true)
+    try {
+      await returnToProfile({ catId: cat._id })
+    } finally {
+      setReturningToProfile(false)
+    }
   }
 
   return (
@@ -110,15 +190,49 @@ export default function CatCeremonyPage() {
           </p>
         </div>
 
-        {isCatProfileEditableStep(cat.ceremonyStep) ? (
-          <CatProfileForm cat={cat} />
-        ) : (
+        {photoBlockMessage !== null ? (
+          <CatPhotoBlockAlert message={photoBlockMessage} />
+        ) : null}
+
+        {showProfileForm ? <CatProfileForm cat={cat} /> : null}
+
+        {showSummaryPipeline ? (
+          <CatSummaryPipelineStatus
+            cat={cat}
+            onRetry={() => void onRetryPipeline()}
+            retrying={retrying}
+          />
+        ) : null}
+
+        {showPhotoQualityReview ? (
+          <CatPhotoQualityReview
+            cat={cat}
+            onReplacePhoto={() => void onReplacePhoto()}
+          />
+        ) : null}
+
+        {returningToProfile ? (
+          <p className="text-muted-foreground text-sm">Opening profile…</p>
+        ) : null}
+
+        {showSummaryReview ? (
+          <CatSummaryReview
+            cat={cat}
+            onEditProfile={() => setEditingProfileFromSummary(true)}
+          />
+        ) : null}
+
+        {!showProfileForm &&
+        !showSummaryPipeline &&
+        !showPhotoQualityReview &&
+        !showSummaryReview ? (
           <>
             <Card>
               <CardHeader className="border-b">
-                <CardTitle className="text-base">Cat profile</CardTitle>
+                <CardTitle className="text-base">Continue your ceremony</CardTitle>
                 <CardDescription>
-                  This step is complete. Continue from the ceremony progress above.
+                  This step is handled in a later part of the journey. Use the
+                  progress bar above or return from the dashboard.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -128,7 +242,7 @@ export default function CatCeremonyPage() {
               </Button>
             </div>
           </>
-        )}
+        ) : null}
       </main>
     </>
   )

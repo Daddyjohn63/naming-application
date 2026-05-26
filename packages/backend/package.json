@@ -18,6 +18,7 @@
     "@clerk/backend": "^3.2.13",
     "@convex-dev/agent": "catalog:",
     "@workspace/shared": "workspace:*",
+    "ai": "^6.0.191",
     "convex": "^1.35.1",
     "file-type": "^22.0.1",
     "image-size": "^2.0.2",

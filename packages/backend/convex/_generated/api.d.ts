@@ -8,8 +8,11 @@
  * @module
  */
 
+import type * as ai_naming from "../ai/naming.js";
 import type * as catProfile from "../catProfile.js";
 import type * as catProfileActions from "../catProfileActions.js";
+import type * as catSummary from "../catSummary.js";
+import type * as catSummaryActions from "../catSummaryActions.js";
 import type * as cats from "../cats.js";
 import type * as chat from "../chat.js";
 import type * as http from "../http.js";
@@ -22,8 +25,11 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "ai/naming": typeof ai_naming;
   catProfile: typeof catProfile;
   catProfileActions: typeof catProfileActions;
+  catSummary: typeof catSummary;
+  catSummaryActions: typeof catSummaryActions;
   cats: typeof cats;
   chat: typeof chat;
   http: typeof http;

@@ -34,7 +34,6 @@ import {
   AlertTitle,
 } from "@workspace/ui/components/alert"
 import { Button } from "@workspace/ui/components/button"
-import { Spinner } from "@workspace/ui/components/spinner"
 import {
   Card,
   CardDescription,
@@ -169,13 +168,6 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
         photoStorageId = await upload(photoFile)
         setStoredPhotoId(photoStorageId)
       }
-      if (photoStorageId === undefined) {
-        setServerFieldErrors((prev) => ({
-          ...prev,
-          photo: "Please upload a photo of your cat.",
-        }))
-        return
-      }
 
       setSubmitting(true)
       await submitProfile({
@@ -185,7 +177,7 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
         existingName: values.existingName,
         age: values.age,
         breed: values.breed,
-        photoStorageId,
+        ...(photoStorageId !== undefined ? { photoStorageId } : {}),
       })
       setPhotoFile(null)
       toast.success(
@@ -280,8 +272,9 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
       <CardHeader className="border-b">
         <CardTitle className="text-base">Cat profile</CardTitle>
         <CardDescription>
-          Upload a photo and tell us about your cat. You can update your profile
-          here until the summary is approved.
+          Tell us about your cat. A photo is optional but helps us write a richer
+          summary when you provide one. You can update your profile here until
+          the summary is submitted.
           {submitsRemaining < MAX_CAT_PROFILE_SUBMIT_COUNT ? (
             <>
               {" "}
@@ -293,16 +286,6 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
       </CardHeader>
 
       <form onSubmit={onSubmit} className="flex flex-col gap-6 px-4 pt-4 pb-6">
-        {cat.ceremonyStep === "awaiting_summary" ? (
-          <Alert className="border-primary/20 bg-primary/5">
-            <Spinner className="text-primary size-4" />
-            <AlertTitle>Generating your summary</AlertTitle>
-            <AlertDescription>
-              You can still edit your photo and story below while we work. Submit
-              again when you&apos;re ready.
-            </AlertDescription>
-          </Alert>
-        ) : null}
         {cat.ceremonyStep === "summary_review" ? (
           <Alert>
             <AlertTitle>Editing will restart summary generation</AlertTitle>
@@ -315,7 +298,9 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
         <FieldGroup>
           <Field data-invalid={photoError !== undefined}>
             <FieldLabel htmlFor="cat-photo">Cat photo</FieldLabel>
-            <FieldDescription>{catPhotoConstraintsLabel()}</FieldDescription>
+            <FieldDescription>
+              Optional · {catPhotoConstraintsLabel()}
+            </FieldDescription>
             <Input
               id="cat-photo"
               type="file"

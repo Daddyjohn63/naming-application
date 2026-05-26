@@ -1,3 +1,11 @@
+/**
+ * KB-003 profile persistence + KB-004 pipeline entry.
+ *
+ * Internal mutations write cat profile fields. `applyCatProfileSubmit` also sets the
+ * first summary substate and schedules photo validation or summary generation.
+ * Parse helpers validate Zod field rules before mutations run (from actions).
+ */
+
 import { ConvexError, v } from "convex/values"
 
 import {
@@ -11,9 +19,14 @@ import {
   submitCatProfileFieldsSchema,
 } from "@workspace/shared/schemas/cat"
 
+import { internal } from "./_generated/api"
 import { internalMutation } from "./_generated/server"
 import type { Id } from "./_generated/dataModel"
 
+/**
+ * KB-004 entry: persist profile, advance ceremony step, schedule AI pipeline.
+ * Called from `catProfileActions.submitCatProfile` after field + photo checks.
+ */
 export const applyCatProfileSubmit = internalMutation({
   args: {
     catId: v.id("cats"),
@@ -23,7 +36,7 @@ export const applyCatProfileSubmit = internalMutation({
     existingName: v.optional(v.string()),
     age: v.optional(v.string()),
     breed: v.optional(v.string()),
-    photoStorageId: v.id("_storage"),
+    photoStorageId: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
     const cat = await ctx.db.get(args.catId)
@@ -57,11 +70,15 @@ export const applyCatProfileSubmit = internalMutation({
     }
 
     const previousPhotoId = cat.photoStorageId
-
     const now = Date.now()
+    // Whether user already had an accepted/edited summary — re-submit clears it.
     const hadSummaryProgress =
       cat.ceremonyStep === "summary_review" ||
       cat.acceptedSummaryVersionId !== undefined
+
+    // Photo path runs vision validation first; no-photo skips straight to summary.
+    const hasPhoto = args.photoStorageId !== undefined
+    const nextStep = hasPhoto ? "awaiting_photo_validation" : "awaiting_summary"
 
     await ctx.db.patch(args.catId, {
       title: args.title,
@@ -70,8 +87,11 @@ export const applyCatProfileSubmit = internalMutation({
       age: args.age,
       breed: args.breed,
       photoStorageId: args.photoStorageId,
-      ceremonyStep: "awaiting_summary",
+      ceremonyStep: nextStep,
       profileSubmitsUsed: submitsUsed + 1,
+      photoValidation: undefined,
+      photoQualityAcknowledged: undefined,
+      summaryGenerationError: undefined,
       updatedAt: now,
       ...(hadSummaryProgress
         ? {
@@ -91,9 +111,22 @@ export const applyCatProfileSubmit = internalMutation({
         // Best-effort orphan cleanup; submit still succeeds.
       }
     }
+
+    if (hasPhoto) {
+      await ctx.scheduler.runAfter(0, internal.catSummaryActions.validateCatPhoto, {
+        catId: args.catId,
+      })
+    } else {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.catSummaryActions.generateCatSummary,
+        { catId: args.catId },
+      )
+    }
   },
 })
 
+/** KB-003 only: save profile fields without triggering the summary pipeline. */
 export const applyCatProfileDraftSave = internalMutation({
   args: {
     catId: v.id("cats"),
