@@ -1,6 +1,6 @@
 /** Default story shown on KB-002 draft rows until the owner submits KB-003 profile. */
 export const DRAFT_CAT_DESCRIPTION_PLACEHOLDER =
-  "Add your cat's photo and story in the next steps. You can replace this anytime before the summary is approved."
+  "Tell your cat's story in the next steps — a photo is optional. You can replace this anytime before the summary is approved."
 
 /**
  * Ceremony steps where the owner may edit and re-submit the KB-003 profile form.

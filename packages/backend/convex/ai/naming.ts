@@ -173,10 +173,19 @@ export async function generateCatSummaryWithAi(args: {
   return text.trim()
 }
 
+const AI_ERROR_USER_MESSAGE =
+  "We couldn't complete that step. Please try again."
+
 /** Map thrown SDK/network errors to a short user-facing retry message. */
 export function normalizeAiError(error: unknown): string {
-  if (error instanceof Error && error.message.trim() !== "") {
-    return error.message.trim()
+  if (error instanceof Error) {
+    console.error(
+      "AI step failed:",
+      error.message.trim() || "(no message)",
+      error
+    )
+  } else {
+    console.error("AI step failed:", error)
   }
-  return "We couldn't complete that step. Please try again."
+  return AI_ERROR_USER_MESSAGE
 }

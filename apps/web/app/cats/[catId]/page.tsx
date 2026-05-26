@@ -27,6 +27,8 @@ import {
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { isCatProfileEditableStep } from "@workspace/shared/constants/cat-profile"
 import { isCatSummaryCeremonyStep } from "@workspace/shared/constants/cat-summary"
+import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
+import { toast } from "@workspace/ui/components/sonner"
 
 import { CatProfileForm } from "@/modules/cats/ui/components/cat-profile-form"
 import { CatPhotoQualityReview } from "@/modules/cats/ui/components/cat-photo-quality-review"
@@ -57,10 +59,12 @@ export default function CatCeremonyPage() {
 
   const cat = useQuery(
     api.cats.getCatByIdForOwner,
-    catIdParam !== undefined ? { catId: catIdParam } : "skip",
+    catIdParam !== undefined ? { catId: catIdParam } : "skip"
   )
   const retryPipeline = useMutation(api.catSummary.retrySummaryPipeline)
-  const returnToProfile = useMutation(api.catSummary.returnToProfileForPhotoReplace)
+  const returnToProfile = useMutation(
+    api.catSummary.returnToProfileForPhotoReplace
+  )
   /** True while the Retry button mutation is in flight. */
   const [retrying, setRetrying] = React.useState(false)
   /** True while returnToProfileForPhotoReplace is in flight. */
@@ -71,7 +75,11 @@ export default function CatCeremonyPage() {
 
   // Leaving summary_review clears the "edit profile from summary" overlay.
   React.useEffect(() => {
-    if (cat !== undefined && cat !== null && cat.ceremonyStep !== "summary_review") {
+    if (
+      cat !== undefined &&
+      cat !== null &&
+      cat.ceremonyStep !== "summary_review"
+    ) {
       setEditingProfileFromSummary(false)
     }
   }, [cat?.ceremonyStep, cat])
@@ -79,7 +87,7 @@ export default function CatCeremonyPage() {
   if (catIdParam === undefined) {
     return (
       <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-4 px-4 py-12">
-        <p className="text-muted-foreground text-sm">Missing ceremony id.</p>
+        <p className="text-sm text-muted-foreground">Missing ceremony id.</p>
         <Button variant="outline" asChild>
           <Link href="/dashboard">Back to dashboard</Link>
         </Button>
@@ -94,7 +102,7 @@ export default function CatCeremonyPage() {
   if (cat === null) {
     return (
       <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 px-4 py-12">
-        <p className="text-muted-foreground text-sm leading-relaxed">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           This ceremony isn&apos;t on your shelf, or it was removed from your
           account.
         </p>
@@ -139,6 +147,8 @@ export default function CatCeremonyPage() {
     setRetrying(true)
     try {
       await retryPipeline({ catId: cat._id })
+    } catch (err) {
+      toast.error(getConvexErrorMessage(err))
     } finally {
       setRetrying(false)
     }
@@ -149,6 +159,8 @@ export default function CatCeremonyPage() {
     setReturningToProfile(true)
     try {
       await returnToProfile({ catId: cat._id })
+    } catch (err) {
+      toast.error(getConvexErrorMessage(err))
     } finally {
       setReturningToProfile(false)
     }
@@ -159,19 +171,19 @@ export default function CatCeremonyPage() {
       <CeremonyStepper currentStep={cat.ceremonyStep} />
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-4 py-8 lg:max-w-4xl">
         <nav
-          className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm"
+          className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground"
           aria-label="Breadcrumb"
         >
           <Link
             href="/dashboard"
-            className="hover:text-foreground font-medium underline-offset-4 hover:underline"
+            className="font-medium underline-offset-4 hover:text-foreground hover:underline"
           >
             Dashboard
           </Link>
           <span aria-hidden className="text-muted-foreground/70">
             /
           </span>
-          <span className="text-foreground line-clamp-1 font-semibold tracking-tight">
+          <span className="line-clamp-1 font-semibold tracking-tight text-foreground">
             {cat.title}
           </span>
         </nav>
@@ -182,12 +194,12 @@ export default function CatCeremonyPage() {
               {ceremonyStepShortLabel(cat.ceremonyStep)}
             </Badge>
           </div>
-          <p className="text-muted-foreground max-w-prose leading-relaxed text-pretty">
+          {/* <p className="text-muted-foreground max-w-prose leading-relaxed text-pretty">
             You&apos;re inside the guided tunnel: one dominant column carries
             the next story beat (photo, summary, style, preview, unlock, then
             paid naming stages). This shell already tracks your server step so
             refresh or return visits land in the right place.
-          </p>
+          </p> */}
         </div>
 
         {photoBlockMessage !== null ? (
@@ -212,7 +224,7 @@ export default function CatCeremonyPage() {
         ) : null}
 
         {returningToProfile ? (
-          <p className="text-muted-foreground text-sm">Opening profile…</p>
+          <p className="text-sm text-muted-foreground">Opening profile…</p>
         ) : null}
 
         {showSummaryReview ? (
@@ -229,7 +241,9 @@ export default function CatCeremonyPage() {
           <>
             <Card>
               <CardHeader className="border-b">
-                <CardTitle className="text-base">Continue your ceremony</CardTitle>
+                <CardTitle className="text-base">
+                  Continue your ceremony
+                </CardTitle>
                 <CardDescription>
                   This step is handled in a later part of the journey. Use the
                   progress bar above or return from the dashboard.

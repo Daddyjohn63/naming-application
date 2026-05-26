@@ -54,7 +54,10 @@ function remainingChars(value: string, max: number): number {
   return Math.max(0, max - value.length)
 }
 
-export function CatSummaryReview({ cat, onEditProfile }: CatSummaryReviewProps) {
+export function CatSummaryReview({
+  cat,
+  onEditProfile,
+}: CatSummaryReviewProps) {
   const latestSummary = useQuery(api.catSummary.getLatestSummaryForOwner, {
     catId: cat._id,
   })
@@ -163,9 +166,8 @@ export function CatSummaryReview({ cat, onEditProfile }: CatSummaryReviewProps) 
       <CardHeader className="border-b">
         <CardTitle className="text-base">Personality summary</CardTitle>
         <CardDescription>
-          Read through your cat&apos;s portrait in words. Edit anything that
-          doesn&apos;t sound right, save your draft, then submit when you&apos;re
-          happy — there is no AI regenerate on this step.
+          Read through your cat&apos;s profile. Edit anything that doesn&apos;t
+          sound right, save your draft, then submit when you&apos;re happy.
         </CardDescription>
       </CardHeader>
 
@@ -177,28 +179,25 @@ export function CatSummaryReview({ cat, onEditProfile }: CatSummaryReviewProps) 
             disabled={busy}
             rows={12}
             maxLength={MAX_CAT_SUMMARY_TEXT_LENGTH}
-            className="min-h-56 resize-y font-normal leading-relaxed"
+            className="min-h-56 resize-y leading-relaxed font-normal"
             {...form.register("summaryText")}
           />
           <FieldDescription>
             At least {MIN_CAT_SUMMARY_TEXT_LENGTH} characters ·{" "}
-            {remainingChars(summaryValue, MAX_CAT_SUMMARY_TEXT_LENGTH)} remaining
+            {remainingChars(summaryValue, MAX_CAT_SUMMARY_TEXT_LENGTH)}{" "}
+            remaining
           </FieldDescription>
           <FieldError>{form.formState.errors.summaryText?.message}</FieldError>
         </Field>
 
         {serverError !== null ? (
-          <p className="text-destructive text-sm" role="alert">
+          <p className="text-sm text-destructive" role="alert">
             {serverError}
           </p>
         ) : null}
 
         <div className="flex flex-wrap gap-3">
-          <Button
-            type="button"
-            disabled={busy}
-            onClick={() => void onSave()}
-          >
+          <Button type="button" disabled={busy} onClick={() => void onSave()}>
             {saving ? "Saving…" : "Save"}
           </Button>
           <Button type="button" disabled={busy} onClick={() => void onSubmit()}>
