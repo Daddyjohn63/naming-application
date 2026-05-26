@@ -47,7 +47,7 @@ export function CeremonyStepper({
         </p>
       ) : null}
       <ol
-        className="flex min-w-0 items-stretch gap-2 px-1 text-xs font-medium text-muted-foreground md:gap-3 md:text-sm"
+        className="flex min-w-0 items-stretch justify-center gap-2 px-1 text-xs font-medium text-muted-foreground md:gap-3 md:text-sm"
         aria-label="Naming ceremony progress"
       >
         {steps.map((step, index) => {
