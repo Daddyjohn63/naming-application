@@ -1,3 +1,10 @@
+/**
+ * KB-003 public actions for profile submit/draft save (Node for photo buffer checks).
+ *
+ * `submitCatProfile` is the client entry that eventually kicks off KB-004 via
+ * `applyCatProfileSubmit` → scheduler → `catSummaryActions`.
+ */
+
 "use node"
 
 import { ConvexError, v } from "convex/values"
@@ -25,6 +32,7 @@ function isAllowedMime(mime: string): mime is AllowedCatPhotoMimeType {
   return (ALLOWED_CAT_PHOTO_MIME_TYPES as readonly string[]).includes(mime)
 }
 
+/** Technical photo gate: MIME, byte size, and pixel dimensions (not AI validation). */
 async function validateCatPhotoBuffer(buffer: Buffer): Promise<void> {
   if (buffer.byteLength > MAX_CAT_PHOTO_BYTES) {
     throw new ConvexError({
@@ -75,6 +83,7 @@ async function validateCatPhotoBuffer(buffer: Buffer): Promise<void> {
   }
 }
 
+/** Client-callable profile submit — validates fields/photo then starts KB-004 pipeline. */
 export const submitCatProfile = action({
   args: {
     catId: v.string(),
@@ -83,7 +92,7 @@ export const submitCatProfile = action({
     existingName: v.optional(v.string()),
     age: v.optional(v.string()),
     breed: v.optional(v.string()),
-    photoStorageId: v.id("_storage"),
+    photoStorageId: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity()
@@ -117,26 +126,28 @@ export const submitCatProfile = action({
       breed: args.breed,
     })
 
-    const photoStorageId = args.photoStorageId as Id<"_storage">
-    const blob = await ctx.storage.get(photoStorageId)
-    if (blob === null) {
-      throw new ConvexError({
-        code: CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_NOT_FOUND,
-      })
-    }
-
-    const buffer = Buffer.from(await blob.arrayBuffer())
-    try {
-      await validateCatPhotoBuffer(buffer)
-    } catch (error) {
-      if (photoStorageId !== cat.photoStorageId) {
-        try {
-          await ctx.storage.delete(photoStorageId)
-        } catch {
-          // Best-effort cleanup of rejected upload.
-        }
+    let photoStorageId = args.photoStorageId as Id<"_storage"> | undefined
+    if (photoStorageId !== undefined) {
+      const blob = await ctx.storage.get(photoStorageId)
+      if (blob === null) {
+        throw new ConvexError({
+          code: CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_NOT_FOUND,
+        })
       }
-      throw error
+
+      const buffer = Buffer.from(await blob.arrayBuffer())
+      try {
+        await validateCatPhotoBuffer(buffer)
+      } catch (error) {
+        if (photoStorageId !== cat.photoStorageId) {
+          try {
+            await ctx.storage.delete(photoStorageId)
+          } catch {
+            // Best-effort cleanup of rejected upload.
+          }
+        }
+        throw error
+      }
     }
 
     await ctx.runMutation(internal.catProfile.applyCatProfileSubmit, {
@@ -152,6 +163,7 @@ export const submitCatProfile = action({
   },
 })
 
+/** Client-callable draft save — no ceremony step change, no AI scheduling. */
 export const saveCatProfileDraft = action({
   args: {
     catId: v.string(),

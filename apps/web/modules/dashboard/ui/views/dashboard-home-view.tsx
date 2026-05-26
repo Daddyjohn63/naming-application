@@ -163,9 +163,7 @@ function DashboardAddCeremonyLead() {
             Your naming ceremonies
           </h1>
           <p className="leading-relaxed text-pretty text-muted-foreground">
-            Each cat owns its own funnel and unlock record. Naming Buddy keeps a
-            single ceremony column per dashboard card so jumping between cats
-            stays calm.
+            Each cat has its own naming ceremony.
           </p>
         </div>
         <div className="shrink-0">
@@ -224,8 +222,8 @@ function DashboardCatsLoaded() {
             </EmptyMedia>
             <EmptyTitle>You haven&apos;t opened a ceremony yet.</EmptyTitle>
             <EmptyDescription>
-              Start when you are ready — profile, summary, preview, unlock,
-              and certificates land in dedicated steps guided by Naming Buddy.
+              Start when you are ready — profile, summary, preview, unlock, and
+              certificates land in dedicated steps guided by Naming Buddy.
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>

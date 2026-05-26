@@ -1,12 +1,23 @@
 import { defineSchema, defineTable } from "convex/server"
 import { v } from "convex/values"
 
+/**
+ * Convex database schema for Naming Buddy.
+ *
+ * KB-004 adds: summary pipeline `ceremonyStep` substates, `photoValidation` /
+ * `summaryGenerationError` on `cats`, and the `cat_summary_versions` table.
+ */
+
 /** Lifecycle position in the guided naming ceremony (Phase 1 funnel). */
 const ceremonyStep = v.union(
   v.literal("draft"),
+  /** Vision model checking uploaded photo (KB-004 §2.3a). */
+  v.literal("awaiting_photo_validation"),
+  /** Cat photo passed likelihood but quality is poor; user must confirm. */
+  v.literal("photo_quality_review"),
   /** Photo + description saved; summary job may run or be queued. */
   v.literal("awaiting_summary"),
-  /** Summary exists; user may edit profile, regenerate (within limits), or approve. */
+  /** Summary exists; user may manually edit or submit to lock. */
   v.literal("summary_review"),
   /** Summary locked; user picks family name style (free phase). */
   v.literal("family_style"),
@@ -75,6 +86,21 @@ export default defineSchema({
     breed: v.optional(v.string()),
     /** Uploaded cat photo reference (Convex file storage). */
     photoStorageId: v.optional(v.id("_storage")),
+    /** Latest §2.3a vision validation payload when a photo was submitted. */
+    photoValidation: v.optional(
+      v.object({
+        isCat: v.boolean(),
+        catLikelihoodScore: v.number(),
+        qualityScore: v.number(),
+        userMessage: v.string(),
+        blockReason: v.string(),
+        validatedAt: v.number(),
+      }),
+    ),
+    /** User chose to continue past a poor-quality photo warning. */
+    photoQualityAcknowledged: v.optional(v.boolean()),
+    /** Last summary/validation pipeline error for retry UI. */
+    summaryGenerationError: v.optional(v.string()),
     /** Successful KB-003 profile submits (cap in shared constants). */
     profileSubmitsUsed: v.optional(v.number()),
     ceremonyStep,

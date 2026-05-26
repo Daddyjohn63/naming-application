@@ -1,9 +1,16 @@
 /**
- * Server ceremony order mirrors `cats.ceremonyStep` / `packages/backend/convex/schema.ts`.
- * UI stepper groups server substates into FinalRequirements journey beats.
+ * Ceremony stepper helpers — maps server `ceremonyStep` to UI pills.
+ *
+ * KB-004: four summary substates (awaiting_photo_validation, photo_quality_review,
+ * awaiting_summary, summary_review) all map to the single "Summary" stepper pill.
+ * Server order mirrors `packages/backend/convex/schema.ts`.
  */
+
+/** Full server-side ceremony order (includes KB-004 summary substates). */
 export const CEREMONY_STEP_SEQUENCE = [
   "draft",
+  "awaiting_photo_validation",
+  "photo_quality_review",
   "awaiting_summary",
   "summary_review",
   "family_style",
@@ -32,6 +39,7 @@ export const CEREMONY_UI_STEP_SEQUENCE = [
 
 export type CeremonyUiStepId = (typeof CEREMONY_UI_STEP_SEQUENCE)[number]
 
+/** Human-readable labels for each stepper pill. */
 const UI_STEP_LABELS: Record<CeremonyUiStepId, string> = {
   profile: "Profile",
   summary: "Summary",
@@ -44,9 +52,13 @@ const UI_STEP_LABELS: Record<CeremonyUiStepId, string> = {
   certificate: "Certificate",
 }
 
-/** Maps a server `ceremonyStep` to the stepper pill index (0-based). */
+/**
+ * KB-004 summary substates (indices 1–4 server-side) → index 1 "Summary" pill.
+ */
 const SERVER_STEP_TO_UI_INDEX: Record<CeremonyStepLiteral, number> = {
   draft: 0,
+  awaiting_photo_validation: 1,
+  photo_quality_review: 1,
   awaiting_summary: 1,
   summary_review: 1,
   family_style: 2,
@@ -58,8 +70,11 @@ const SERVER_STEP_TO_UI_INDEX: Record<CeremonyStepLiteral, number> = {
   ceremony_complete: 8,
 }
 
+/** Badge text on the ceremony page header for each server step. */
 const SERVER_STEP_SHORT_LABEL: Record<CeremonyStepLiteral, string> = {
   draft: "Profile",
+  awaiting_photo_validation: "Summary",
+  photo_quality_review: "Summary",
   awaiting_summary: "Summary",
   summary_review: "Summary",
   family_style: "Family style",
@@ -71,7 +86,7 @@ const SERVER_STEP_SHORT_LABEL: Record<CeremonyStepLiteral, string> = {
   ceremony_complete: "Certificate",
 }
 
-/** Index of server step in funnel, or `-1` when the server value isn’t mapped. */
+/** Stepper pill index for a server step, or -1 if unmapped. */
 export function ceremonyStepIndex(step: string): number {
   if (CEREMONY_STEP_SEQUENCE.includes(step as CeremonyStepLiteral)) {
     return SERVER_STEP_TO_UI_INDEX[step as CeremonyStepLiteral]
@@ -79,6 +94,7 @@ export function ceremonyStepIndex(step: string): number {
   return -1
 }
 
+/** Ordered list of stepper pills with id + label for CeremonyStepper. */
 export function ceremonyStepsForUi(): readonly {
   id: CeremonyUiStepId
   label: string
@@ -89,6 +105,7 @@ export function ceremonyStepsForUi(): readonly {
   }))
 }
 
+/** Short label for the current step badge on /cats/[catId]. */
 export function ceremonyStepShortLabel(step: string): string {
   if (CEREMONY_STEP_SEQUENCE.includes(step as CeremonyStepLiteral)) {
     return SERVER_STEP_SHORT_LABEL[step as CeremonyStepLiteral]
