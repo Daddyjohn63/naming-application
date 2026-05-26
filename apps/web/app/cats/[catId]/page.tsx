@@ -27,7 +27,6 @@ import {
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { isCatProfileEditableStep } from "@workspace/shared/constants/cat-profile"
 import { isCatSummaryCeremonyStep } from "@workspace/shared/constants/cat-summary"
-import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
 import { toast } from "@workspace/ui/components/sonner"
 
 import { CatProfileForm } from "@/modules/cats/ui/components/cat-profile-form"
@@ -37,6 +36,18 @@ import {
   CatSummaryPipelineStatus,
 } from "@/modules/cats/ui/components/cat-summary-pipeline-status"
 import { CatSummaryReview } from "@/modules/cats/ui/components/cat-summary-review"
+
+/** User-facing summary-ceremony copy plus dev-visible error details. */
+function toastSummaryMutationError(label: string, err: unknown) {
+  const detail =
+    err instanceof Error && err.message.length > 0
+      ? err.message
+      : err != null
+        ? String(err)
+        : ""
+  console.error(label, err)
+  toast.error(detail.length > 0 ? `${label}: ${detail}` : label)
+}
 
 /** Placeholder layout while the cat query is loading. */
 function CatCeremonySkeleton() {
@@ -148,7 +159,7 @@ export default function CatCeremonyPage() {
     try {
       await retryPipeline({ catId: cat._id })
     } catch (err) {
-      toast.error(getConvexErrorMessage(err))
+      toastSummaryMutationError("Failed to retry summary pipeline", err)
     } finally {
       setRetrying(false)
     }
@@ -160,7 +171,7 @@ export default function CatCeremonyPage() {
     try {
       await returnToProfile({ catId: cat._id })
     } catch (err) {
-      toast.error(getConvexErrorMessage(err))
+      toastSummaryMutationError("Failed to return to profile", err)
     } finally {
       setReturningToProfile(false)
     }
