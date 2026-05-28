@@ -15,26 +15,25 @@ type CeremonyStepperProps = {
 }
 
 /**
- * Horizontal “guided tunnel” stepper (DESIGN-GUIDES.md Recommendation 1).
- * Completed steps read as subdued checks; current is dominant; future uses lock metaphor.
+ * Horizontal guided-tunnel stepper — warm cream bar, coral current step, sage completes.
  */
 export function CeremonyStepper({
-  // as per what server is telling us is current step
   currentStep,
   className,
 }: CeremonyStepperProps) {
   const steps = ceremonyStepsForUi()
-  // active index is the index of the current step in the ceremony steps sequence. source of truth is currentStep prop from server.
   const activeIndex = ceremonyStepIndex(currentStep)
-  // if the active index is less than 0, that means the current step is not in the ceremony steps sequence and something has gone wrong.
-  // TODO: we should probably handle this case more gracefully and do checks on the db to re-align the current step with the ceremony steps sequence.
   const unknownStep = activeIndex < 0
+  const progressPercent =
+    !unknownStep && steps.length > 1
+      ? (activeIndex / (steps.length - 1)) * 100
+      : 0
 
   return (
     <div
       className={cn(
-        "w-full overflow-x-auto border-y border-border/60 bg-muted/20 py-3",
-        className
+        "border-border/70 bg-muted/40 w-full overflow-x-auto border-y py-3",
+        className,
       )}
     >
       {unknownStep ? (
@@ -46,46 +45,63 @@ export function CeremonyStepper({
           tracker. Refresh or continue if the rest of the page looks fine.
         </p>
       ) : null}
-      <ol
-        className="flex min-w-0 items-stretch justify-center gap-2 px-1 text-xs font-medium text-muted-foreground md:gap-3 md:text-sm"
-        aria-label="Naming ceremony progress"
-      >
-        {steps.map((step, index) => {
-          const isComplete = !unknownStep && index < activeIndex
-          const isCurrent = !unknownStep && index === activeIndex
 
-          return (
-            <li
-              key={step.id}
-              aria-current={isCurrent ? "step" : undefined}
-              className={cn(
-                "flex min-w-30 shrink-0 flex-col gap-1 rounded-lg border border-border/80 bg-background/80 px-2 py-2 md:min-w-33 md:px-3",
-                isCurrent &&
-                  "border-primary/50 text-foreground ring-2 ring-primary/25",
-                isComplete && "border-transparent bg-transparent opacity-80",
-                index > activeIndex && "opacity-60"
-              )}
-            >
+      <div className="relative px-3">
+        <div
+          className="pointer-events-none absolute inset-x-3 top-4 hidden md:block"
+          aria-hidden
+        >
+          <div className="bg-border/80 h-0.5 w-full" />
+          <div
+            className="bg-primary absolute inset-y-0 left-0 h-0.5 transition-[width] duration-300"
+            style={{
+              width: `calc((100% - 1.5rem) * ${progressPercent / 100} + 0.75rem)`,
+            }}
+          />
+        </div>
+
+        <ol
+          className="relative z-10 flex min-w-0 items-stretch justify-center gap-2 px-1 text-xs font-medium text-muted-foreground md:gap-3 md:text-sm"
+          aria-label="Naming ceremony progress"
+        >
+          {steps.map((step, index) => {
+            const isComplete = !unknownStep && index < activeIndex
+            const isCurrent = !unknownStep && index === activeIndex
+
+            return (
+              <li
+                key={step.id}
+                aria-current={isCurrent ? "step" : undefined}
+                className={cn(
+                  "bg-card flex min-w-30 shrink-0 flex-col gap-1 rounded-xl border px-2 py-2 shadow-sm md:min-w-33 md:px-3",
+                  isCurrent &&
+                    "border-primary/45 text-foreground ring-primary/30 bg-card ring-2",
+                  isComplete &&
+                    "border-ceremony-complete/25 bg-card shadow-none",
+                  !isComplete && !isCurrent && "border-border/80 opacity-65",
+                )}
+              >
               <span className="flex items-center gap-1.5">
                 {isComplete ? (
                   <CheckCircle2
-                    className="size-4 shrink-0 text-primary"
+                    className="text-ceremony-complete size-4 shrink-0"
                     aria-hidden
                   />
                 ) : isCurrent ? (
                   <CircleDot
-                    className="size-4 shrink-0 text-primary"
+                    className="text-primary size-4 shrink-0"
                     aria-hidden
                   />
                 ) : (
-                  <Lock className="size-3.5 shrink-0" aria-hidden />
+                  <Lock className="size-3.5 shrink-0 opacity-70" aria-hidden />
                 )}
                 <span className="truncate">{step.label}</span>
               </span>
             </li>
-          )
-        })}
-      </ol>
+            )
+          })}
+        </ol>
+      </div>
     </div>
   )
 }

@@ -18,5 +18,5 @@ export type AllowedCatPhotoMimeType =
 /** Human-readable constraints for file inputs and helper copy. */
 export function catPhotoConstraintsLabel(): string {
   const mb = MAX_CAT_PHOTO_BYTES / (1024 * 1024)
-  return `JPEG, PNG, or WebP · max ${mb}MB · ${MIN_CAT_PHOTO_DIMENSION_PX}–${MAX_CAT_PHOTO_DIMENSION_PX}px per side`
+  return `JPEG, PNG, or WebP · max ${mb}MB · ${MIN_CAT_PHOTO_DIMENSION_PX}–${MAX_CAT_PHOTO_DIMENSION_PX}px per side · one cat per photo`
 }

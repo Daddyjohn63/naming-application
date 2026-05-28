@@ -15,6 +15,8 @@ import type * as catSummary from "../catSummary.js";
 import type * as catSummaryActions from "../catSummaryActions.js";
 import type * as cats from "../cats.js";
 import type * as chat from "../chat.js";
+import type * as familyNaming from "../familyNaming.js";
+import type * as familyNamingActions from "../familyNamingActions.js";
 import type * as http from "../http.js";
 import type * as users from "../users.js";
 
@@ -32,6 +34,8 @@ declare const fullApi: ApiFromModules<{
   catSummaryActions: typeof catSummaryActions;
   cats: typeof cats;
   chat: typeof chat;
+  familyNaming: typeof familyNaming;
+  familyNamingActions: typeof familyNamingActions;
   http: typeof http;
   users: typeof users;
 }>;

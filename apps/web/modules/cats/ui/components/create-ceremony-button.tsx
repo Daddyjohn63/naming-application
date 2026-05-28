@@ -4,7 +4,9 @@ import * as React from "react"
 
 import { PlusCircle } from "lucide-react"
 
+import { ceremonyCtaButtonClassName } from "@/modules/ceremony/lib/ceremony-styles"
 import { Button } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
 import { toast } from "@workspace/ui/components/sonner"
 
 import { useCreateDraftCeremony } from "../hooks/use-create-draft-ceremony"
@@ -38,7 +40,7 @@ export function CreateCeremonyButton({
       type="button"
       variant={variant}
       size={size}
-      className={className}
+      className={cn(ceremonyCtaButtonClassName, className)}
       disabled={pending}
       aria-busy={pending}
       onClick={() => {

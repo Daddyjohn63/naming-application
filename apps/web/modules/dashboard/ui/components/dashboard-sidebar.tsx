@@ -46,6 +46,10 @@ const sidebarHeaderItems = [
   },
 ]
 
+const dashboardSidebarMenuClassName = "gap-1.5"
+const dashboardSidebarGroupLabelClassName =
+  "text-sm font-semibold text-sidebar-foreground/80"
+
 function SidebarAddCatMenuItem() {
   const { execute, pending, error, clearError } = useCreateDraftCeremony()
 
@@ -87,7 +91,7 @@ export const DashboardSidebar = () => {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <SidebarMenu>
+        <SidebarMenu className={dashboardSidebarMenuClassName}>
           {sidebarHeaderItems.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
@@ -107,9 +111,11 @@ export const DashboardSidebar = () => {
       <SidebarContent>
         {/* User support items */}
         <SidebarGroup>
-          <SidebarGroupLabel>User Support</SidebarGroupLabel>
+          <SidebarGroupLabel className={dashboardSidebarGroupLabelClassName}>
+            User Support
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className={dashboardSidebarMenuClassName}>
               {userSupportItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
@@ -129,9 +135,11 @@ export const DashboardSidebar = () => {
         </SidebarGroup>
         {/* Cats owned by user */}
         <SidebarGroup>
-          <SidebarGroupLabel>Cats</SidebarGroupLabel>
+          <SidebarGroupLabel className={dashboardSidebarGroupLabelClassName}>
+            Your Cats
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className={dashboardSidebarMenuClassName}>
               {cats === undefined ? (
                 <SidebarMenuItem>
                   <SidebarMenuButton disabled className="opacity-60">
@@ -177,7 +185,7 @@ export const DashboardSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <SidebarMenu>
+        <SidebarMenu className={dashboardSidebarMenuClassName}>
           <SidebarMenuItem>
             <UserButton
               showName

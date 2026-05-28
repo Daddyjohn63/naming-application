@@ -7,7 +7,16 @@ import { openai } from "@ai-sdk/openai"
 import { generateText, Output } from "ai"
 
 import { classifyCatPhotoValidation } from "@workspace/shared/constants/cat-photo-validation"
+import { SUMMARY_PIPELINE_TRANSIENT_ERROR_MESSAGE } from "@workspace/shared/utils/summary-pipeline-error"
+import {
+  familyStyleLabelsForPrompt,
+  type FamilyNameStyleId,
+} from "@workspace/shared/constants/family-naming"
 import { catPhotoValidationSchema } from "@workspace/shared/schemas/cat-photo-validation"
+import {
+  familyNameBatchSchema,
+  type FamilyNameBatch,
+} from "@workspace/shared/schemas/family-naming"
 
 /** Bump when prompt text changes — useful for logging and future funnel analytics. */
 export const NAMING_PROMPT_VERSION = "family-summary-prompt-v1"
@@ -18,14 +27,15 @@ const PHOTO_VALIDATION_SYSTEM_PROMPT = `You are Naming Buddy's photo validator f
 Examine the uploaded image and return structured scores only — no summary, no name suggestions.
 
 Evaluate:
-1. Whether the primary subject is a cat (domestic cat or kitten). Reject obvious non-cats: dogs, people alone, landscapes, memes, cartoons, objects, empty rooms, etc. If multiple animals, the cat must be clearly primary.
-2. catLikelihoodScore (1–10): how confident you are the image shows a cat as the main subject.
-3. qualityScore (1–10): usefulness for a personality portrait — lighting, focus, resolution, how clearly the cat's face/body is visible (10 = excellent, 1 = unusable).
+1. Whether the primary subject is a cat (domestic cat or kitten). Reject obvious non-cats: dogs, people alone, landscapes, memes, cartoons, objects, empty rooms, etc.
+2. Whether there is exactly one cat in the image. Set isSingleCat false when two or more cats are clearly visible (including pairs cuddling, mother with kittens, or a litter). A single cat with people, furniture, or other non-cat animals in the background is fine if only one cat is present.
+3. catLikelihoodScore (1–10): how confident you are the image shows a cat as the main subject.
+4. qualityScore (1–10): usefulness for a personality portrait — lighting, focus, resolution, how clearly the cat's face/body is visible (10 = excellent, 1 = unusable).
 
 Be fair: a phone snapshot in average light can still score 6–7 if the cat is clearly visible. Score low for heavy blur, extreme darkness, cat as a tiny distant speck, or face completely hidden.
 
 userMessage: one or two short plain sentences for the owner if blocked or warned (warm, not scolding). Empty string if silent pass.
-blockReason: brief internal reason if not a cat or catLikelihoodScore would imply block; empty if pass/warn only.`
+blockReason: brief internal reason if not a cat, multiple cats, or catLikelihoodScore would imply block; empty if pass/warn only.`
 
 /** Short user turn paired with the image in the validation request. */
 const PHOTO_VALIDATION_USER_TEXT =
@@ -112,6 +122,7 @@ ${profile.description}${optionalBlock}${photoNote}`
 export type PhotoValidationResult = {
   validation: {
     isCat: boolean
+    isSingleCat: boolean
     catLikelihoodScore: number
     qualityScore: number
     userMessage: string
@@ -173,8 +184,84 @@ export async function generateCatSummaryWithAi(args: {
   return text.trim()
 }
 
-const AI_ERROR_USER_MESSAGE =
-  "We couldn't complete that step. Please try again."
+/** §2 system prompt: everyday family names grounded in the cat summary. */
+const FAMILY_NAMES_SYSTEM_PROMPT = `You are Naming Buddy's family-name generator for the "everyday name" a cat's humans use daily (T. S. Eliot's first name).
+
+Rules:
+- Return exactly 10 name options.
+- Each name must be a plausible everyday family name (first name or familiar nickname) — sensible, speakable, not joke strings or random syllables unless the style is Silly.
+- Match the requested style throughout the set.
+- Ground choices in the cat summary — names should feel earned by personality and appearance, not random.
+- Each option needs a one-sentence rationale (max ~25 words) explaining the fit.
+- No duplicate names within the batch.
+- Avoid names already in the excluded list.
+- Respond with valid JSON only — no markdown, no preamble.`
+
+const FAMILY_STYLE_PROMPT_NUANCES: Record<
+  Exclude<FamilyNameStyleId, "mix_it_up">,
+  string
+> = {
+  elegant: "Ref refined, graceful, slightly literary; avoid cutesy spellings.",
+  silly: "Warm humour, gentle absurdity; still usable day-to-day.",
+  classic: "Timeless human names; could appear on a birth certificate.",
+  nature_inspired: "Flora, fauna, seasons, landscapes — subtle not cartoon.",
+  non_human_names:
+    "Names that feel otherworldly or non-human yet still speakable as everyday nicknames.",
+}
+
+function buildFamilyStylePromptLine(styleIds: readonly FamilyNameStyleId[]): string {
+  const labels = familyStyleLabelsForPrompt(styleIds)
+  const nuances = styleIds
+    .filter((id): id is Exclude<FamilyNameStyleId, "mix_it_up"> => id !== "mix_it_up")
+    .map((id) => `${FAMILY_STYLE_PROMPT_NUANCES[id]}`)
+  return `Family name style: ${labels.join(" + ")}\n${nuances.join("\n")}`
+}
+
+function buildFamilyNamesUserText(args: {
+  summaryText: string
+  styleIds: readonly FamilyNameStyleId[]
+  excludedNames: readonly string[]
+  generationIndex: number
+}): string {
+  const excluded =
+    args.excludedNames.length > 0
+      ? args.excludedNames.join(", ")
+      : "(none)"
+
+  return `Cat personality summary:
+${args.summaryText}
+
+${buildFamilyStylePromptLine(args.styleIds)}
+
+Generation batch: ${args.generationIndex} (0 = first batch, 1 = regeneration — must differ meaningfully from batch 0)
+
+Excluded names (do not reuse): ${excluded}
+
+Generate 10 family name options with rationales.`
+}
+
+/** Generate a batch of 10 family names + rationales (KB-006 §2). */
+export async function generateFamilyNamesWithAi(args: {
+  summaryText: string
+  styleIds: readonly FamilyNameStyleId[]
+  excludedNames: readonly string[]
+  generationIndex: number
+}): Promise<FamilyNameBatch> {
+  const userText = buildFamilyNamesUserText(args)
+
+  const { output } = await generateText({
+    model: openai("gpt-4o-mini"),
+    output: Output.object({ schema: familyNameBatchSchema }),
+    messages: [
+      { role: "system", content: FAMILY_NAMES_SYSTEM_PROMPT },
+      { role: "user", content: userText },
+    ],
+  })
+
+  return output
+}
+
+const AI_ERROR_USER_MESSAGE = SUMMARY_PIPELINE_TRANSIENT_ERROR_MESSAGE
 
 /** Map thrown SDK/network errors to a short user-facing retry message. */
 export function normalizeAiError(error: unknown): string {

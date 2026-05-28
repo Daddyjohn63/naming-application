@@ -28,6 +28,15 @@ import {
   getConvexErrorData,
   getConvexErrorMessage,
 } from "@workspace/shared/utils/convex-error"
+import { applyCatProfileActionError } from "@workspace/shared/utils/cat-profile-action-error"
+import { isCatProfileActionFailure } from "@workspace/shared/schemas/cat-profile-action"
+import {
+  ceremonyCtaButtonClassName,
+  ceremonyFieldLabelClassName,
+  ceremonyInputClassName,
+  ceremonyOutlineButtonClassName,
+  ceremonyTextareaClassName,
+} from "@/modules/ceremony/lib/ceremony-styles"
 import {
   Alert,
   AlertDescription,
@@ -50,12 +59,16 @@ import {
 import { Input } from "@workspace/ui/components/input"
 import { Textarea } from "@workspace/ui/components/textarea"
 import { toast } from "@workspace/ui/components/sonner"
+import { cn } from "@workspace/ui/lib/utils"
 
 import { defaultProfileFormValues } from "../../lib/cat-profile-form-values"
 import { useCatPhotoUpload } from "../hooks/use-cat-photo-upload"
+import { CatPhotoUploader } from "./image-uploader"
 
 type CatProfileFormProps = {
   cat: Doc<"cats"> & { photoUrl?: string }
+  /** Specific photo issue message when sent back from AI validation. */
+  photoIssueMessage?: string | null
 }
 
 type FieldName = keyof SubmitCatProfileFieldsInput | "photo"
@@ -64,7 +77,10 @@ function remainingChars(value: string, max: number): number {
   return Math.max(0, max - value.length)
 }
 
-export function CatProfileForm({ cat }: CatProfileFormProps) {
+export function CatProfileForm({
+  cat,
+  photoIssueMessage = null,
+}: CatProfileFormProps) {
   const router = useRouter()
   const submitProfile = useAction(api.catProfileActions.submitCatProfile)
   const saveDraft = useAction(api.catProfileActions.saveCatProfileDraft)
@@ -112,9 +128,12 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
       }
       return null
     })
+    if (photoIssueMessage !== null && photoIssueMessage.length > 0) {
+      setServerFieldErrors((prev) => ({ ...prev, photo: photoIssueMessage }))
+    }
     // Re-sync when server row updates (e.g. after submit or another tab).
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset from latest cat snapshot
-  }, [cat._id, cat.updatedAt])
+  }, [cat._id, cat.updatedAt, photoIssueMessage])
 
   React.useEffect(() => {
     return () => {
@@ -142,22 +161,6 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
     setFormError(null)
   }
 
-  const onPhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    clearFieldError("photo")
-    const file = event.target.files?.[0]
-    if (file === undefined) {
-      return
-    }
-    setPhotoFile(file)
-    setStoredPhotoId(undefined)
-    setPreviewUrl((prev) => {
-      if (prev !== null && prev.startsWith("blob:")) {
-        URL.revokeObjectURL(prev)
-      }
-      return URL.createObjectURL(file)
-    })
-  }
-
   const onSubmit = form.handleSubmit(async (values) => {
     setFormError(null)
     setServerFieldErrors({})
@@ -170,7 +173,7 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
       }
 
       setSubmitting(true)
-      await submitProfile({
+      const result = await submitProfile({
         catId: cat._id,
         title: values.title,
         description: values.description,
@@ -179,6 +182,13 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
         breed: values.breed,
         ...(photoStorageId !== undefined ? { photoStorageId } : {}),
       })
+      if (isCatProfileActionFailure(result)) {
+        applyCatProfileActionError(result, {
+          setServerFieldErrors,
+          setFormError,
+        })
+        return
+      }
       setPhotoFile(null)
       toast.success(
         cat.ceremonyStep === "draft"
@@ -232,7 +242,7 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
       }
 
       setSavingDraft(true)
-      await saveDraft({
+      const result = await saveDraft({
         catId: cat._id,
         title: parsed.data.title,
         description: parsed.data.description,
@@ -241,6 +251,13 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
         breed: parsed.data.breed,
         ...(photoStorageId !== undefined ? { photoStorageId } : {}),
       })
+      if (isCatProfileActionFailure(result)) {
+        applyCatProfileActionError(result, {
+          setServerFieldErrors,
+          setFormError,
+        })
+        return
+      }
       setPhotoFile(null)
       toast.success("Profile saved.")
       router.push("/dashboard")
@@ -268,7 +285,7 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
   const busy = submitting || uploadPending || savingDraft
 
   return (
-    <Card>
+    <Card className="ceremony-panel">
       <CardHeader className="border-b">
         <CardTitle className="text-base">Cat profile</CardTitle>
         <CardDescription>
@@ -285,7 +302,7 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
         </CardDescription>
       </CardHeader>
 
-      <form onSubmit={onSubmit} className="flex flex-col gap-6 px-4 pt-4 pb-6">
+      <form onSubmit={onSubmit} className="flex flex-col gap-6 px-4 py-6">
         {cat.ceremonyStep === "summary_review" ? (
           <Alert>
             <AlertTitle>Editing will restart summary generation</AlertTitle>
@@ -297,37 +314,44 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
         ) : null}
         <FieldGroup>
           <Field data-invalid={photoError !== undefined}>
-            <FieldLabel htmlFor="cat-photo">Cat photo</FieldLabel>
+            <FieldLabel htmlFor="cat-photo" className={ceremonyFieldLabelClassName}>
+              Cat photo
+            </FieldLabel>
             <FieldDescription>
               Optional · {catPhotoConstraintsLabel()}
             </FieldDescription>
-            <Input
+            <CatPhotoUploader
               id="cat-photo"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
+              previewUrl={displayPreviewUrl ?? null}
               disabled={busy}
-              onChange={onPhotoChange}
-              onFocus={() => clearFieldError("photo")}
+              onFileSelect={(file) => {
+                clearFieldError("photo")
+                setPhotoFile(file)
+                setStoredPhotoId(undefined)
+                setPreviewUrl((prev) => {
+                  if (prev !== null && prev.startsWith("blob:")) {
+                    URL.revokeObjectURL(prev)
+                  }
+                  return URL.createObjectURL(file)
+                })
+              }}
+              onValidationError={(message) => {
+                setServerFieldErrors((prev) => ({ ...prev, photo: message }))
+              }}
+              onInteraction={() => clearFieldError("photo")}
             />
-            {displayPreviewUrl !== null && displayPreviewUrl !== undefined ? (
-              <div className="bg-muted relative mt-2 aspect-square w-full max-w-xs overflow-hidden rounded-xl border">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={displayPreviewUrl}
-                  alt="Uploaded cat photo preview"
-                  className="size-full object-cover"
-                />
-              </div>
-            ) : null}
             <FieldError>{photoError}</FieldError>
           </Field>
 
           <Field data-invalid={!!form.formState.errors.title || !!serverFieldErrors.title}>
-            <FieldLabel htmlFor="cat-title">Ceremony title</FieldLabel>
+            <FieldLabel htmlFor="cat-title" className={ceremonyFieldLabelClassName}>
+              Ceremony title
+            </FieldLabel>
             <Input
               id="cat-title"
               disabled={busy}
               maxLength={MAX_CAT_TITLE_LENGTH}
+              className={ceremonyInputClassName}
               {...form.register("title", {
                 onChange: () => clearFieldError("title"),
               })}
@@ -348,13 +372,15 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
               !!serverFieldErrors.description
             }
           >
-            <FieldLabel htmlFor="cat-description">Your cat&apos;s story</FieldLabel>
+            <FieldLabel htmlFor="cat-description" className={ceremonyFieldLabelClassName}>
+              Your cat&apos;s story
+            </FieldLabel>
             <Textarea
               id="cat-description"
               disabled={busy}
               rows={6}
               maxLength={MAX_CAT_DESCRIPTION_LENGTH}
-              className="min-h-[8rem] resize-y"
+              className={cn(ceremonyTextareaClassName, "min-h-[10rem]")}
               {...form.register("description", {
                 onChange: () => clearFieldError("description"),
               })}
@@ -371,13 +397,22 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
             </FieldError>
           </Field>
 
-          <Field data-invalid={!!serverFieldErrors.existingName}>
-            <FieldLabel htmlFor="cat-existing-name">Current name</FieldLabel>
-            <FieldDescription>Optional</FieldDescription>
-            <Input
-              id="cat-existing-name"
-              disabled={busy}
-              maxLength={MAX_CAT_OPTIONAL_FIELD_LENGTH}
+          <div className="flex flex-col gap-5 border-t border-border/60 pt-6">
+            <p className="text-sm font-medium text-foreground">Optional details</p>
+
+            <Field data-invalid={!!serverFieldErrors.existingName}>
+              <FieldLabel
+                htmlFor="cat-existing-name"
+                className={ceremonyFieldLabelClassName}
+              >
+                Current name
+              </FieldLabel>
+              <FieldDescription>If your cat already has a name we should know about.</FieldDescription>
+              <Input
+                id="cat-existing-name"
+                disabled={busy}
+                maxLength={MAX_CAT_OPTIONAL_FIELD_LENGTH}
+                className={ceremonyInputClassName}
               {...form.register("existingName", {
                 onChange: () => clearFieldError("existingName"),
               })}
@@ -386,35 +421,44 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
             <FieldError>{serverFieldErrors.existingName}</FieldError>
           </Field>
 
-          <Field data-invalid={!!serverFieldErrors.age}>
-            <FieldLabel htmlFor="cat-age">Age</FieldLabel>
-            <FieldDescription>Optional — e.g. &quot;3 years&quot;</FieldDescription>
-            <Input
-              id="cat-age"
-              disabled={busy}
-              maxLength={MAX_CAT_OPTIONAL_FIELD_LENGTH}
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field data-invalid={!!serverFieldErrors.age}>
+              <FieldLabel htmlFor="cat-age" className={ceremonyFieldLabelClassName}>
+                Age
+              </FieldLabel>
+              <FieldDescription>e.g. &quot;3 years&quot;</FieldDescription>
+              <Input
+                id="cat-age"
+                disabled={busy}
+                maxLength={MAX_CAT_OPTIONAL_FIELD_LENGTH}
+                className={ceremonyInputClassName}
               {...form.register("age", {
                 onChange: () => clearFieldError("age"),
               })}
               onFocus={() => clearFieldError("age")}
             />
-            <FieldError>{serverFieldErrors.age}</FieldError>
-          </Field>
+              <FieldError>{serverFieldErrors.age}</FieldError>
+            </Field>
 
-          <Field data-invalid={!!serverFieldErrors.breed}>
-            <FieldLabel htmlFor="cat-breed">Breed</FieldLabel>
-            <FieldDescription>Optional</FieldDescription>
-            <Input
-              id="cat-breed"
-              disabled={busy}
-              maxLength={MAX_CAT_OPTIONAL_FIELD_LENGTH}
+            <Field data-invalid={!!serverFieldErrors.breed}>
+              <FieldLabel htmlFor="cat-breed" className={ceremonyFieldLabelClassName}>
+                Breed
+              </FieldLabel>
+              <FieldDescription>e.g. &quot;Domestic shorthair&quot;</FieldDescription>
+              <Input
+                id="cat-breed"
+                disabled={busy}
+                maxLength={MAX_CAT_OPTIONAL_FIELD_LENGTH}
+                className={ceremonyInputClassName}
               {...form.register("breed", {
                 onChange: () => clearFieldError("breed"),
               })}
               onFocus={() => clearFieldError("breed")}
             />
-            <FieldError>{serverFieldErrors.breed}</FieldError>
-          </Field>
+              <FieldError>{serverFieldErrors.breed}</FieldError>
+            </Field>
+          </div>
+          </div>
         </FieldGroup>
 
         {formError !== null ? (
@@ -424,7 +468,11 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
         ) : null}
 
         <div className="flex flex-wrap gap-3">
-          <Button type="submit" disabled={busy || submitsRemaining === 0}>
+          <Button
+            type="submit"
+            disabled={busy || submitsRemaining === 0}
+            className={ceremonyCtaButtonClassName}
+          >
             {submitting
               ? "Submitting…"
               : "Submit profile and generate summary"}
@@ -433,6 +481,7 @@ export function CatProfileForm({ cat }: CatProfileFormProps) {
             type="button"
             variant="outline"
             disabled={busy}
+            className={ceremonyOutlineButtonClassName}
             onClick={() => void onSaveAndExit()}
           >
             {savingDraft ? "Saving…" : "Save & exit to dashboard"}

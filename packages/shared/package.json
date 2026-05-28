@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "eslint",
     "format": "prettier --write \"**/*.ts\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test \"src/**/*.test.ts\""
   },
   "dependencies": {
     "zod": "^3.25.76"

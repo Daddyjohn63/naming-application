@@ -9,6 +9,11 @@
 
 import { ConvexError, v } from "convex/values"
 
+import {
+  CAT_PHOTO_CHECK_FAILED_MESSAGE,
+  resolvePhotoIssueUserMessage,
+} from "@workspace/shared/constants/cat-photo-validation"
+import { canReturnToProfileForPhotoReplace } from "@workspace/shared/utils/summary-pipeline-error"
 import { CAT_SUMMARY_ERROR_CODE } from "@workspace/shared/constants/cat-summary-errors"
 import {
   saveCatSummaryDraftSchema,
@@ -26,6 +31,51 @@ import {
 } from "./_generated/server"
 import { getCurrentUser } from "./users"
 import type { Id } from "./_generated/dataModel"
+
+const photoValidationInput = v.object({
+  isCat: v.boolean(),
+  isSingleCat: v.boolean(),
+  catLikelihoodScore: v.number(),
+  qualityScore: v.number(),
+  userMessage: v.string(),
+  blockReason: v.string(),
+})
+
+type PhotoValidationInput = {
+  isCat: boolean
+  isSingleCat: boolean
+  catLikelihoodScore: number
+  qualityScore: number
+  userMessage: string
+  blockReason: string
+}
+
+/** Send owner back to profile with a specific photo issue message. */
+async function returnCatToProfileForPhotoIssueDoc(
+  ctx: MutationCtx,
+  catId: Id<"cats">,
+  validation: PhotoValidationInput,
+) {
+  const cat = await ctx.db.get(catId)
+  if (cat === null) {
+    return
+  }
+
+  const now = Date.now()
+  const userMessage = resolvePhotoIssueUserMessage(validation)
+
+  await ctx.db.patch(catId, {
+    ceremonyStep: "draft",
+    photoValidation: {
+      ...validation,
+      userMessage,
+      validatedAt: now,
+    },
+    photoQualityAcknowledged: undefined,
+    summaryGenerationError: undefined,
+    updatedAt: now,
+  })
+}
 
 /** Load a cat and verify it belongs to the signed-in user; throws on missing/forbidden. */
 async function getOwnedCatOrThrow(
@@ -247,13 +297,8 @@ export const retrySummaryPipeline = mutation({
     }
     const cat = await getOwnedCatOrThrow(ctx, id, currentUser._id)
 
-    // Only retry when the cat is mid-pipeline and an error was recorded.
-    const retryableSteps = new Set([
-      "awaiting_photo_validation",
-      "awaiting_summary",
-      "photo_quality_review",
-    ])
-    if (!retryableSteps.has(cat.ceremonyStep)) {
+    // Only retry transient summary failures — photo issues return to profile.
+    if (cat.ceremonyStep !== "awaiting_summary") {
       throw new ConvexError({ code: CAT_SUMMARY_ERROR_CODE.STEP_LOCKED })
     }
     if (cat.summaryGenerationError === undefined) {
@@ -263,24 +308,6 @@ export const retrySummaryPipeline = mutation({
     }
 
     const now = Date.now()
-    // Photo-quality review or failed validation → re-run vision check.
-    const shouldValidatePhoto =
-      cat.ceremonyStep === "photo_quality_review" ||
-      (cat.ceremonyStep === "awaiting_photo_validation" &&
-        cat.photoStorageId !== undefined)
-
-    if (shouldValidatePhoto) {
-      await ctx.db.patch(id, {
-        ceremonyStep: "awaiting_photo_validation",
-        summaryGenerationError: undefined,
-        updatedAt: now,
-      })
-      await ctx.scheduler.runAfter(0, internal.catSummaryActions.validateCatPhoto, {
-        catId: id,
-      })
-      return
-    }
-
     await ctx.db.patch(id, {
       ceremonyStep: "awaiting_summary",
       summaryGenerationError: undefined,
@@ -307,15 +334,81 @@ export const returnToProfileForPhotoReplace = mutation({
       throw new ConvexError({ code: CAT_SUMMARY_ERROR_CODE.NOT_FOUND })
     }
     const cat = await getOwnedCatOrThrow(ctx, id, currentUser._id)
-    if (cat.ceremonyStep !== "photo_quality_review") {
+
+    if (
+      !canReturnToProfileForPhotoReplace({
+        ceremonyStep: cat.ceremonyStep,
+        summaryGenerationError: cat.summaryGenerationError,
+        hasPhotoValidation: cat.photoValidation !== undefined,
+      })
+    ) {
       throw new ConvexError({ code: CAT_SUMMARY_ERROR_CODE.STEP_LOCKED })
     }
+
+    const now = Date.now()
+
+    // Already on profile (e.g. validation returned here before the button click).
+    if (cat.ceremonyStep === "draft") {
+      if (
+        cat.photoValidation !== undefined &&
+        cat.summaryGenerationError === undefined
+      ) {
+        return
+      }
+      const pipelineMessage = cat.summaryGenerationError?.trim() ?? ""
+      if (pipelineMessage.length === 0 && cat.photoValidation !== undefined) {
+        return
+      }
+    }
+
+    const pipelineMessage = cat.summaryGenerationError?.trim() ?? ""
+    const photoValidation =
+      cat.photoValidation !== undefined
+        ? cat.photoValidation
+        : pipelineMessage.length > 0
+          ? {
+              isCat: true,
+              isSingleCat: true,
+              catLikelihoodScore: 0,
+              qualityScore: 0,
+              userMessage: pipelineMessage,
+              blockReason: "",
+              validatedAt: now,
+            }
+          : {
+              isCat: true,
+              isSingleCat: true,
+              catLikelihoodScore: 0,
+              qualityScore: 0,
+              userMessage: CAT_PHOTO_CHECK_FAILED_MESSAGE,
+              blockReason: "",
+              validatedAt: now,
+            }
+
+    const resolvedUserMessage = resolvePhotoIssueUserMessage(photoValidation)
 
     await ctx.db.patch(id, {
       ceremonyStep: "draft",
       photoQualityAcknowledged: undefined,
-      updatedAt: Date.now(),
+      summaryGenerationError: undefined,
+      photoValidation: {
+        ...photoValidation,
+        userMessage: resolvedUserMessage,
+        validatedAt: now,
+      },
+      updatedAt: now,
     })
+  },
+})
+
+/** Send owner back to profile with a persisted photo issue message. */
+export const returnCatToProfileForPhotoIssue = internalMutation({
+  args: {
+    catId: v.id("cats"),
+    validation: photoValidationInput,
+  },
+  handler: async (ctx, args) => {
+    await returnCatToProfileForPhotoIssueDoc(ctx, args.catId, args.validation)
   },
 })
 
@@ -326,13 +419,7 @@ export const returnToProfileForPhotoReplace = mutation({
 export const applyPhotoValidationResult = internalMutation({
   args: {
     catId: v.id("cats"),
-    validation: v.object({
-      isCat: v.boolean(),
-      catLikelihoodScore: v.number(),
-      qualityScore: v.number(),
-      userMessage: v.string(),
-      blockReason: v.string(),
-    }),
+    validation: photoValidationInput,
     outcome: v.union(
       v.literal("pass"),
       v.literal("warn"),
@@ -345,34 +432,18 @@ export const applyPhotoValidationResult = internalMutation({
       return
     }
 
+    if (args.outcome === "block" || args.outcome === "warn") {
+      // MVP: any photo issue sends the owner back to the profile form to re-upload.
+      await returnCatToProfileForPhotoIssueDoc(ctx, args.catId, args.validation)
+      return
+    }
+
     const now = Date.now()
+    const userMessage = resolvePhotoIssueUserMessage(args.validation)
     const validationRecord = {
       ...args.validation,
+      userMessage,
       validatedAt: now,
-    }
-
-    if (args.outcome === "block") {
-      // Send user back to profile form; summary never starts.
-      await ctx.db.patch(args.catId, {
-        ceremonyStep: "draft",
-        photoValidation: validationRecord,
-        photoQualityAcknowledged: undefined,
-        summaryGenerationError: undefined,
-        updatedAt: now,
-      })
-      return
-    }
-
-    if (args.outcome === "warn") {
-      // Hold summary until user acknowledges or replaces photo.
-      await ctx.db.patch(args.catId, {
-        ceremonyStep: "photo_quality_review",
-        photoValidation: validationRecord,
-        photoQualityAcknowledged: undefined,
-        summaryGenerationError: undefined,
-        updatedAt: now,
-      })
-      return
     }
 
     // Pass — advance to awaiting_summary; action layer schedules generateCatSummary.
