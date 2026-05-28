@@ -49,6 +49,10 @@ const sidebarHeaderItems = [
 const dashboardSidebarMenuClassName = "gap-1.5"
 const dashboardSidebarGroupLabelClassName =
   "text-sm font-semibold text-sidebar-foreground/80"
+const catSidebarPhotoClassName =
+  "size-8 shrink-0 rounded object-cover group-data-[collapsible=icon]:size-full group-data-[collapsible=icon]:rounded-md"
+const catSidebarPhotoButtonClassName =
+  "group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:overflow-hidden"
 
 function SidebarAddCatMenuItem() {
   const { execute, pending, error, clearError } = useCreateDraftCeremony()
@@ -159,6 +163,11 @@ export const DashboardSidebar = () => {
                           asChild
                           isActive={pathname === href}
                           tooltip={cat.name}
+                          className={
+                            cat.photoUrl
+                              ? catSidebarPhotoButtonClassName
+                              : undefined
+                          }
                         >
                           <Link href={href}>
                             {cat.photoUrl ? (
@@ -166,12 +175,14 @@ export const DashboardSidebar = () => {
                               <img
                                 src={cat.photoUrl}
                                 alt=""
-                                className="size-8 shrink-0 rounded object-cover"
+                                className={catSidebarPhotoClassName}
                               />
                             ) : (
                               <Cat aria-hidden />
                             )}
-                            <span className="truncate">{cat.name}</span>
+                            <span className="truncate group-data-[collapsible=icon]:hidden">
+                              {cat.name}
+                            </span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>

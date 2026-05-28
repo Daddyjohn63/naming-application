@@ -32,6 +32,7 @@ import { toast } from "@workspace/ui/components/sonner"
 import { cn } from "@workspace/ui/lib/utils"
 
 import { FamilyNamePaywallTeaser } from "./family-name-paywall-teaser"
+import { scrollToCeremonyThreeNames } from "@/modules/ceremony/lib/scroll-to-ceremony-three-names"
 
 type FamilyNameCurationProps = {
   cat: Doc<"cats">
@@ -167,6 +168,7 @@ export function FamilyNameCuration({
     setSettingFavourite(name)
     try {
       await setFavourite({ catId: cat._id, name })
+      scrollToCeremonyThreeNames()
     } catch (error) {
       toast.error(getConvexErrorMessage(error))
     } finally {

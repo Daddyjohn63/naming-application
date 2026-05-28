@@ -9,6 +9,10 @@ import {
   canChangeFamilyFavourite,
   isCeremonyUnlocked,
 } from "@/modules/ceremony/lib/ceremony-layout"
+import {
+  CEREMONY_THREE_NAMES_SECTION_ID,
+  scrollToCeremonyThreeNames,
+} from "@/modules/ceremony/lib/scroll-to-ceremony-three-names"
 import { normalizeFamilyName } from "@workspace/shared/constants/family-naming"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
 import { Button } from "@workspace/ui/components/button"
@@ -85,6 +89,7 @@ export function CeremonyThreeNamesView({
     setSettingFavourite(name)
     try {
       await setFavourite({ catId: cat._id, name })
+      scrollToCeremonyThreeNames()
     } catch (error) {
       toast.error(getConvexErrorMessage(error))
     } finally {
@@ -99,7 +104,11 @@ export function CeremonyThreeNamesView({
       : "Your everyday name is chosen — unlock for the rest of the ceremony."
 
   return (
-    <section className={cn("flex flex-col gap-6", className)} aria-label="Your cat's three names">
+    <section
+      id={CEREMONY_THREE_NAMES_SECTION_ID}
+      className={cn("flex scroll-mt-24 flex-col gap-6", className)}
+      aria-label="Your cat's three names"
+    >
       <header className="flex flex-col gap-2">
         <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
           Your cat&apos;s three names
