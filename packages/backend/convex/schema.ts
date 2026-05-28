@@ -19,13 +19,17 @@ const ceremonyStep = v.union(
   v.literal("awaiting_summary"),
   /** Summary exists; user may manually edit or submit to lock. */
   v.literal("summary_review"),
-  /** Summary locked; user picks family name style (free phase). */
+  /** Summary locked; user picks family name style(s) (KB-005). */
   v.literal("family_style"),
-  /** Three family-name preview + paywall teaser (free phase). */
-  v.literal("family_preview"),
-  /** User must complete one-off unlock before full naming stages. */
+  /** AI generating the first or regenerated family-name batch (KB-006). */
+  v.literal("awaiting_family_names"),
+  /** Ten family names ready; shortlist, favourite, paywall teaser (KB-006). */
+  v.literal("family_curation"),
+  /** User must complete one-off unlock before cat-world naming (KB-007). */
   v.literal("awaiting_payment"),
-  /** Ten family-name options after unlock; user selects one. */
+  /** Legacy — treat as family_curation if encountered. */
+  v.literal("family_preview"),
+  /** Legacy post-unlock family step — superseded by free family_curation (KB-006). */
   v.literal("naming_family"),
   /** Literary / distinct identity names; uniqueness enforced via claims table. */
   v.literal("naming_cat_world"),
@@ -49,6 +53,16 @@ const paymentStatus = v.union(
 )
 
 const paymentProvider = v.union(v.literal("stub"), v.literal("stripe"))
+
+/** KB-005 — must match `FAMILY_NAME_STYLE_IDS` in @workspace/shared/constants/family-naming. */
+const familyNameStyleId = v.union(
+  v.literal("elegant"),
+  v.literal("silly"),
+  v.literal("classic"),
+  v.literal("nature_inspired"),
+  v.literal("non_human_names"),
+  v.literal("mix_it_up"),
+)
 
 export default defineSchema({
   /**
@@ -90,6 +104,7 @@ export default defineSchema({
     photoValidation: v.optional(
       v.object({
         isCat: v.boolean(),
+        isSingleCat: v.boolean(),
         catLikelihoodScore: v.number(),
         qualityScore: v.number(),
         userMessage: v.string(),
@@ -108,8 +123,21 @@ export default defineSchema({
     summaryRegenerationsUsed: v.number(),
     /** Accepted summary row; naming stages should read copy from this version. */
     acceptedSummaryVersionId: v.optional(v.id("cat_summary_versions")),
-    /** Family name style chosen in free phase (KB-005). */
-    familyNameStyle: v.optional(v.string()),
+    /** Family name styles chosen in free phase (KB-005); mix-it-up resolved to concrete styles. */
+    familyNameStyles: v.optional(v.array(familyNameStyleId)),
+    /** Saved family names during curation (max 6, unique by normalized name). */
+    familyNameShortlist: v.optional(
+      v.array(
+        v.object({
+          name: v.string(),
+          rationale: v.string(),
+        }),
+      ),
+    ),
+    /** AI batch regenerations consumed for family names (max 1 per §4a). */
+    familyNameRegenerationsUsed: v.optional(v.number()),
+    /** Last family-name generation error for retry UI. */
+    familyNameGenerationError: v.optional(v.string()),
     /** Successful unlock tied to this ceremony (see cat_payments). */
     ceremonyPaymentId: v.optional(v.id("cat_payments")),
     /** Final picks + rationales copied here for certificate & fast dashboard reads. */

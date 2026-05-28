@@ -9,9 +9,11 @@
 
 import { v } from "convex/values"
 
+import { CAT_PHOTO_CHECK_FAILED_MESSAGE } from "@workspace/shared/constants/cat-photo-validation"
+import { classifySummaryPipelineError } from "@workspace/shared/utils/summary-pipeline-error"
+
 import {
   generateCatSummaryWithAi,
-  normalizeAiError,
   validateCatPhotoWithAi,
 } from "./ai/naming"
 import { internal } from "./_generated/api"
@@ -50,6 +52,7 @@ export const validateCatPhoto = internalAction({
         catId,
         validation: {
           isCat: true,
+          isSingleCat: true,
           catLikelihoodScore: 10,
           qualityScore: 10,
           userMessage: "",
@@ -81,10 +84,26 @@ export const validateCatPhoto = internalAction({
         )
       }
     } catch (error) {
-      await ctx.runMutation(internal.catSummary.applySummaryPipelineFailure, {
+      const failure = classifySummaryPipelineError({ error, hasPhoto: true })
+      const userMessage =
+        failure.kind === "photo"
+          ? failure.userMessage
+          : CAT_PHOTO_CHECK_FAILED_MESSAGE
+
+      await ctx.runMutation(internal.catSummary.applyPhotoValidationResult, {
         catId,
-        errorMessage: normalizeAiError(error),
-        step: "awaiting_photo_validation",
+        validation: {
+          isCat: true,
+          isSingleCat: true,
+          catLikelihoodScore: 0,
+          qualityScore: 0,
+          userMessage,
+          blockReason:
+            error instanceof Error
+              ? error.message
+              : "Photo validation failed",
+        },
+        outcome: "block",
       })
     }
   },
@@ -131,9 +150,29 @@ export const generateCatSummary = internalAction({
         photoStorageId: cat.photoStorageId,
       })
     } catch (error) {
+      const hasPhoto = cat.photoStorageId !== undefined
+      const failure = classifySummaryPipelineError({ error, hasPhoto })
+
+      if (failure.kind === "photo") {
+        const priorValidation = cat.photoValidation
+        await ctx.runMutation(internal.catSummary.returnCatToProfileForPhotoIssue, {
+          catId,
+          validation: {
+            isCat: priorValidation?.isCat ?? true,
+            isSingleCat: priorValidation?.isSingleCat ?? true,
+            catLikelihoodScore: priorValidation?.catLikelihoodScore ?? 8,
+            qualityScore: priorValidation?.qualityScore ?? 0,
+            userMessage: failure.userMessage,
+            blockReason:
+              error instanceof Error ? error.message : "Summary photo failure",
+          },
+        })
+        return
+      }
+
       await ctx.runMutation(internal.catSummary.applySummaryPipelineFailure, {
         catId,
-        errorMessage: normalizeAiError(error),
+        errorMessage: failure.userMessage,
         step: "awaiting_summary",
       })
     }

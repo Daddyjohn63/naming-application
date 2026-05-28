@@ -7,6 +7,7 @@ import { api } from "@workspace/backend/_generated/api"
 import { CreateCeremonyButton } from "@/modules/cats/ui/components/create-ceremony-button"
 import { useCreateDraftCeremony } from "@/modules/cats/ui/hooks/use-create-draft-ceremony"
 import { ceremonyStepShortLabel } from "@/modules/ceremony/lib/ceremony-progress"
+import { ceremonyCtaButtonClassName } from "@/modules/ceremony/lib/ceremony-styles"
 import {
   Alert,
   AlertDescription,
@@ -30,7 +31,8 @@ import {
   EmptyTitle,
 } from "@workspace/ui/components/empty"
 import { Skeleton } from "@workspace/ui/components/skeleton"
-import { AlertCircleIcon, Cat } from "lucide-react"
+import { cn } from "@workspace/ui/lib/utils"
+import { AlertCircleIcon, Cat, PlusCircle } from "lucide-react"
 import { useConvexAuth, useQuery } from "convex/react"
 
 const DASHBOARD_SKELETON_CARD_KEYS = ["a", "b", "c", "d", "e", "f"] as const
@@ -172,11 +174,13 @@ function DashboardAddCeremonyLead() {
             size="lg"
             disabled={pending}
             aria-busy={pending}
+            className={cn(ceremonyCtaButtonClassName, "px-6")}
             onClick={() => {
               clearError()
               void execute()
             }}
           >
+            <PlusCircle className="size-4" aria-hidden />
             {pending ? "Starting ceremony…" : "Add a cat"}
           </Button>
         </div>
@@ -228,8 +232,8 @@ function DashboardCatsLoaded() {
           </EmptyHeader>
           <EmptyContent>
             <CreateCeremonyButton
-              variant="secondary"
               size="lg"
+              className="px-6"
               label="Start your first ceremony"
             />
           </EmptyContent>

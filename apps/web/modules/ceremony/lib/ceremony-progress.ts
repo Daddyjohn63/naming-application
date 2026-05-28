@@ -1,8 +1,8 @@
 /**
  * Ceremony stepper helpers — maps server `ceremonyStep` to UI pills.
  *
- * KB-004: four summary substates (awaiting_photo_validation, photo_quality_review,
- * awaiting_summary, summary_review) all map to the single "Summary" stepper pill.
+ * KB-004: four summary substates share the "Summary" pill.
+ * KB-005/006: `awaiting_family_names` + `family_curation` share "Family names".
  * Server order mirrors `packages/backend/convex/schema.ts`.
  */
 
@@ -14,12 +14,15 @@ export const CEREMONY_STEP_SEQUENCE = [
   "awaiting_summary",
   "summary_review",
   "family_style",
-  "family_preview",
+  "awaiting_family_names",
+  "family_curation",
   "awaiting_payment",
-  "naming_family",
   "naming_cat_world",
   "naming_ineffable",
   "ceremony_complete",
+  /** Legacy values kept for resume of older rows. */
+  "family_preview",
+  "naming_family",
 ] as const
 
 export type CeremonyStepLiteral = (typeof CEREMONY_STEP_SEQUENCE)[number]
@@ -29,9 +32,8 @@ export const CEREMONY_UI_STEP_SEQUENCE = [
   "profile",
   "summary",
   "family_style",
-  "family_preview",
+  "family_names",
   "unlock",
-  "naming_family",
   "naming_cat_world",
   "naming_ineffable",
   "certificate",
@@ -44,16 +46,16 @@ const UI_STEP_LABELS: Record<CeremonyUiStepId, string> = {
   profile: "Profile",
   summary: "Summary",
   family_style: "Family style",
-  family_preview: "Preview",
+  family_names: "Family names",
   unlock: "Unlock",
-  naming_family: "Family names",
   naming_cat_world: "Cat-world",
   naming_ineffable: "Ineffable",
   certificate: "Certificate",
 }
 
 /**
- * KB-004 summary substates (indices 1–4 server-side) → index 1 "Summary" pill.
+ * KB-004 summary substates → "Summary" pill.
+ * KB-006 generation + curation → "Family names" pill.
  */
 const SERVER_STEP_TO_UI_INDEX: Record<CeremonyStepLiteral, number> = {
   draft: 0,
@@ -62,12 +64,14 @@ const SERVER_STEP_TO_UI_INDEX: Record<CeremonyStepLiteral, number> = {
   awaiting_summary: 1,
   summary_review: 1,
   family_style: 2,
+  awaiting_family_names: 3,
+  family_curation: 3,
   family_preview: 3,
   awaiting_payment: 4,
-  naming_family: 5,
-  naming_cat_world: 6,
-  naming_ineffable: 7,
-  ceremony_complete: 8,
+  naming_family: 3,
+  naming_cat_world: 5,
+  naming_ineffable: 6,
+  ceremony_complete: 7,
 }
 
 /** Badge text on the ceremony page header for each server step. */
@@ -78,7 +82,9 @@ const SERVER_STEP_SHORT_LABEL: Record<CeremonyStepLiteral, string> = {
   awaiting_summary: "Summary",
   summary_review: "Summary",
   family_style: "Family style",
-  family_preview: "Preview",
+  awaiting_family_names: "Family names",
+  family_curation: "Family names",
+  family_preview: "Family names",
   awaiting_payment: "Unlock",
   naming_family: "Family names",
   naming_cat_world: "Cat-world",

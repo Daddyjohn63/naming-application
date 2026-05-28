@@ -162,7 +162,7 @@ export function CatSummaryReview({
   }
 
   return (
-    <Card>
+    <Card className="ceremony-panel">
       <CardHeader className="border-b">
         <CardTitle className="text-base">Personality summary</CardTitle>
         <CardDescription>

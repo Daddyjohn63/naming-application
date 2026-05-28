@@ -58,7 +58,7 @@ export function CatPhotoQualityReview({
   }
 
   return (
-    <Card>
+    <Card className="ceremony-panel">
       <CardHeader className="border-b">
         <CardTitle className="text-base">Photo quality check</CardTitle>
         <CardDescription>{message}</CardDescription>

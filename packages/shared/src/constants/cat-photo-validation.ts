@@ -20,11 +20,13 @@ export type CatPhotoValidationOutcome = "pass" | "warn" | "block"
  */
 export function classifyCatPhotoValidation(args: {
   isCat: boolean
+  isSingleCat: boolean
   catLikelihoodScore: number
   qualityScore: number
 }): CatPhotoValidationOutcome {
   if (
     !args.isCat ||
+    !args.isSingleCat ||
     args.catLikelihoodScore < CAT_PHOTO_BLOCK_LIKELIHOOD_THRESHOLD
   ) {
     return "block"
@@ -33,4 +35,89 @@ export function classifyCatPhotoValidation(args: {
     return "warn"
   }
   return "pass"
+}
+
+/** Owner-facing fallback when the model returns an empty userMessage on block. */
+export function catPhotoBlockFallbackMessage(args: {
+  isCat: boolean
+  isSingleCat: boolean
+  qualityScore?: number
+}): string {
+  if (args.isCat && !args.isSingleCat) {
+    return "We spotted more than one cat in this photo. Please upload a clear photo with just your cat."
+  }
+  if (!args.isCat) {
+    return "That photo doesn't look like a cat. Please upload a photo of your cat."
+  }
+  if (
+    args.qualityScore !== undefined &&
+    args.qualityScore <= CAT_PHOTO_WARN_QUALITY_THRESHOLD
+  ) {
+    return "We can see your cat, but this photo isn't clear enough. Please upload a clearer one."
+  }
+  return "That photo can't be used. Please upload a clear photo of your cat alone."
+}
+
+/** When the vision check throws before a structured result is saved. */
+export const CAT_PHOTO_CHECK_FAILED_MESSAGE =
+  "We couldn't check your photo. Please try uploading a clear photo of your cat alone."
+
+/** Resolve the owner-facing message from AI validation or structured fallbacks. */
+export function resolvePhotoIssueUserMessage(args: {
+  userMessage: string
+  isCat: boolean
+  isSingleCat: boolean
+  qualityScore: number
+}): string {
+  const trimmed = args.userMessage.trim()
+  if (trimmed.length > 0) {
+    return trimmed
+  }
+  return catPhotoBlockFallbackMessage({
+    isCat: args.isCat,
+    isSingleCat: args.isSingleCat,
+    qualityScore: args.qualityScore,
+  })
+}
+
+type PhotoIssueDisplayInput = {
+  userMessage: string
+  isCat: boolean
+  isSingleCat: boolean
+  qualityScore: number
+}
+
+/** Title + body for pipeline error cards and profile alerts after a failed photo check. */
+export function resolvePhotoIssueDisplay(
+  validation: PhotoIssueDisplayInput,
+): { title: string; message: string } {
+  return {
+    title: catPhotoBlockAlertTitle({
+      isCat: validation.isCat,
+      isSingleCat: validation.isSingleCat,
+      qualityScore: validation.qualityScore,
+    }),
+    message: resolvePhotoIssueUserMessage(validation),
+  }
+}
+
+/** Alert title when the owner is sent back to profile for a photo issue. */
+export function catPhotoBlockAlertTitle(args: {
+  isCat: boolean
+  isSingleCat: boolean
+  qualityScore?: number
+}): string {
+  if (args.isCat && !args.isSingleCat) {
+    return "More than one cat in this photo"
+  }
+  if (!args.isCat) {
+    return "That photo doesn't look like a cat"
+  }
+  if (
+    args.qualityScore !== undefined &&
+    args.qualityScore <= CAT_PHOTO_WARN_QUALITY_THRESHOLD
+  ) {
+    return "Please upload a clearer photo"
+  }
+  return "Please update your cat photo"
 }

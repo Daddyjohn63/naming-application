@@ -3,6 +3,9 @@
  *
  * `submitCatProfile` is the client entry that eventually kicks off KB-004 via
  * `applyCatProfileSubmit` → scheduler → `catSummaryActions`.
+ *
+ * Expected photo validation failures return `{ ok: false, code }` so the client
+ * can show inline errors without Convex logging a server error.
  */
 
 "use node"
@@ -18,33 +21,47 @@ import {
   MAX_CAT_PHOTO_DIMENSION_PX,
   MIN_CAT_PHOTO_DIMENSION_PX,
 } from "@workspace/shared/constants/cat-photo"
-import { CAT_PROFILE_SUBMIT_ERROR_CODE } from "@workspace/shared/constants/cat-profile-errors"
+import {
+  CAT_PROFILE_SUBMIT_ERROR_CODE,
+  type CatProfileSubmitErrorCode,
+} from "@workspace/shared/constants/cat-profile-errors"
 
 import { api, internal } from "./_generated/api"
-import { action } from "./_generated/server"
+import { action, type ActionCtx } from "./_generated/server"
 import {
   parseSaveCatProfileDraftFields,
   parseSubmitCatProfileFields,
 } from "./catProfile"
 import type { Id } from "./_generated/dataModel"
 
+const profileActionResultValidator = v.union(
+  v.object({ ok: v.literal(true) }),
+  v.object({
+    ok: v.literal(false),
+    code: v.string(),
+    fieldErrors: v.optional(v.record(v.string(), v.string())),
+  }),
+)
+
 function isAllowedMime(mime: string): mime is AllowedCatPhotoMimeType {
   return (ALLOWED_CAT_PHOTO_MIME_TYPES as readonly string[]).includes(mime)
 }
 
+function profileActionFailure(code: CatProfileSubmitErrorCode) {
+  return { ok: false as const, code }
+}
+
 /** Technical photo gate: MIME, byte size, and pixel dimensions (not AI validation). */
-async function validateCatPhotoBuffer(buffer: Buffer): Promise<void> {
+async function validateCatPhotoBuffer(
+  buffer: Buffer,
+): Promise<CatProfileSubmitErrorCode | null> {
   if (buffer.byteLength > MAX_CAT_PHOTO_BYTES) {
-    throw new ConvexError({
-      code: CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_TOO_LARGE,
-    })
+    return CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_TOO_LARGE
   }
 
   const detected = await fileTypeFromBuffer(buffer)
   if (detected === undefined || !isAllowedMime(detected.mime)) {
-    throw new ConvexError({
-      code: CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_INVALID_TYPE,
-    })
+    return CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_INVALID_TYPE
   }
 
   let width: number | undefined
@@ -54,33 +71,59 @@ async function validateCatPhotoBuffer(buffer: Buffer): Promise<void> {
     width = dimensions.width
     height = dimensions.height
   } catch {
-    throw new ConvexError({
-      code: CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_UNREADABLE,
-    })
+    return CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_UNREADABLE
   }
   if (width === undefined || height === undefined) {
-    throw new ConvexError({
-      code: CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_UNREADABLE,
-    })
+    return CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_UNREADABLE
   }
 
   if (
     width < MIN_CAT_PHOTO_DIMENSION_PX ||
     height < MIN_CAT_PHOTO_DIMENSION_PX
   ) {
-    throw new ConvexError({
-      code: CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_DIMENSIONS_TOO_SMALL,
-    })
+    return CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_DIMENSIONS_TOO_SMALL
   }
 
   if (
     width > MAX_CAT_PHOTO_DIMENSION_PX ||
     height > MAX_CAT_PHOTO_DIMENSION_PX
   ) {
-    throw new ConvexError({
-      code: CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_DIMENSIONS_TOO_LARGE,
-    })
+    return CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_DIMENSIONS_TOO_LARGE
   }
+
+  return null
+}
+
+async function rejectPhotoStorageIfNeeded(
+  ctx: ActionCtx,
+  photoStorageId: Id<"_storage">,
+  existingPhotoStorageId: Id<"_storage"> | undefined,
+) {
+  if (photoStorageId !== existingPhotoStorageId) {
+    try {
+      await ctx.storage.delete(photoStorageId)
+    } catch {
+      // Best-effort cleanup of rejected upload.
+    }
+  }
+}
+
+async function validateStoredCatPhoto(
+  ctx: ActionCtx,
+  photoStorageId: Id<"_storage">,
+  existingPhotoStorageId: Id<"_storage"> | undefined,
+): Promise<CatProfileSubmitErrorCode | null> {
+  const blob = await ctx.storage.get(photoStorageId)
+  if (blob === null) {
+    return CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_NOT_FOUND
+  }
+
+  const buffer = Buffer.from(await blob.arrayBuffer())
+  const code = await validateCatPhotoBuffer(buffer)
+  if (code !== null) {
+    await rejectPhotoStorageIfNeeded(ctx, photoStorageId, existingPhotoStorageId)
+  }
+  return code
 }
 
 /** Client-callable profile submit — validates fields/photo then starts KB-004 pipeline. */
@@ -94,6 +137,7 @@ export const submitCatProfile = action({
     breed: v.optional(v.string()),
     photoStorageId: v.optional(v.id("_storage")),
   },
+  returns: profileActionResultValidator,
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity()
     if (identity === null) {
@@ -126,27 +170,15 @@ export const submitCatProfile = action({
       breed: args.breed,
     })
 
-    let photoStorageId = args.photoStorageId as Id<"_storage"> | undefined
+    const photoStorageId = args.photoStorageId as Id<"_storage"> | undefined
     if (photoStorageId !== undefined) {
-      const blob = await ctx.storage.get(photoStorageId)
-      if (blob === null) {
-        throw new ConvexError({
-          code: CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_NOT_FOUND,
-        })
-      }
-
-      const buffer = Buffer.from(await blob.arrayBuffer())
-      try {
-        await validateCatPhotoBuffer(buffer)
-      } catch (error) {
-        if (photoStorageId !== cat.photoStorageId) {
-          try {
-            await ctx.storage.delete(photoStorageId)
-          } catch {
-            // Best-effort cleanup of rejected upload.
-          }
-        }
-        throw error
+      const photoError = await validateStoredCatPhoto(
+        ctx,
+        photoStorageId,
+        cat.photoStorageId,
+      )
+      if (photoError !== null) {
+        return profileActionFailure(photoError)
       }
     }
 
@@ -160,6 +192,8 @@ export const submitCatProfile = action({
       breed: fields.breed,
       photoStorageId,
     })
+
+    return { ok: true as const }
   },
 })
 
@@ -174,6 +208,7 @@ export const saveCatProfileDraft = action({
     breed: v.optional(v.string()),
     photoStorageId: v.optional(v.id("_storage")),
   },
+  returns: profileActionResultValidator,
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity()
     if (identity === null) {
@@ -206,27 +241,15 @@ export const saveCatProfileDraft = action({
       breed: args.breed,
     })
 
-    let photoStorageId = args.photoStorageId as Id<"_storage"> | undefined
+    const photoStorageId = args.photoStorageId as Id<"_storage"> | undefined
     if (photoStorageId !== undefined) {
-      const blob = await ctx.storage.get(photoStorageId)
-      if (blob === null) {
-        throw new ConvexError({
-          code: CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_NOT_FOUND,
-        })
-      }
-
-      const buffer = Buffer.from(await blob.arrayBuffer())
-      try {
-        await validateCatPhotoBuffer(buffer)
-      } catch (error) {
-        if (photoStorageId !== cat.photoStorageId) {
-          try {
-            await ctx.storage.delete(photoStorageId)
-          } catch {
-            // Best-effort cleanup of rejected upload.
-          }
-        }
-        throw error
+      const photoError = await validateStoredCatPhoto(
+        ctx,
+        photoStorageId,
+        cat.photoStorageId,
+      )
+      if (photoError !== null) {
+        return profileActionFailure(photoError)
       }
     }
 
@@ -240,5 +263,7 @@ export const saveCatProfileDraft = action({
       breed: fields.breed,
       photoStorageId,
     })
+
+    return { ok: true as const }
   },
 })
