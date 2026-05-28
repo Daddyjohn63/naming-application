@@ -14,7 +14,6 @@ import type * as catProfileActions from "../catProfileActions.js";
 import type * as catSummary from "../catSummary.js";
 import type * as catSummaryActions from "../catSummaryActions.js";
 import type * as cats from "../cats.js";
-import type * as chat from "../chat.js";
 import type * as familyNaming from "../familyNaming.js";
 import type * as familyNamingActions from "../familyNamingActions.js";
 import type * as http from "../http.js";
@@ -33,7 +32,6 @@ declare const fullApi: ApiFromModules<{
   catSummary: typeof catSummary;
   catSummaryActions: typeof catSummaryActions;
   cats: typeof cats;
-  chat: typeof chat;
   familyNaming: typeof familyNaming;
   familyNamingActions: typeof familyNamingActions;
   http: typeof http;
@@ -66,6 +64,4 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {
-  agent: import("@convex-dev/agent/_generated/component.js").ComponentApi<"agent">;
-};
+export declare const components: {};
