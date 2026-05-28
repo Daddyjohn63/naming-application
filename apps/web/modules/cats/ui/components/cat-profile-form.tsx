@@ -128,9 +128,14 @@ export function CatProfileForm({
       }
       return null
     })
-    if (photoIssueMessage !== null && photoIssueMessage.length > 0) {
-      setServerFieldErrors((prev) => ({ ...prev, photo: photoIssueMessage }))
-    }
+    setServerFieldErrors((prev) => {
+      if (photoIssueMessage && photoIssueMessage.length > 0) {
+        return { ...prev, photo: photoIssueMessage }
+      }
+      const next = { ...prev }
+      delete next.photo
+      return next
+    })
     // Re-sync when server row updates (e.g. after submit or another tab).
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset from latest cat snapshot
   }, [cat._id, cat.updatedAt, photoIssueMessage])

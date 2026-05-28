@@ -1,6 +1,6 @@
-/** Shared ceremony coral CTA styling (works outside `.ceremony-theme`). */
+/** Shared ceremony coral CTA — uses tokens from `ceremony-variables.css`. */
 export const ceremonyCtaButtonClassName =
-  "ceremony-cta h-10 gap-2 rounded-full px-5"
+  "ceremony-theme ceremony-cta h-10 gap-2 rounded-full px-5"
 
 /** Outline actions in ceremony panels (e.g. Save & exit). */
 export const ceremonyOutlineButtonClassName =

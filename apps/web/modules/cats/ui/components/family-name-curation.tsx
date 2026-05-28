@@ -67,14 +67,22 @@ export function FamilyNameCuration({
   const [regenStyleSelection, setRegenStyleSelection] = React.useState<
     FamilyNameStyleId[]
   >([])
+  const hasEditedRegenSelectionRef = React.useRef(false)
 
   React.useEffect(() => {
+    if (!showRegenStyles) {
+      hasEditedRegenSelectionRef.current = false
+      return
+    }
+    if (hasEditedRegenSelectionRef.current) {
+      return
+    }
     if (state?.familyNameStyles !== undefined) {
       setRegenStyleSelection(
         state.familyNameStyles.filter(isFamilyStyleId),
       )
     }
-  }, [state?.familyNameStyles])
+  }, [showRegenStyles, state?.familyNameStyles])
 
   if (state === undefined) {
     return (
@@ -124,6 +132,7 @@ export function FamilyNameCuration({
       : null
 
   const toggleRegenStyle = (id: FamilyNameStyleId) => {
+    hasEditedRegenSelectionRef.current = true
     setRegenStyleSelection((current) =>
       current.includes(id)
         ? current.filter((item) => item !== id)

@@ -27,11 +27,16 @@ export type FamilyNameBatch = z.infer<typeof familyNameBatchSchema>
 
 const familyNameStyleIdSchema = z.enum(FAMILY_NAME_STYLE_IDS)
 
+const familyNameStyleIdsArraySchema = z
+  .array(familyNameStyleIdSchema)
+  .min(1, "Choose at least one style.")
+  .max(FAMILY_NAME_STYLE_IDS.length)
+  .refine((styleIds) => new Set(styleIds).size === styleIds.length, {
+    message: "Duplicate styles are not allowed.",
+  })
+
 export const submitFamilyNameStylesSchema = z.object({
-  styleIds: z
-    .array(familyNameStyleIdSchema)
-    .min(1, "Choose at least one style.")
-    .max(FAMILY_NAME_STYLE_IDS.length),
+  styleIds: familyNameStyleIdsArraySchema,
 })
 
 export type SubmitFamilyNameStylesFields = z.infer<
@@ -47,7 +52,7 @@ export const setFamilyFavouriteSchema = z.object({
 })
 
 export const regenerateFamilyNamesSchema = z.object({
-  styleIds: z.array(familyNameStyleIdSchema).min(1).max(FAMILY_NAME_STYLE_IDS.length),
+  styleIds: familyNameStyleIdsArraySchema,
 })
 
 export {

@@ -69,7 +69,8 @@ export function resolveMixItUpStyles(
   random: () => number = Math.random,
 ): Exclude<FamilyNameStyleId, "mix_it_up">[] {
   const pool = [...FAMILY_NAME_STYLE_POOL_FOR_MIX]
-  const count = 1 + Math.floor(random() * 3)
+  const r = Math.min(random(), 0.999999999999)
+  const count = 1 + Math.floor(r * 3)
   const picked: Exclude<FamilyNameStyleId, "mix_it_up">[] = []
   while (picked.length < count && pool.length > 0) {
     const index = Math.floor(random() * pool.length)

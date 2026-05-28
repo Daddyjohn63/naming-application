@@ -109,7 +109,17 @@ export default function CatCeremonyPage() {
     if (cat?.ceremonyStep !== "photo_quality_review") {
       return
     }
-    void returnToProfile({ catId: cat._id })
+    const catId = cat?._id
+    if (catId === undefined) {
+      return
+    }
+    void (async () => {
+      try {
+        await returnToProfile({ catId })
+      } catch (err) {
+        toastSummaryMutationError("Could not return to profile", err)
+      }
+    })()
   }, [cat?._id, cat?.ceremonyStep, returnToProfile])
 
   if (catIdParam === undefined) {

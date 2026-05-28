@@ -79,15 +79,9 @@
     @apply rounded-xl border border-ceremony-highlight-border bg-ceremony-highlight shadow-sm;
   }
 
-  /* Coral primary CTA — same tokens as `.ceremony-theme` (packages/tokens/src/ceremony.ts) */
-  .ceremony-cta {
-    --primary: oklch(0.704 0.128 38.5);
-    --primary-foreground: oklch(0.99 0 0);
+  /* Coral primary CTA — inherits `--primary` from `.ceremony-theme` (ceremony-variables.css). */
+  .ceremony-theme .ceremony-cta,
+  .ceremony-theme.ceremony-cta {
     @apply rounded-full border-transparent bg-primary text-primary-foreground shadow-none hover:bg-primary/90;
-  }
-
-  .dark .ceremony-cta {
-    --primary: oklch(0.74 0.12 42);
-    --primary-foreground: oklch(0.2 0.02 55);
   }
 }

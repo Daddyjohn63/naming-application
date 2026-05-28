@@ -54,6 +54,16 @@ const paymentStatus = v.union(
 
 const paymentProvider = v.union(v.literal("stub"), v.literal("stripe"))
 
+/** KB-005 — must match `FAMILY_NAME_STYLE_IDS` in @workspace/shared/constants/family-naming. */
+const familyNameStyleId = v.union(
+  v.literal("elegant"),
+  v.literal("silly"),
+  v.literal("classic"),
+  v.literal("nature_inspired"),
+  v.literal("non_human_names"),
+  v.literal("mix_it_up"),
+)
+
 export default defineSchema({
   /**
    * App user mirrored from Clerk (webhook upsert). Owns cats and payments.
@@ -114,7 +124,7 @@ export default defineSchema({
     /** Accepted summary row; naming stages should read copy from this version. */
     acceptedSummaryVersionId: v.optional(v.id("cat_summary_versions")),
     /** Family name styles chosen in free phase (KB-005); mix-it-up resolved to concrete styles. */
-    familyNameStyles: v.optional(v.array(v.string())),
+    familyNameStyles: v.optional(v.array(familyNameStyleId)),
     /** Saved family names during curation (max 6, unique by normalized name). */
     familyNameShortlist: v.optional(
       v.array(
