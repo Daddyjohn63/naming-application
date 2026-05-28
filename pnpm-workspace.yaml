@@ -4,5 +4,4 @@ packages:
 
 # Single source of truth for packages used in more than one workspace member.
 catalog:
-  "@convex-dev/agent": "^0.6.1"
   convex-helpers: "^0.1.103"
