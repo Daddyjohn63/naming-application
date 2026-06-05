@@ -7,7 +7,7 @@ import { ConvexError, v } from "convex/values"
 import { catCreateFieldsSchema } from "@workspace/shared/schemas/cat"
 import { DRAFT_CAT_DESCRIPTION_PLACEHOLDER } from "@workspace/shared/constants/cat-profile"
 
-import { query, mutation, type QueryCtx } from "./_generated/server"
+import { query, mutation, type MutationCtx, type QueryCtx } from "./_generated/server"
 import { getCurrentUser, getCurrentUserOrThrow } from "./users"
 import type { Doc, Id } from "./_generated/dataModel"
 
@@ -21,6 +21,18 @@ async function resolveStoragePublicUrl(
   }
   const url = (await ctx.storage.getUrl(storageId)) ?? ""
   return url === "" ? undefined : url
+}
+
+/** Best-effort storage cleanup; deletion still succeeds if the blob is already gone. */
+async function deleteStorageIfPresent(
+  ctx: MutationCtx,
+  storageId: Id<"_storage">
+): Promise<void> {
+  try {
+    await ctx.storage.delete(storageId)
+  } catch {
+    // Orphaned or missing file references should not block ceremony removal.
+  }
 }
 
 //cat with storage URLs
@@ -246,7 +258,7 @@ export const deleteCeremony = mutation({
       .collect()
     for (const version of summaryVersions) {
       if (version.summaryImageStorageId !== undefined) {
-        await ctx.storage.delete(version.summaryImageStorageId)
+        await deleteStorageIfPresent(ctx, version.summaryImageStorageId)
       }
       await ctx.db.delete(version._id)
     }
@@ -284,7 +296,7 @@ export const deleteCeremony = mutation({
       .withIndex("by_catId", (q) => q.eq("catId", catId))
       .collect()
     for (const certificate of certificates) {
-      await ctx.storage.delete(certificate.certificateStorageId)
+      await deleteStorageIfPresent(ctx, certificate.certificateStorageId)
       await ctx.db.delete(certificate._id)
     }
 
@@ -297,10 +309,10 @@ export const deleteCeremony = mutation({
     }
 
     if (cat.photoStorageId !== undefined) {
-      await ctx.storage.delete(cat.photoStorageId)
+      await deleteStorageIfPresent(ctx, cat.photoStorageId)
     }
     if (cat.certificateStorageId !== undefined) {
-      await ctx.storage.delete(cat.certificateStorageId)
+      await deleteStorageIfPresent(ctx, cat.certificateStorageId)
     }
 
     await ctx.db.delete(catId)

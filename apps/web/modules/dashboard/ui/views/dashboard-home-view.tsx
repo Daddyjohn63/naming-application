@@ -157,7 +157,7 @@ function CatCeremonyCard({ cat }: CatCeremonyCardProps) {
                 </div>
               )}
             </div>
-            <CardTitle className="font-sans text-base tracking-tight">
+            <CardTitle className="pt-3 font-sans text-base tracking-tight">
               {cat.title}
             </CardTitle>
             <CardDescription className="line-clamp-2 text-xs">
@@ -175,7 +175,7 @@ function CatCeremonyCard({ cat }: CatCeremonyCardProps) {
   )
 }
 
-/** Primary “Add” with inline recovery (KB-002). */
+/** Primary “Add” with inline recovery (KB-002). Shown once the user has ceremonies. */
 function DashboardAddCeremonyLead() {
   const { execute, pending, error, clearError } = useCreateDraftCeremony()
 
@@ -249,36 +249,41 @@ function DashboardCatsLoaded() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-10">
-      <DashboardAddCeremonyLead />
-
       {hasCats ? (
-        <section aria-labelledby="cat-grid-heading">
-          <h2 id="cat-grid-heading" className="sr-only">
-            Ceremony cards
-          </h2>
-          <ul className="grid list-none grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {cats.map((cat) => (
-              <CatCeremonyCard key={cat._id} cat={cat} />
-            ))}
-          </ul>
-        </section>
+        <>
+          <DashboardAddCeremonyLead />
+          <section aria-labelledby="cat-grid-heading">
+            <h2 id="cat-grid-heading" className="sr-only">
+              Ceremony cards
+            </h2>
+            <ul className="grid list-none grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {cats.map((cat) => (
+                <CatCeremonyCard key={cat._id} cat={cat} />
+              ))}
+            </ul>
+          </section>
+        </>
       ) : (
         <Empty className="border-solid border-border/70 bg-muted/15">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Cat aria-hidden />
+          <EmptyHeader className="max-w-md">
+            <EmptyMedia variant="icon" className="size-[60px]">
+              <Cat className="size-[60px]" aria-hidden />
             </EmptyMedia>
-            <EmptyTitle>You haven&apos;t opened a ceremony yet.</EmptyTitle>
+            <EmptyTitle className="text-3xl font-bold">
+              You haven&apos;t started a naming ceremony yet for your cat
+            </EmptyTitle>
             <EmptyDescription>
-              Start when you are ready — profile, summary, preview, unlock, and
-              certificates land in dedicated steps guided by Naming Buddy.
+              Start when you are ready — You can load an image of your cat and
+              create a profile. Our feline trained AI Agent will then create a
+              summary of your cats personality from which names can then me
+              generated.
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <CreateCeremonyButton
               size="lg"
               className="px-6"
-              label="Start your first ceremony"
+              label="Add your first cat"
             />
           </EmptyContent>
         </Empty>
