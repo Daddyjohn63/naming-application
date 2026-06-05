@@ -169,7 +169,7 @@ function CatCeremonyCard({ cat }: CatCeremonyCardProps) {
               Open to resume this ceremony where you left off.
             </CardDescription>
           </CardHeader>
-          <CardFooter className="pt-0">
+          <CardFooter>
             <Badge variant="outline" className="text-xs font-normal">
               {ceremonyStepShortLabel(cat.ceremonyStep)}
             </Badge>
@@ -185,7 +185,10 @@ function DashboardAddCeremonyLead() {
   const { execute, pending, error, clearError } = useCreateDraftCeremony()
 
   return (
-    <div {...dataComponent("DashboardAddCeremonyLead")} className="flex flex-col gap-6">
+    <div
+      {...dataComponent("DashboardAddCeremonyLead")}
+      className="flex flex-col gap-6"
+    >
       {error !== null ? (
         <Alert variant="destructive" className="max-w-xl">
           <AlertCircleIcon className="-mt-0.5 inline" aria-hidden />
