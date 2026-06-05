@@ -23,6 +23,8 @@ import {
 } from "@workspace/ui/components/card"
 import { toast } from "@workspace/ui/components/sonner"
 
+import { dataComponent } from "@/lib/data-component"
+
 type CatPhotoQualityReviewProps = {
   cat: Doc<"cats"> & { photoUrl?: string }
   /** Parent calls returnToProfileForPhotoReplace — opens profile form for new upload. */
@@ -58,7 +60,7 @@ export function CatPhotoQualityReview({
   }
 
   return (
-    <Card className="ceremony-panel">
+    <Card {...dataComponent("CatPhotoQualityReview")} className="ceremony-panel">
       <CardHeader className="border-b">
         <CardTitle className="text-base">Photo quality check</CardTitle>
         <CardDescription>{message}</CardDescription>

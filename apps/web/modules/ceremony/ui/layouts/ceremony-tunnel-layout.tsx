@@ -2,6 +2,8 @@
 
 import { cn } from "@workspace/ui/lib/utils"
 
+import { dataComponent } from "@/lib/data-component"
+
 type CeremonyTunnelLayoutProps = {
   main: React.ReactNode
   sidebar?: React.ReactNode | null
@@ -19,6 +21,7 @@ export function CeremonyTunnelLayout({
 }: CeremonyTunnelLayoutProps) {
   return (
     <div
+      {...dataComponent("CeremonyTunnelLayout")}
       className={cn(
         "mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-8 lg:flex-row lg:items-start lg:gap-8",
         className,

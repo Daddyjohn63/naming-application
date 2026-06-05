@@ -42,6 +42,7 @@ import { CatSummaryReview } from "@/modules/cats/ui/components/cat-summary-revie
 import { FamilyNameCuration } from "@/modules/cats/ui/components/family-name-curation"
 import { FamilyNamePipelineStatus } from "@/modules/cats/ui/components/family-name-pipeline-status"
 import { FamilyNameStylePicker } from "@/modules/cats/ui/components/family-name-style-picker"
+import { dataComponent } from "@/lib/data-component"
 
 /** User-facing summary-ceremony copy plus dev-visible error details. */
 function toastSummaryMutationError(label: string, err: unknown) {
@@ -58,7 +59,10 @@ function toastSummaryMutationError(label: string, err: unknown) {
 /** Placeholder layout while the cat query is loading. */
 function CatCeremonySkeleton() {
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-8 lg:max-w-4xl">
+    <div
+      {...dataComponent("CatCeremonySkeleton")}
+      className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-8 lg:max-w-4xl"
+    >
       <Skeleton className="h-4 w-48" />
       <Skeleton className="h-24 w-full rounded-lg" />
       <Skeleton className="h-64 w-full rounded-xl" />
@@ -126,7 +130,10 @@ export default function CatCeremonyPage() {
 
   if (catIdParam === undefined) {
     return (
-      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-4 px-4 py-12">
+      <main
+        {...dataComponent("CatCeremonyPage")}
+        className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-4 px-4 py-12"
+      >
         <p className="text-sm text-muted-foreground">Missing ceremony id.</p>
         <Button variant="outline" asChild>
           <Link href="/dashboard">Back to dashboard</Link>
@@ -141,7 +148,10 @@ export default function CatCeremonyPage() {
 
   if (cat === null) {
     return (
-      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 px-4 py-12">
+      <main
+        {...dataComponent("CatCeremonyPage")}
+        className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 px-4 py-12"
+      >
         <p className="text-sm leading-relaxed text-muted-foreground">
           This ceremony isn&apos;t on your shelf, or it was removed from your
           account.
@@ -348,7 +358,7 @@ export default function CatCeremonyPage() {
     !showNamingTunnel
 
   return (
-    <>
+    <div {...dataComponent("CatCeremonyPage")} className="contents">
       <CeremonyStepper currentStep={cat.ceremonyStep} />
       {showNamingTunnel ? (
         <CeremonyTunnelLayout
@@ -381,6 +391,6 @@ export default function CatCeremonyPage() {
           ) : null}
         </main>
       )}
-    </>
+    </div>
   )
 }

@@ -9,6 +9,7 @@ import { TooltipProvider } from "@workspace/ui/components/tooltip"
 import { Toaster } from "@workspace/ui/components/sonner"
 
 import { nextPreference } from "@/components/theme-toggle"
+import { dataComponent } from "@/lib/data-component"
 
 if (!process.env.NEXT_PUBLIC_CONVEX_URL) {
   throw new Error("NEXT_PUBLIC_CONVEX_URL is not set")
@@ -31,8 +32,10 @@ function Providers({
       >
         <ThemeHotkey />
         <TooltipProvider>
-          {children}
-          <Toaster />
+          <div {...dataComponent("Providers")} className="contents">
+            {children}
+            <Toaster />
+          </div>
         </TooltipProvider>
       </NextThemesProvider>
     </ConvexProviderWithClerk>

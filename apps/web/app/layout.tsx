@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import "@workspace/ui/globals.css"
 import { ConditionalRootHeader } from "@/components/conditional-root-header"
 import { Providers } from "@/components/providers"
+import { dataComponent } from "@/lib/data-component"
 import { ClerkProvider } from "@clerk/nextjs"
 import { cn } from "@workspace/ui/lib/utils"
 
@@ -29,7 +30,10 @@ export default function RootLayout({
         geist.variable
       )}
     >
-      <body className="flex min-h-svh flex-col">
+      <body
+        {...dataComponent("RootLayout")}
+        className="flex min-h-svh flex-col"
+      >
         <ClerkProvider>
           <Providers>
             <ConditionalRootHeader />

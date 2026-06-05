@@ -4,6 +4,8 @@ import { DashboardSidebar } from "@/modules/dashboard/ui/components/dashboard-si
 import { SidebarInset, SidebarProvider } from "@workspace/ui/components/sidebar"
 import { cookies } from "next/headers"
 
+import { dataComponent } from "@/lib/data-component"
+
 export const DashboardLayout = async ({
   children,
 }: {
@@ -16,7 +18,10 @@ export const DashboardLayout = async ({
     <AuthGuard>
       <SidebarProvider defaultOpen={defaultOpen}>
         <DashboardSidebar />
-        <SidebarInset className="flex flex-1 flex-col">
+        <SidebarInset
+          {...dataComponent("DashboardLayout")}
+          className="flex flex-1 flex-col"
+        >
           <DashboardHeader />
           <div className="flex flex-1 flex-col">{children}</div>
         </SidebarInset>

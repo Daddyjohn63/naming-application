@@ -5,6 +5,8 @@ import { Monitor, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@workspace/ui/components/button"
 
+import { dataComponent } from "@/lib/data-component"
+
 const THEME_CYCLE = ["light", "dark", "system"] as const
 type ThemePreference = (typeof THEME_CYCLE)[number]
 
@@ -39,11 +41,18 @@ export function ThemeToggle() {
         : "System theme (next: light)"
 
   if (!mounted) {
-    return <div className="size-8 shrink-0" aria-hidden />
+    return (
+      <div
+        {...dataComponent("ThemeToggle")}
+        className="size-8 shrink-0"
+        aria-hidden
+      />
+    )
   }
 
   return (
     <Button
+      {...dataComponent("ThemeToggle")}
       type="button"
       variant="ghost"
       size="icon"

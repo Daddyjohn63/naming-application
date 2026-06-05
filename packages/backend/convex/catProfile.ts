@@ -14,8 +14,10 @@ import {
   isCatProfileEditableStep,
   MAX_CAT_PROFILE_SUBMIT_COUNT,
 } from "@workspace/shared/constants/cat-profile"
+import { MAX_PHOTO_VALIDATION_ATTEMPTS } from "@workspace/shared/constants/cat-photo-validation"
 import { CAT_PROFILE_SUBMIT_ERROR_CODE } from "@workspace/shared/constants/cat-profile-errors"
 import {
+  normalizeCatSex,
   saveCatProfileDraftFieldsSchema,
   submitCatProfileFieldsSchema,
 } from "@workspace/shared/schemas/cat"
@@ -35,6 +37,7 @@ export const applyCatProfileSubmit = internalMutation({
     title: v.string(),
     description: v.string(),
     existingName: v.optional(v.string()),
+    sex: v.optional(v.union(v.literal("male"), v.literal("female"))),
     age: v.optional(v.string()),
     breed: v.optional(v.string()),
     photoStorageId: v.optional(v.id("_storage")),
@@ -57,10 +60,22 @@ export const applyCatProfileSubmit = internalMutation({
       })
     }
 
+    const isSummaryReviewResubmit = cat.ceremonyStep === "summary_review"
     const submitsUsed = cat.profileSubmitsUsed ?? 0
-    if (submitsUsed >= MAX_CAT_PROFILE_SUBMIT_COUNT) {
+    if (
+      isSummaryReviewResubmit &&
+      submitsUsed >= MAX_CAT_PROFILE_SUBMIT_COUNT
+    ) {
       throw new ConvexError({
         code: CAT_PROFILE_SUBMIT_ERROR_CODE.SUBMIT_LIMIT_REACHED,
+      })
+    }
+
+    const photoAttemptsUsed = cat.photoValidationAttemptsUsed ?? 0
+    const hasPhoto = args.photoStorageId !== undefined
+    if (hasPhoto && photoAttemptsUsed >= MAX_PHOTO_VALIDATION_ATTEMPTS) {
+      throw new ConvexError({
+        code: CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_VALIDATION_LIMIT_REACHED,
       })
     }
 
@@ -78,18 +93,23 @@ export const applyCatProfileSubmit = internalMutation({
       cat.acceptedSummaryVersionId !== undefined
 
     // Photo path runs vision validation first; no-photo skips straight to summary.
-    const hasPhoto = args.photoStorageId !== undefined
     const nextStep = hasPhoto ? "awaiting_photo_validation" : "awaiting_summary"
 
     await ctx.db.patch(args.catId, {
       title: args.title,
       description: args.description,
       existingName: args.existingName,
+      sex: args.sex,
       age: args.age,
       breed: args.breed,
       photoStorageId: args.photoStorageId,
       ceremonyStep: nextStep,
-      profileSubmitsUsed: submitsUsed + 1,
+      ...(isSummaryReviewResubmit
+        ? { profileSubmitsUsed: submitsUsed + 1 }
+        : {}),
+      ...(hasPhoto
+        ? { photoValidationAttemptsUsed: photoAttemptsUsed + 1 }
+        : {}),
       photoValidation: undefined,
       photoQualityAcknowledged: undefined,
       summaryGenerationError: undefined,
@@ -139,6 +159,7 @@ export const applyCatProfileDraftSave = internalMutation({
     title: v.string(),
     description: v.string(),
     existingName: v.optional(v.string()),
+    sex: v.optional(v.union(v.literal("male"), v.literal("female"))),
     age: v.optional(v.string()),
     breed: v.optional(v.string()),
     photoStorageId: v.optional(v.id("_storage")),
@@ -168,6 +189,7 @@ export const applyCatProfileDraftSave = internalMutation({
       title: args.title,
       description: args.description,
       existingName: args.existingName,
+      sex: args.sex,
       age: args.age,
       breed: args.breed,
       ...(args.photoStorageId !== undefined
@@ -195,6 +217,7 @@ export function parseSubmitCatProfileFields(args: {
   title: string
   description: string
   existingName?: string
+  sex?: "male" | "female"
   age?: string
   breed?: string
 }) {
@@ -212,7 +235,10 @@ export function parseSubmitCatProfileFields(args: {
       fieldErrors,
     })
   }
-  return parsed.data
+  return {
+    ...parsed.data,
+    sex: normalizeCatSex(parsed.data.sex),
+  }
 }
 
 /** Parse draft-save fields; empty description stores the draft placeholder. */
@@ -220,6 +246,7 @@ export function parseSaveCatProfileDraftFields(args: {
   title: string
   description: string
   existingName?: string
+  sex?: "male" | "female"
   age?: string
   breed?: string
 }) {
@@ -241,7 +268,11 @@ export function parseSaveCatProfileDraftFields(args: {
     parsed.data.description === ""
       ? DRAFT_CAT_DESCRIPTION_PLACEHOLDER
       : parsed.data.description
-  return { ...parsed.data, description }
+  return {
+    ...parsed.data,
+    description,
+    sex: normalizeCatSex(parsed.data.sex),
+  }
 }
 
 export type CatProfilePhotoStorageId = Id<"_storage">

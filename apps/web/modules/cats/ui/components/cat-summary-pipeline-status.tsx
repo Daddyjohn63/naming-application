@@ -29,6 +29,8 @@ import {
 } from "@workspace/ui/components/card"
 import { Spinner } from "@workspace/ui/components/spinner"
 
+import { dataComponent } from "@/lib/data-component"
+
 type CatSummaryPipelineStatusProps = {
   cat: Doc<"cats">
   /** Re-run summary generation after a transient failure on awaiting_summary. */
@@ -96,7 +98,7 @@ export function CatSummaryPipelineStatus({
     if (useBackToProfile) {
       const { title, message } = resolvePhotoPipelineErrorDisplay(cat)
       return (
-        <Card className="ceremony-panel">
+        <Card {...dataComponent("CatSummaryPipelineStatus")} className="ceremony-panel">
           <CardHeader className="border-b">
             <CardTitle className="text-base">{title}</CardTitle>
             <CardDescription>{message}</CardDescription>
@@ -115,7 +117,7 @@ export function CatSummaryPipelineStatus({
     }
 
     return (
-      <Card className="ceremony-panel">
+      <Card {...dataComponent("CatSummaryPipelineStatus")} className="ceremony-panel">
         <CardHeader className="border-b">
           <CardTitle className="text-base">Something went wrong</CardTitle>
           <CardDescription>{cat.summaryGenerationError}</CardDescription>
@@ -130,7 +132,10 @@ export function CatSummaryPipelineStatus({
   }
 
   return (
-    <Card className="ceremony-highlight-panel border-primary/25">
+    <Card
+      {...dataComponent("CatSummaryPipelineStatus")}
+      className="ceremony-highlight-panel border-primary/25"
+    >
       <CardHeader className="flex flex-row items-center gap-3 border-0 pb-0">
         <Spinner className="text-primary size-5 shrink-0" />
         <div className="flex flex-col gap-1">
@@ -153,7 +158,7 @@ export function CatPhotoBlockAlert({
   message,
 }: CatPhotoBlockAlertProps) {
   return (
-    <Alert variant="destructive">
+    <Alert {...dataComponent("CatPhotoBlockAlert")} variant="destructive">
       <AlertTitle>{title}</AlertTitle>
       <AlertDescription>{message}</AlertDescription>
     </Alert>

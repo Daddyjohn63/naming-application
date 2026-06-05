@@ -9,8 +9,10 @@
 
 import { ConvexError, v } from "convex/values"
 
+import { DRAFT_CAT_DESCRIPTION_PLACEHOLDER } from "@workspace/shared/constants/cat-profile"
 import {
   CAT_PHOTO_CHECK_FAILED_MESSAGE,
+  MAX_PHOTO_VALIDATION_ATTEMPTS,
   resolvePhotoIssueUserMessage,
 } from "@workspace/shared/constants/cat-photo-validation"
 import { canReturnToProfileForPhotoReplace } from "@workspace/shared/utils/summary-pipeline-error"
@@ -397,6 +399,70 @@ export const returnToProfileForPhotoReplace = mutation({
         validatedAt: now,
       },
       updatedAt: now,
+    })
+  },
+})
+
+/**
+ * Escape hatch when all AI photo checks are used — drop the photo and generate
+ * a text-only summary from the owner's written description.
+ */
+export const continueWithoutPhoto = mutation({
+  args: { catId: v.string() },
+  handler: async (ctx, { catId }) => {
+    const currentUser = await getCurrentUser(ctx)
+    if (currentUser === null) {
+      throw new ConvexError({
+        code: CAT_SUMMARY_ERROR_CODE.NOT_AUTHENTICATED,
+      })
+    }
+    const id = ctx.db.normalizeId("cats", catId)
+    if (id === null) {
+      throw new ConvexError({ code: CAT_SUMMARY_ERROR_CODE.NOT_FOUND })
+    }
+    const cat = await getOwnedCatOrThrow(ctx, id, currentUser._id)
+
+    if (cat.ceremonyStep !== "draft") {
+      throw new ConvexError({ code: CAT_SUMMARY_ERROR_CODE.STEP_LOCKED })
+    }
+
+    const photoAttemptsUsed = cat.photoValidationAttemptsUsed ?? 0
+    if (photoAttemptsUsed < MAX_PHOTO_VALIDATION_ATTEMPTS) {
+      throw new ConvexError({ code: CAT_SUMMARY_ERROR_CODE.STEP_LOCKED })
+    }
+
+    if (cat.description === DRAFT_CAT_DESCRIPTION_PLACEHOLDER) {
+      throw new ConvexError({
+        code: CAT_SUMMARY_ERROR_CODE.INVALID_SUMMARY,
+        fieldErrors: {
+          description:
+            "Write at least 20 characters about your cat before continuing.",
+        },
+      })
+    }
+
+    const previousPhotoId = cat.photoStorageId
+    const now = Date.now()
+
+    await ctx.db.patch(id, {
+      photoStorageId: undefined,
+      photoValidation: undefined,
+      photoQualityAcknowledged: undefined,
+      ceremonyStep: "awaiting_summary",
+      summaryGenerationError: undefined,
+      updatedAt: now,
+    })
+
+    if (previousPhotoId !== undefined) {
+      try {
+        await ctx.storage.delete(previousPhotoId)
+      } catch {
+        // Best-effort cleanup; summary generation still proceeds.
+      }
+    }
+
+    await ctx.scheduler.runAfter(0, internal.catSummaryActions.generateCatSummary, {
+      catId: id,
     })
   },
 })

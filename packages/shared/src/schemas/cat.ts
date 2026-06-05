@@ -1,6 +1,10 @@
 import { z } from "zod"
 
-import { DRAFT_CAT_DESCRIPTION_PLACEHOLDER } from "../constants/cat-profile"
+import {
+  CAT_SEX_VALUES,
+  DRAFT_CAT_DESCRIPTION_PLACEHOLDER,
+  type CatSex,
+} from "../constants/cat-profile"
 import {
   MAX_CAT_DESCRIPTION_LENGTH,
   MAX_CAT_OPTIONAL_FIELD_LENGTH,
@@ -18,6 +22,16 @@ const optionalTrimmedProfileField = z
   .max(MAX_CAT_OPTIONAL_FIELD_LENGTH)
   .transform((s) => (s === "" ? undefined : s))
   .optional()
+
+const catSexSchema = z.enum(CAT_SEX_VALUES)
+
+const optionalCatSexField = z.union([catSexSchema, z.literal("")]).optional()
+
+export function normalizeCatSex(
+  sex: CatSex | "" | undefined,
+): CatSex | undefined {
+  return sex === "" || sex === undefined ? undefined : sex
+}
 
 /**
  * Shared validation for Convex `createCat` / new-cat forms.
@@ -66,6 +80,7 @@ export const submitCatProfileFieldsSchema = z.object({
         "Replace the placeholder story with your cat's personality and story.",
     }),
   existingName: optionalTrimmedProfileField,
+  sex: optionalCatSexField,
   age: optionalTrimmedProfileField,
   breed: optionalTrimmedProfileField,
 })
@@ -88,6 +103,7 @@ export const saveCatProfileDraftFieldsSchema = z.object({
     .max(MAX_CAT_TITLE_LENGTH),
   description: z.string().trim().max(MAX_CAT_DESCRIPTION_LENGTH),
   existingName: optionalTrimmedProfileField,
+  sex: optionalCatSexField,
   age: optionalTrimmedProfileField,
   breed: optionalTrimmedProfileField,
 })

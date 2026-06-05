@@ -6,6 +6,10 @@
 import { openai } from "@ai-sdk/openai"
 import { generateText, Output } from "ai"
 
+import {
+  formatCatSexLabel,
+  type CatSex,
+} from "@workspace/shared/constants/cat-profile"
 import { classifyCatPhotoValidation } from "@workspace/shared/constants/cat-photo-validation"
 import { SUMMARY_PIPELINE_TRANSIENT_ERROR_MESSAGE } from "@workspace/shared/utils/summary-pipeline-error"
 import {
@@ -19,7 +23,7 @@ import {
 } from "@workspace/shared/schemas/family-naming"
 
 /** Bump when prompt text changes — useful for logging and future funnel analytics. */
-export const NAMING_PROMPT_VERSION = "family-summary-prompt-v1"
+export const NAMING_PROMPT_VERSION = "family-summary-prompt-v2"
 
 /** §0 system prompt: vision model returns scores only, never prose summary or names. */
 const PHOTO_VALIDATION_SYSTEM_PROMPT = `You are Naming Buddy's photo validator for a cat naming ceremony.
@@ -61,9 +65,11 @@ The poem is really about the mystery and independence of cats. Eliot presents ca
 Rules:
 - Write 2–4 short paragraphs (roughly 120–220 words total).
 - Tone: warm, witty, affectionate, specific — never generic filler ("fluffy companion", "lovely cat").
-- Ground every claim in the owner's description and, when a photo is provided, in what you actually see (colour, markings, expression, posture, setting) — weave visible details naturally; do not list them like a catalog.
+- When a photo is provided, treat visible physical details as authoritative from the photo: colour, markings, eye colour, expression, posture, and setting. Use the owner's description for personality, behaviour, habits, quirks, and temperament.
+- If the description conflicts with the photo on something visible, follow the photo for appearance and the description for character. Do not invent physical traits the photo contradicts. Treat figurative language in the description (e.g. "eyes like embers") as personality colour, not literal appearance.
+- Weave appearance details naturally; do not list them like a catalog.
 - Include at least one vivid habit or quirk and one line that hints at how the cat sees themselves.
-- Use they/them unless the owner specifies otherwise.
+- Use he/him or she/her when sex is provided in optional details; otherwise use they/them.
 - Plain prose only: no markdown, no bullet lists, no headings, no emojis.
 - Do not invent medical facts, breed certifications, or dramatic backstory the owner did not imply.
 - Do not suggest names — naming comes later.`
@@ -73,11 +79,12 @@ export type CatProfileForSummary = {
   title: string
   description: string
   existingName?: string
+  sex?: CatSex
   age?: string
   breed?: string
 }
 
-/** Build bullet lines for optional existingName / age / breed in the user prompt. */
+/** Build bullet lines for optional profile details in the user prompt. */
 function buildOptionalDetailsLines(profile: CatProfileForSummary): string[] {
   const lines: string[] = []
   if (
@@ -85,6 +92,10 @@ function buildOptionalDetailsLines(profile: CatProfileForSummary): string[] {
     profile.existingName.trim() !== ""
   ) {
     lines.push(`- Existing name (if any): ${profile.existingName.trim()}`)
+  }
+  const sexLabel = formatCatSexLabel(profile.sex)
+  if (sexLabel !== undefined) {
+    lines.push(`- Sex: ${sexLabel}`)
   }
   if (profile.age !== undefined && profile.age.trim() !== "") {
     lines.push(`- Age: ${profile.age.trim()}`)
@@ -107,8 +118,8 @@ function buildSummaryUserText(
       : ""
 
   const photoNote = hasPhoto
-    ? "\n\nLook at the attached photo and combine what you see with the description above. Make note of the cat's colour, markings, expression, posture, and setting."
-    : "\n\nNo photo was provided — rely on the description and optional details only."
+    ? "\n\nA photo is attached. Use it as the source of truth for visible appearance (colour, markings, eye colour, expression, posture, setting) — if the description conflicts, follow the photo for looks and the description for personality. Use the description above for character, habits, and quirks."
+    : "\n\nNo photo was provided — rely on the description and optional details for both appearance and personality."
 
   return `Write the personality summary for this cat.
 

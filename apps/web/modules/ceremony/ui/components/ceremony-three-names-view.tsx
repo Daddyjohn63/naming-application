@@ -19,6 +19,8 @@ import { Button } from "@workspace/ui/components/button"
 import { toast } from "@workspace/ui/components/sonner"
 import { cn } from "@workspace/ui/lib/utils"
 
+import { dataComponent } from "@/lib/data-component"
+
 import {
   CeremonyNameSlot,
   type CeremonyNameSlotState,
@@ -105,6 +107,7 @@ export function CeremonyThreeNamesView({
 
   return (
     <section
+      {...dataComponent("CeremonyThreeNamesView")}
       id={CEREMONY_THREE_NAMES_SECTION_ID}
       className={cn("flex scroll-mt-24 flex-col gap-6", className)}
       aria-label="Your cat's three names"

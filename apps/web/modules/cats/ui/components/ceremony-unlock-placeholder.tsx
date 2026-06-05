@@ -15,13 +15,15 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card"
 
+import { dataComponent } from "@/lib/data-component"
+
 type CeremonyUnlockPlaceholderProps = {
   cat: Doc<"cats">
 }
 
 export function CeremonyUnlockPlaceholder({ cat }: CeremonyUnlockPlaceholderProps) {
   return (
-    <Card className="ceremony-panel">
+    <Card {...dataComponent("CeremonyUnlockPlaceholder")} className="ceremony-panel">
       <CardHeader className="border-b">
         <CardTitle className="text-base">Unlock your ceremony</CardTitle>
         <CardDescription>

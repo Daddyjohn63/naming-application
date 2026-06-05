@@ -26,6 +26,8 @@ import {
 import { toast } from "@workspace/ui/components/sonner"
 import { cn } from "@workspace/ui/lib/utils"
 
+import { dataComponent } from "@/lib/data-component"
+
 type FamilyNameStylePickerProps = {
   cat: Doc<"cats">
 }
@@ -62,7 +64,7 @@ export function FamilyNameStylePicker({ cat }: FamilyNameStylePickerProps) {
   }
 
   return (
-    <Card className="ceremony-panel">
+    <Card {...dataComponent("FamilyNameStylePicker")} className="ceremony-panel">
       <CardHeader className="border-b">
         <CardTitle className="text-base">Family name style</CardTitle>
         <CardDescription>

@@ -21,6 +21,8 @@ import {
 } from "@workspace/ui/components/card"
 import { toast } from "@workspace/ui/components/sonner"
 
+import { dataComponent } from "@/lib/data-component"
+
 type CeremonyUnlockSidebarProps = {
   cat: Doc<"cats">
 }
@@ -73,7 +75,7 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
         : "Your everyday family name is free. Unlock once per cat to reveal cat-world and ineffable names, then receive your certificate."
 
   return (
-    <Card className="ceremony-sidebar-panel border-primary/20">
+    <Card {...dataComponent("CeremonyUnlockSidebar")} className="ceremony-sidebar-panel border-primary/20">
       <CardHeader className="border-b">
         <div className="flex items-center gap-2">
           <Lock className="text-primary size-4 shrink-0" aria-hidden />

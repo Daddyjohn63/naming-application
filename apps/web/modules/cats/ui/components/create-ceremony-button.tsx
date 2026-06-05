@@ -5,6 +5,7 @@ import * as React from "react"
 import { PlusCircle } from "lucide-react"
 
 import { ceremonyCtaButtonClassName } from "@/modules/ceremony/lib/ceremony-styles"
+import { dataComponent } from "@/lib/data-component"
 import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 import { toast } from "@workspace/ui/components/sonner"
@@ -37,6 +38,7 @@ export function CreateCeremonyButton({
 
   return (
     <Button
+      {...dataComponent("CreateCeremonyButton")}
       type="button"
       variant={variant}
       size={size}

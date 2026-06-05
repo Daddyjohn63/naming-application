@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form"
 
 import { api } from "@workspace/backend/_generated/api"
 import type { Doc } from "@workspace/backend/_generated/dataModel"
+import { MAX_CAT_PROFILE_SUBMIT_COUNT } from "@workspace/shared/constants/cat-profile"
 import {
   MAX_CAT_SUMMARY_TEXT_LENGTH,
   MIN_CAT_SUMMARY_TEXT_LENGTH,
@@ -43,6 +44,9 @@ import { Skeleton } from "@workspace/ui/components/skeleton"
 import { Textarea } from "@workspace/ui/components/textarea"
 import { toast } from "@workspace/ui/components/sonner"
 
+import { useConfirm } from "@/hooks/use-confirm"
+import { dataComponent } from "@/lib/data-component"
+
 type CatSummaryReviewProps = {
   cat: Doc<"cats">
   /** Parent switches back to profile form (summary_review → edit profile overlay). */
@@ -63,6 +67,10 @@ export function CatSummaryReview({
   })
   const saveDraft = useMutation(api.catSummary.saveSummaryDraft)
   const submitSummary = useMutation(api.catSummary.submitSummary)
+  const [ShowConfirm, confirm] = useConfirm(
+    "Go back to profile?",
+    `Going back to edit your profile may result in losing this AI generated summary. But remember you have ${MAX_CAT_PROFILE_SUBMIT_COUNT} attempts.`
+  )
 
   /** Non-field errors from save/submit mutations (auth, step locked, etc.). */
   const [serverError, setServerError] = React.useState<string | null>(null)
@@ -133,9 +141,16 @@ export function CatSummaryReview({
   /** Disable all buttons while either mutation runs. */
   const busy = saving || submitting
 
+  async function handleEditProfile() {
+    const confirmed = await confirm()
+    if (confirmed) {
+      onEditProfile()
+    }
+  }
+
   if (latestSummary === undefined) {
     return (
-      <Card>
+      <Card {...dataComponent("CatSummaryReview")}>
         <CardHeader className="border-b">
           <Skeleton className="h-5 w-40" />
           <Skeleton className="mt-2 h-4 w-full max-w-md" />
@@ -149,7 +164,7 @@ export function CatSummaryReview({
 
   if (latestSummary === null) {
     return (
-      <Card>
+      <Card {...dataComponent("CatSummaryReview")}>
         <CardHeader className="border-b">
           <CardTitle className="text-base">Summary not ready</CardTitle>
           <CardDescription>
@@ -162,7 +177,8 @@ export function CatSummaryReview({
   }
 
   return (
-    <Card className="ceremony-panel">
+    <Card {...dataComponent("CatSummaryReview")} className="ceremony-panel">
+      <ShowConfirm />
       <CardHeader className="border-b">
         <CardTitle className="text-base">Personality summary</CardTitle>
         <CardDescription>
@@ -207,9 +223,9 @@ export function CatSummaryReview({
             type="button"
             variant="outline"
             disabled={busy}
-            onClick={onEditProfile}
+            onClick={() => void handleEditProfile()}
           >
-            Edit profile
+            Go back to profile
           </Button>
         </div>
       </form>

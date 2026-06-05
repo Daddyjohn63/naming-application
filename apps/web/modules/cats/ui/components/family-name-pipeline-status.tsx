@@ -15,6 +15,8 @@ import {
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { Spinner } from "@workspace/ui/components/spinner"
 
+import { dataComponent } from "@/lib/data-component"
+
 type FamilyNamePipelineStatusProps = {
   cat: Doc<"cats">
   onRetry: () => void
@@ -28,7 +30,7 @@ export function FamilyNamePipelineStatus({
 }: FamilyNamePipelineStatusProps) {
   if (cat.familyNameGenerationError !== undefined) {
     return (
-      <Card className="ceremony-panel">
+      <Card {...dataComponent("FamilyNamePipelineStatus")} className="ceremony-panel">
         <CardHeader className="border-b">
           <CardTitle className="text-base">Couldn&apos;t generate names</CardTitle>
           <CardDescription>{cat.familyNameGenerationError}</CardDescription>
@@ -43,7 +45,10 @@ export function FamilyNamePipelineStatus({
   }
 
   return (
-    <Card className="ceremony-highlight-panel border-primary/25">
+    <Card
+      {...dataComponent("FamilyNamePipelineStatus")}
+      className="ceremony-highlight-panel border-primary/25"
+    >
       <CardHeader className="flex flex-row items-center gap-3 border-0 pb-0">
         <Spinner className="size-5 shrink-0 text-primary" />
         <div className="flex flex-col gap-1">

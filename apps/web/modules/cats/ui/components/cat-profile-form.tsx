@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useAction } from "convex/react"
+import { useAction, useMutation } from "convex/react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -9,10 +9,17 @@ import { useForm } from "react-hook-form"
 import { api } from "@workspace/backend/_generated/api"
 import type { Doc, Id } from "@workspace/backend/_generated/dataModel"
 import {
+  CAT_SEX_LABELS,
+  CAT_SEX_VALUES,
+  CAT_STORY_PLACEHOLDER,
   MAX_CAT_PROFILE_SUBMIT_COUNT,
 } from "@workspace/shared/constants/cat-profile"
 import { CAT_PROFILE_SUBMIT_ERROR_CODE } from "@workspace/shared/constants/cat-profile-errors"
 import { catPhotoConstraintsLabel } from "@workspace/shared/constants/cat-photo"
+import {
+  photoValidationAttemptsRemaining,
+  photoValidationAttemptsUsed,
+} from "@workspace/shared/constants/cat-photo-validation"
 import {
   MAX_CAT_DESCRIPTION_LENGTH,
   MAX_CAT_OPTIONAL_FIELD_LENGTH,
@@ -21,6 +28,7 @@ import {
 } from "@workspace/shared/constants/limits"
 import {
   saveCatProfileDraftFieldsSchema,
+  normalizeCatSex,
   submitCatProfileFieldsSchema,
   type SubmitCatProfileFieldsInput,
 } from "@workspace/shared/schemas/cat"
@@ -61,8 +69,11 @@ import { Textarea } from "@workspace/ui/components/textarea"
 import { toast } from "@workspace/ui/components/sonner"
 import { cn } from "@workspace/ui/lib/utils"
 
+import { dataComponent } from "@/lib/data-component"
+
 import { defaultProfileFormValues } from "../../lib/cat-profile-form-values"
 import { useCatPhotoUpload } from "../hooks/use-cat-photo-upload"
+import { CatPhotoGuidance } from "./cat-photo-guidance"
 import { CatPhotoUploader } from "./image-uploader"
 
 type CatProfileFormProps = {
@@ -84,6 +95,7 @@ export function CatProfileForm({
   const router = useRouter()
   const submitProfile = useAction(api.catProfileActions.submitCatProfile)
   const saveDraft = useAction(api.catProfileActions.saveCatProfileDraft)
+  const continueWithoutPhoto = useMutation(api.catSummary.continueWithoutPhoto)
   const {
     upload,
     pending: uploadPending,
@@ -102,12 +114,24 @@ export function CatProfileForm({
   const [formError, setFormError] = React.useState<string | null>(null)
   const [submitting, setSubmitting] = React.useState(false)
   const [savingDraft, setSavingDraft] = React.useState(false)
+  const [continuingWithoutPhoto, setContinuingWithoutPhoto] =
+    React.useState(false)
 
+  const isSummaryReviewResubmit = cat.ceremonyStep === "summary_review"
   const submitsUsed = cat.profileSubmitsUsed ?? 0
   const submitsRemaining = Math.max(
     0,
     MAX_CAT_PROFILE_SUBMIT_COUNT - submitsUsed,
   )
+  const photoAttemptsUsed = photoValidationAttemptsUsed(cat)
+  const photoAttemptsRemaining =
+    photoValidationAttemptsRemaining(photoAttemptsUsed)
+  const photoChecksExhausted = photoAttemptsRemaining === 0
+  const hasPhotoSelected =
+    photoFile !== null ||
+    storedPhotoId !== undefined ||
+    (cat.photoStorageId !== undefined && photoFile === null && previewUrl === null)
+  const photoSubmitBlocked = photoChecksExhausted && hasPhotoSelected
 
   const form = useForm<SubmitCatProfileFieldsInput>({
     resolver: zodResolver(submitCatProfileFieldsSchema),
@@ -117,6 +141,7 @@ export function CatProfileForm({
 
   const titleValue = form.watch("title") ?? ""
   const descriptionValue = form.watch("description") ?? ""
+  const sexValue = form.watch("sex") ?? ""
 
   React.useEffect(() => {
     form.reset(defaultProfileFormValues(cat))
@@ -183,6 +208,7 @@ export function CatProfileForm({
         title: values.title,
         description: values.description,
         existingName: values.existingName,
+        sex: normalizeCatSex(values.sex),
         age: values.age,
         breed: values.breed,
         ...(photoStorageId !== undefined ? { photoStorageId } : {}),
@@ -252,6 +278,7 @@ export function CatProfileForm({
         title: parsed.data.title,
         description: parsed.data.description,
         existingName: parsed.data.existingName,
+        sex: normalizeCatSex(parsed.data.sex),
         age: parsed.data.age,
         breed: parsed.data.breed,
         ...(photoStorageId !== undefined ? { photoStorageId } : {}),
@@ -287,21 +314,47 @@ export function CatProfileForm({
   const photoError =
     serverFieldErrors.photo ?? uploadHookError ?? undefined
 
-  const busy = submitting || uploadPending || savingDraft
+  const onContinueWithoutPhoto = async () => {
+    setFormError(null)
+    setServerFieldErrors({})
+    try {
+      setContinuingWithoutPhoto(true)
+      await continueWithoutPhoto({ catId: cat._id })
+      toast.success("Generating your summary without a photo.")
+    } catch (error) {
+      const data = getConvexErrorData(error)
+      if (data?.fieldErrors !== undefined) {
+        setServerFieldErrors(
+          data.fieldErrors as Partial<Record<FieldName, string>>,
+        )
+      }
+      const message = getConvexErrorMessage(error)
+      if (data?.fieldErrors === undefined) {
+        setFormError(message)
+      }
+    } finally {
+      setContinuingWithoutPhoto(false)
+    }
+  }
+
+  const busy =
+    submitting || uploadPending || savingDraft || continuingWithoutPhoto
 
   return (
-    <Card className="ceremony-panel">
+    <Card {...dataComponent("CatProfileForm")} className="ceremony-panel">
       <CardHeader className="border-b">
         <CardTitle className="text-base">Cat profile</CardTitle>
         <CardDescription>
           Tell us about your cat. A photo is optional but helps us write a richer
           summary when you provide one. You can update your profile here until
           the summary is submitted.
-          {submitsRemaining < MAX_CAT_PROFILE_SUBMIT_COUNT ? (
+          {isSummaryReviewResubmit &&
+          submitsRemaining < MAX_CAT_PROFILE_SUBMIT_COUNT ? (
             <>
               {" "}
               ({submitsRemaining}{" "}
-              {submitsRemaining === 1 ? "submission" : "submissions"} remaining)
+              {submitsRemaining === 1 ? "profile update" : "profile updates"}{" "}
+              remaining before summary regeneration is locked.)
             </>
           ) : null}
         </CardDescription>
@@ -325,10 +378,22 @@ export function CatProfileForm({
             <FieldDescription>
               Optional · {catPhotoConstraintsLabel()}
             </FieldDescription>
+            <div className="mt-3">
+              <CatPhotoGuidance
+                cat={cat}
+                photoChecksExhausted={photoChecksExhausted}
+                continuingWithoutPhoto={continuingWithoutPhoto}
+                onContinueWithoutPhoto={
+                  photoChecksExhausted
+                    ? () => void onContinueWithoutPhoto()
+                    : undefined
+                }
+              />
+            </div>
             <CatPhotoUploader
               id="cat-photo"
               previewUrl={displayPreviewUrl ?? null}
-              disabled={busy}
+              disabled={busy || photoChecksExhausted}
               onFileSelect={(file) => {
                 clearFieldError("photo")
                 setPhotoFile(file)
@@ -385,6 +450,7 @@ export function CatProfileForm({
               disabled={busy}
               rows={6}
               maxLength={MAX_CAT_DESCRIPTION_LENGTH}
+              placeholder={CAT_STORY_PLACEHOLDER}
               className={cn(ceremonyTextareaClassName, "min-h-[10rem]")}
               {...form.register("description", {
                 onChange: () => clearFieldError("description"),
@@ -424,6 +490,46 @@ export function CatProfileForm({
               onFocus={() => clearFieldError("existingName")}
             />
             <FieldError>{serverFieldErrors.existingName}</FieldError>
+          </Field>
+
+          <Field data-invalid={!!serverFieldErrors.sex}>
+            <FieldLabel className={ceremonyFieldLabelClassName}>Sex</FieldLabel>
+            <FieldDescription>
+              Optional. Helps us use the right pronouns in your cat&apos;s summary.
+            </FieldDescription>
+            <div
+              className="flex flex-wrap gap-2"
+              role="radiogroup"
+              aria-label="Cat sex"
+            >
+              {CAT_SEX_VALUES.map((value) => {
+                const selected = sexValue === value
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    disabled={busy}
+                    onClick={() => {
+                      form.setValue("sex", selected ? "" : value, {
+                        shouldDirty: true,
+                      })
+                      clearFieldError("sex")
+                    }}
+                    className={cn(
+                      "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                      selected
+                        ? "border-primary bg-primary/10 text-foreground shadow-sm"
+                        : "border-border bg-card text-muted-foreground hover:border-primary/35 hover:text-foreground",
+                    )}
+                  >
+                    {CAT_SEX_LABELS[value]}
+                  </button>
+                )
+              })}
+            </div>
+            <FieldError>{serverFieldErrors.sex}</FieldError>
           </Field>
 
           <div className="grid gap-5 sm:grid-cols-2">
@@ -475,12 +581,18 @@ export function CatProfileForm({
         <div className="flex flex-wrap gap-3">
           <Button
             type="submit"
-            disabled={busy || submitsRemaining === 0}
+            disabled={
+              busy ||
+              (isSummaryReviewResubmit && submitsRemaining === 0) ||
+              photoSubmitBlocked
+            }
             className={ceremonyCtaButtonClassName}
           >
             {submitting
               ? "Submitting…"
-              : "Submit profile and generate summary"}
+              : photoSubmitBlocked
+                ? "Continue without photo"
+                : "Submit profile and generate summary"}
           </Button>
           <Button
             type="button"
