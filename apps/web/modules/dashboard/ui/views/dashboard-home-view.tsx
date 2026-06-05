@@ -31,9 +31,13 @@ import {
   EmptyTitle,
 } from "@workspace/ui/components/empty"
 import { Skeleton } from "@workspace/ui/components/skeleton"
+import { toast } from "@workspace/ui/components/sonner"
 import { cn } from "@workspace/ui/lib/utils"
-import { AlertCircleIcon, Cat, PlusCircle } from "lucide-react"
-import { useConvexAuth, useQuery } from "convex/react"
+import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
+import { useConfirm } from "@/hooks/use-confirm"
+import { AlertCircleIcon, Cat, PlusCircle, Trash2 } from "lucide-react"
+import { useConvexAuth, useMutation, useQuery } from "convex/react"
+import type { FunctionReturnType } from "convex/server"
 
 const DASHBOARD_SKELETON_CARD_KEYS = ["a", "b", "c", "d", "e", "f"] as const
 
@@ -77,20 +81,60 @@ function ConvexAuthHydrationGate({ children }: { children: React.ReactNode }) {
   return children
 }
 
+type DashboardCat = FunctionReturnType<
+  typeof api.cats.listMyCatsForDashboard
+>[number]
+
 type CatCeremonyCardProps = {
-  cat: {
-    _id: string
-    title: string
-    ceremonyStep: string
-    photoUrl?: string
-  }
+  cat: DashboardCat
 }
 
 function CatCeremonyCard({ cat }: CatCeremonyCardProps) {
   const href = `/cats/${encodeURIComponent(cat._id)}`
+  const deleteCeremony = useMutation(api.cats.deleteCeremony)
+  const [deleting, setDeleting] = React.useState(false)
+  const [ShowConfirm, confirm] = useConfirm(
+    `Delete "${cat.title}"?`,
+    "This will permanently remove this naming ceremony and all its progress. This cannot be undone."
+  )
+
+  async function handleDeleteClick(event: React.MouseEvent<HTMLButtonElement>) {
+    event.preventDefault()
+    event.stopPropagation()
+
+    const confirmed = await confirm()
+    if (!confirmed) {
+      return
+    }
+
+    setDeleting(true)
+    try {
+      await deleteCeremony({ catId: cat._id })
+      toast.success("Ceremony deleted.")
+    } catch (error) {
+      toast.error(getConvexErrorMessage(error))
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   return (
-    <li className="min-w-0">
+    <li className="relative min-w-0">
+      <ShowConfirm />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        disabled={deleting}
+        aria-busy={deleting}
+        aria-label={`Delete ${cat.title}`}
+        className="absolute top-2 right-2 z-10 size-8 bg-background/85 text-muted-foreground shadow-sm backdrop-blur-sm hover:bg-background/85 hover:text-muted-foreground hover:[&_svg]:text-destructive"
+        onClick={(event) => {
+          void handleDeleteClick(event)
+        }}
+      >
+        <Trash2 className="size-4 transition-colors" aria-hidden />
+      </Button>
       <Link
         href={href}
         prefetch

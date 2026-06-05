@@ -227,6 +227,86 @@ export const getCatBySlug = query({
   },
 })
 
+/** Permanently removes a naming ceremony and all related rows for the signed-in owner. */
+export const deleteCeremony = mutation({
+  args: { catId: v.id("cats") },
+  handler: async (ctx, { catId }) => {
+    const currentUser = await getCurrentUserOrThrow(ctx)
+    const cat = await ctx.db.get(catId)
+    if (cat === null) {
+      throw new ConvexError("Ceremony not found.")
+    }
+    if (cat.userId !== currentUser._id) {
+      throw new ConvexError("You do not have permission to delete this ceremony.")
+    }
+
+    const summaryVersions = await ctx.db
+      .query("cat_summary_versions")
+      .withIndex("by_catId_versionNumber", (q) => q.eq("catId", catId))
+      .collect()
+    for (const version of summaryVersions) {
+      if (version.summaryImageStorageId !== undefined) {
+        await ctx.storage.delete(version.summaryImageStorageId)
+      }
+      await ctx.db.delete(version._id)
+    }
+
+    const nameGenerations = await ctx.db
+      .query("cat_name_generations")
+      .withIndex("by_catId_stage_generationIndex", (q) => q.eq("catId", catId))
+      .collect()
+    for (const generation of nameGenerations) {
+      await ctx.db.delete(generation._id)
+    }
+
+    const worldNameClaims = await ctx.db
+      .query("cat_world_name_claims")
+      .withIndex("by_userId_normalizedName", (q) =>
+        q.eq("userId", currentUser._id)
+      )
+      .collect()
+    for (const claim of worldNameClaims) {
+      if (claim.catId === catId) {
+        await ctx.db.delete(claim._id)
+      }
+    }
+
+    const payments = await ctx.db
+      .query("cat_payments")
+      .withIndex("by_catId", (q) => q.eq("catId", catId))
+      .collect()
+    for (const payment of payments) {
+      await ctx.db.delete(payment._id)
+    }
+
+    const certificates = await ctx.db
+      .query("certificates")
+      .withIndex("by_catId", (q) => q.eq("catId", catId))
+      .collect()
+    for (const certificate of certificates) {
+      await ctx.storage.delete(certificate.certificateStorageId)
+      await ctx.db.delete(certificate._id)
+    }
+
+    const funnelEvents = await ctx.db
+      .query("funnel_events")
+      .withIndex("by_catId_occurredAt", (q) => q.eq("catId", catId))
+      .collect()
+    for (const event of funnelEvents) {
+      await ctx.db.delete(event._id)
+    }
+
+    if (cat.photoStorageId !== undefined) {
+      await ctx.storage.delete(cat.photoStorageId)
+    }
+    if (cat.certificateStorageId !== undefined) {
+      await ctx.storage.delete(cat.certificateStorageId)
+    }
+
+    await ctx.db.delete(catId)
+  },
+})
+
 /** Starts a draft cat profile; naming ceremony fields are filled in later mutations. */
 export const createCat = mutation({
   args: {
