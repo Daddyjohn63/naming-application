@@ -5,6 +5,8 @@ import { Lock, Sparkles } from "lucide-react"
 import { Badge } from "@workspace/ui/components/badge"
 import { cn } from "@workspace/ui/lib/utils"
 
+import { dataComponent } from "@/lib/data-component"
+
 export type CeremonyNameSlotState = "filled" | "locked" | "placeholder"
 
 type CeremonyNameSlotProps = {
@@ -34,6 +36,7 @@ export function CeremonyNameSlot({
 
   return (
     <article
+      {...dataComponent("CeremonyNameSlot")}
       className={cn(
         "box-border flex w-full flex-col gap-3 rounded-xl border p-4",
         isLockedSlot && "min-h-52",

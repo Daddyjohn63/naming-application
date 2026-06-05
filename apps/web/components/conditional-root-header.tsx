@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { ThemeToggle } from "@/components/theme-toggle"
+import { dataComponent } from "@/lib/data-component"
 import { Button } from "@workspace/ui/components/button"
 
 /**
@@ -18,7 +19,10 @@ export function ConditionalRootHeader() {
   }
 
   return (
-    <header className="border-border/40 bg-background/80 sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b px-4 backdrop-blur-md supports-backdrop-filter:bg-background/70 md:h-16 md:px-6">
+    <header
+      {...dataComponent("ConditionalRootHeader")}
+      className="border-border/40 bg-background/80 sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b px-4 backdrop-blur-md supports-backdrop-filter:bg-background/70 md:h-16 md:px-6"
+    >
       <Link
         href="/"
         className="hover:text-primary text-sm font-semibold tracking-tight transition-colors md:text-base"

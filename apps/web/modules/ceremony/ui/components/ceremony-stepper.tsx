@@ -4,6 +4,8 @@ import { CheckCircle2, CircleDot, Lock } from "lucide-react"
 
 import { cn } from "@workspace/ui/lib/utils"
 
+import { dataComponent } from "@/lib/data-component"
+
 import {
   ceremonyStepsForUi,
   ceremonyStepIndex,
@@ -31,6 +33,7 @@ export function CeremonyStepper({
 
   return (
     <div
+      {...dataComponent("CeremonyStepper")}
       className={cn(
         "border-border/70 bg-muted/40 w-full overflow-x-auto border-y py-3",
         className,

@@ -24,6 +24,8 @@ import { api } from "@workspace/backend/_generated/api"
 import { toast } from "@workspace/ui/components/sonner"
 import { useQuery } from "convex/react"
 
+import { dataComponent } from "@/lib/data-component"
+
 const userSupportItems = [
   {
     title: "User Support",
@@ -66,7 +68,7 @@ function SidebarAddCatMenuItem() {
   }, [error, clearError])
 
   return (
-    <SidebarMenuItem>
+    <SidebarMenuItem {...dataComponent("SidebarAddCatMenuItem")}>
       <SidebarMenuButton
         disabled={pending}
         tooltip={pending === true ? undefined : "Add a cat"}
@@ -93,7 +95,7 @@ export const DashboardSidebar = () => {
   }
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar {...dataComponent("DashboardSidebar")} collapsible="icon">
       <SidebarHeader>
         <SidebarMenu className={dashboardSidebarMenuClassName}>
           {sidebarHeaderItems.map((item) => (

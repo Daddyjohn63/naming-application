@@ -9,6 +9,7 @@ import {
 } from "@workspace/shared/constants/cat-photo"
 
 import { validateCatPhotoFile } from "../hooks/use-cat-photo-upload"
+import { dataComponent } from "@/lib/data-component"
 
 type CatPhotoUploaderProps = {
   id?: string
@@ -67,7 +68,7 @@ export function CatPhotoUploader({
   )
 
   return (
-    <div>
+    <div {...dataComponent("CatPhotoUploader")}>
       <label
         htmlFor={id}
         aria-disabled={disabled}

@@ -12,6 +12,8 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card"
 
+import { dataComponent } from "@/lib/data-component"
+
 type FamilyNamePaywallTeaserProps = {
   unlockEnabled: boolean
   unlocking: boolean
@@ -24,7 +26,7 @@ export function FamilyNamePaywallTeaser({
   onUnlock,
 }: FamilyNamePaywallTeaserProps) {
   return (
-    <Card className="ceremony-sidebar-panel border-primary/20">
+    <Card {...dataComponent("FamilyNamePaywallTeaser")} className="ceremony-sidebar-panel border-primary/20">
       <CardHeader className="border-b">
         <CardTitle className="text-base">Unlock the rest of the ceremony</CardTitle>
         <CardDescription>

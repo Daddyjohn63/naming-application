@@ -10,10 +10,12 @@ import {
 } from "@workspace/ui/components/card"
 import { Separator } from "@workspace/ui/components/separator"
 
+import { dataComponent } from "@/lib/data-component"
+
 /** Marketing landing for KB-001 — public funnel entry before Clerk sign-up. */
 export function LandingView() {
   return (
-    <main className="flex flex-1 flex-col">
+    <main {...dataComponent("LandingView")} className="flex flex-1 flex-col">
       <div className="mx-auto flex w-full max-w-xl flex-col gap-10 px-4 py-14 md:max-w-2xl md:gap-14 md:py-20 lg:max-w-3xl lg:gap-16">
         <section className="flex flex-col gap-4 md:gap-5">
           <Badge variant="secondary" className="w-fit rounded-full px-3 py-0.5">

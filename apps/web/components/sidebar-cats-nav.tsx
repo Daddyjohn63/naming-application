@@ -8,6 +8,8 @@ import { NavCats } from "@workspace/ui/components/nav-cats"
 import { useQuery } from "convex/react"
 import { Cat } from "lucide-react"
 
+import { dataComponent } from "@/lib/data-component"
+
 /**
  * Convex-backed cat list for the dashboard sidebar. Pass into `AppSidebar` as `catsSlot`
  * so `@workspace/ui` stays free of Convex.
@@ -42,5 +44,9 @@ export function SidebarCatsNav() {
     }
   })
 
-  return <NavCats cats={cats} />
+  return (
+    <div {...dataComponent("SidebarCatsNav")} className="contents">
+      <NavCats cats={cats} />
+    </div>
+  )
 }

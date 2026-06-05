@@ -18,6 +18,8 @@ import {
 } from "@workspace/ui/components/drawer"
 import { cn } from "@workspace/ui/lib/utils"
 
+import { dataComponent } from "@/lib/data-component"
+
 interface ResponsiveDialogProps {
   title: string
   description?: string
@@ -47,7 +49,10 @@ export const ResponsiveDialog = ({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className={cn("bg-white", className)}>
+        <DrawerContent
+          {...dataComponent("ResponsiveDialog")}
+          className={cn("bg-white", className)}
+        >
           <DrawerHeader className={headerClassName}>
             <DrawerTitle>{title}</DrawerTitle>
             <DrawerDescription>{description}</DrawerDescription>
@@ -60,7 +65,10 @@ export const ResponsiveDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn("bg-white", className)}>
+      <DialogContent
+        {...dataComponent("ResponsiveDialog")}
+        className={cn("bg-white", className)}
+      >
         <DialogHeader className={headerClassName}>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>

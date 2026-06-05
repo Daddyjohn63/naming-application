@@ -65,6 +65,8 @@ import { Textarea } from "@workspace/ui/components/textarea"
 import { toast } from "@workspace/ui/components/sonner"
 import { cn } from "@workspace/ui/lib/utils"
 
+import { dataComponent } from "@/lib/data-component"
+
 import { defaultProfileFormValues } from "../../lib/cat-profile-form-values"
 import { useCatPhotoUpload } from "../hooks/use-cat-photo-upload"
 import { CatPhotoGuidance } from "./cat-photo-guidance"
@@ -332,7 +334,7 @@ export function CatProfileForm({
     submitting || uploadPending || savingDraft || continuingWithoutPhoto
 
   return (
-    <Card className="ceremony-panel">
+    <Card {...dataComponent("CatProfileForm")} className="ceremony-panel">
       <CardHeader className="border-b">
         <CardTitle className="text-base">Cat profile</CardTitle>
         <CardDescription>

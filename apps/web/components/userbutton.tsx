@@ -17,6 +17,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@workspace/ui/components/avatar"
+import { dataComponent } from "@/lib/data-component"
 import {
   SidebarMenu,
   SidebarMenuItem,
@@ -110,7 +111,7 @@ function SignedInSidebarUser() {
 
   if (!mounted || !isLoaded) {
     return (
-      <SidebarMenu>
+      <SidebarMenu {...dataComponent("SignedInSidebarUser")}>
         <SidebarMenuItem>
           <SidebarMenuSkeleton showIcon className="h-12" />
         </SidebarMenuItem>
@@ -127,7 +128,7 @@ function SignedInSidebarUser() {
   const initials = avatarInitials(name)
 
   return (
-    <SidebarMenu>
+    <SidebarMenu {...dataComponent("SignedInSidebarUser")}>
       <SidebarMenuItem>
         {/*
           Decorative row (pointer-events-none) + invisible fullscreen Clerk trigger for avatar/name.
@@ -216,8 +217,10 @@ function SignedInSidebarUser() {
 
 export function UserButtonClerk() {
   return (
-    <Show when="signed-in">
-      <SignedInSidebarUser />
-    </Show>
+    <div {...dataComponent("UserButtonClerk")} className="contents">
+      <Show when="signed-in">
+        <SignedInSidebarUser />
+      </Show>
+    </div>
   )
 }

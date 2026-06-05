@@ -35,6 +35,7 @@ import { toast } from "@workspace/ui/components/sonner"
 import { cn } from "@workspace/ui/lib/utils"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
 import { useConfirm } from "@/hooks/use-confirm"
+import { dataComponent } from "@/lib/data-component"
 import { AlertCircleIcon, Cat, PlusCircle, Trash2 } from "lucide-react"
 import { useConvexAuth, useMutation, useQuery } from "convex/react"
 import type { FunctionReturnType } from "convex/server"
@@ -44,6 +45,7 @@ const DASHBOARD_SKELETON_CARD_KEYS = ["a", "b", "c", "d", "e", "f"] as const
 function DashboardCatsSkeletonGrid() {
   return (
     <ul
+      {...dataComponent("DashboardCatsSkeletonGrid")}
       className="mx-auto grid w-full max-w-6xl list-none grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
       aria-hidden
     >
@@ -68,7 +70,10 @@ function ConvexAuthHydrationGate({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 flex-col gap-8">
+      <div
+        {...dataComponent("ConvexAuthHydrationGate")}
+        className="flex flex-1 flex-col gap-8"
+      >
         <div className="space-y-3">
           <Skeleton className="h-10 w-full max-w-sm" />
           <Skeleton className="h-6 w-full max-w-md" />
@@ -119,7 +124,7 @@ function CatCeremonyCard({ cat }: CatCeremonyCardProps) {
   }
 
   return (
-    <li className="relative min-w-0">
+    <li {...dataComponent("CatCeremonyCard")} className="relative min-w-0">
       <ShowConfirm />
       <Button
         type="button"
@@ -180,7 +185,7 @@ function DashboardAddCeremonyLead() {
   const { execute, pending, error, clearError } = useCreateDraftCeremony()
 
   return (
-    <div className="flex flex-col gap-6">
+    <div {...dataComponent("DashboardAddCeremonyLead")} className="flex flex-col gap-6">
       {error !== null ? (
         <Alert variant="destructive" className="max-w-xl">
           <AlertCircleIcon className="-mt-0.5 inline" aria-hidden />
@@ -238,7 +243,10 @@ function DashboardCatsLoaded() {
 
   if (cats === undefined) {
     return (
-      <div className="flex flex-1 flex-col gap-10">
+      <div
+        {...dataComponent("DashboardCatsLoaded")}
+        className="flex flex-1 flex-col gap-10"
+      >
         <DashboardAddCeremonyLead />
         <DashboardCatsSkeletonGrid />
       </div>
@@ -248,7 +256,10 @@ function DashboardCatsLoaded() {
   const hasCats = cats.length > 0
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-10">
+    <div
+      {...dataComponent("DashboardCatsLoaded")}
+      className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-10"
+    >
       {hasCats ? (
         <>
           <DashboardAddCeremonyLead />
@@ -294,8 +305,10 @@ function DashboardCatsLoaded() {
 
 export function DashboardHomeView() {
   return (
-    <ConvexAuthHydrationGate>
-      <DashboardCatsLoaded />
-    </ConvexAuthHydrationGate>
+    <div {...dataComponent("DashboardHomeView")} className="contents">
+      <ConvexAuthHydrationGate>
+        <DashboardCatsLoaded />
+      </ConvexAuthHydrationGate>
+    </div>
   )
 }

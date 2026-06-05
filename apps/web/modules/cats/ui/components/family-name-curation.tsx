@@ -33,6 +33,7 @@ import { cn } from "@workspace/ui/lib/utils"
 
 import { FamilyNamePaywallTeaser } from "./family-name-paywall-teaser"
 import { scrollToCeremonyThreeNames } from "@/modules/ceremony/lib/scroll-to-ceremony-three-names"
+import { dataComponent } from "@/lib/data-component"
 
 type FamilyNameCurationProps = {
   cat: Doc<"cats">
@@ -87,7 +88,7 @@ export function FamilyNameCuration({
 
   if (state === undefined) {
     return (
-      <Card className="ceremony-panel">
+      <Card {...dataComponent("FamilyNameCuration")} className="ceremony-panel">
         <CardHeader className="border-b">
           <Skeleton className="h-5 w-48" />
           <Skeleton className="mt-2 h-4 w-full max-w-md" />
@@ -103,7 +104,7 @@ export function FamilyNameCuration({
 
   if (state === null || state.currentBatch === null) {
     return (
-      <Card className="ceremony-panel">
+      <Card {...dataComponent("FamilyNameCuration")} className="ceremony-panel">
         <CardHeader className="border-b">
           <CardTitle className="text-base">Names not ready</CardTitle>
           <CardDescription>
@@ -214,7 +215,7 @@ export function FamilyNameCuration({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div {...dataComponent("FamilyNameCuration")} className="flex flex-col gap-6">
       <Card className="ceremony-panel">
         <CardHeader className="border-b">
           <div className="flex flex-wrap items-start justify-between gap-3">

@@ -43,6 +43,8 @@ import { Skeleton } from "@workspace/ui/components/skeleton"
 import { Textarea } from "@workspace/ui/components/textarea"
 import { toast } from "@workspace/ui/components/sonner"
 
+import { dataComponent } from "@/lib/data-component"
+
 type CatSummaryReviewProps = {
   cat: Doc<"cats">
   /** Parent switches back to profile form (summary_review → edit profile overlay). */
@@ -135,7 +137,7 @@ export function CatSummaryReview({
 
   if (latestSummary === undefined) {
     return (
-      <Card>
+      <Card {...dataComponent("CatSummaryReview")}>
         <CardHeader className="border-b">
           <Skeleton className="h-5 w-40" />
           <Skeleton className="mt-2 h-4 w-full max-w-md" />
@@ -149,7 +151,7 @@ export function CatSummaryReview({
 
   if (latestSummary === null) {
     return (
-      <Card>
+      <Card {...dataComponent("CatSummaryReview")}>
         <CardHeader className="border-b">
           <CardTitle className="text-base">Summary not ready</CardTitle>
           <CardDescription>
@@ -162,7 +164,7 @@ export function CatSummaryReview({
   }
 
   return (
-    <Card className="ceremony-panel">
+    <Card {...dataComponent("CatSummaryReview")} className="ceremony-panel">
       <CardHeader className="border-b">
         <CardTitle className="text-base">Personality summary</CardTitle>
         <CardDescription>

@@ -17,6 +17,7 @@ import { Separator } from "@workspace/ui/components/separator"
 import { SidebarTrigger } from "@workspace/ui/components/sidebar"
 
 import { ThemeToggle } from "@/components/theme-toggle"
+import { dataComponent } from "@/lib/data-component"
 
 const SEGMENT_LABELS: Record<string, string> = {
   dashboard: "Dashboard",
@@ -50,6 +51,7 @@ export function DashboardHeader() {
 
   return (
     <header
+      {...dataComponent("DashboardHeader")}
       className="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
     >
       <div className="flex min-w-0 flex-1 items-center gap-2 px-4">

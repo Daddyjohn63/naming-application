@@ -29,6 +29,7 @@ import { useState, type JSX } from "react"
 
 import { Button } from "@workspace/ui/components/button"
 import { ResponsiveDialog } from "@/components/ResponsiveDialog"
+import { dataComponent } from "@/lib/data-component"
 
 export const useConfirm = (
   title: string,
@@ -97,7 +98,10 @@ export const useConfirm = (
       title={title}
       description={description}
     >
-      <div className="flex w-full flex-col-reverse items-center justify-end gap-x-2 gap-y-2 pt-4 lg:flex-row">
+      <div
+        {...dataComponent("ConfirmDialog")}
+        className="flex w-full flex-col-reverse items-center justify-end gap-x-2 gap-y-2 pt-4 lg:flex-row"
+      >
         <Button
           type="button"
           onClick={handleCancel}

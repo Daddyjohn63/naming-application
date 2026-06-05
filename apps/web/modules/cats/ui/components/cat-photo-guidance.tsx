@@ -13,6 +13,7 @@ import {
 } from "@workspace/ui/components/alert"
 import { Button } from "@workspace/ui/components/button"
 import { ceremonyCtaButtonClassName } from "@/modules/ceremony/lib/ceremony-styles"
+import { dataComponent } from "@/lib/data-component"
 
 type CatPhotoGuidanceProps = {
   cat: { photoValidationAttemptsUsed?: number }
@@ -31,7 +32,7 @@ export function CatPhotoGuidance({
   const attemptsRemaining = photoValidationAttemptsRemaining(attemptsUsed)
 
   return (
-    <div className="flex flex-col gap-3">
+    <div {...dataComponent("CatPhotoGuidance")} className="flex flex-col gap-3">
       <Alert className="border-primary/15 bg-accent/30">
         <AlertTitle>Photo tips</AlertTitle>
         <AlertDescription>

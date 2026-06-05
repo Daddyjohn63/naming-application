@@ -11,6 +11,8 @@ import {
 } from "@workspace/ui/components/card"
 import { Spinner } from "@workspace/ui/components/spinner"
 
+import { dataComponent } from "@/lib/data-component"
+
 type CatProfileAwaitingSummaryProps = {
   cat: Doc<"cats"> & { photoUrl?: string }
 }
@@ -31,7 +33,7 @@ export function CatProfileAwaitingSummary({
   cat,
 }: CatProfileAwaitingSummaryProps) {
   return (
-    <div className="flex flex-col gap-6">
+    <div {...dataComponent("CatProfileAwaitingSummary")} className="flex flex-col gap-6">
       <Card className="border-primary/20 bg-primary/5">
         <CardHeader className="flex flex-row items-center gap-3 border-0 pb-0">
           <Spinner className="text-primary size-5 shrink-0" />

@@ -5,6 +5,7 @@ import { Cat } from "lucide-react"
 import Link from "next/link"
 
 import { ThemeToggle } from "@/components/theme-toggle"
+import { dataComponent } from "@/lib/data-component"
 import { Button } from "@workspace/ui/components/button"
 
 type CeremonyShellProps = {
@@ -17,7 +18,10 @@ type CeremonyShellProps = {
  */
 export function CeremonyShell({ children }: CeremonyShellProps) {
   return (
-    <div className="ceremony-theme bg-background text-foreground flex min-h-svh flex-col">
+    <div
+      {...dataComponent("CeremonyShell")}
+      className="ceremony-theme bg-background text-foreground flex min-h-svh flex-col"
+    >
       <header className="border-border/70 bg-background/95 sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between gap-3 border-b px-4 backdrop-blur-md supports-backdrop-filter:bg-background/85 md:h-16 md:px-6">
         <div className="flex min-w-0 items-center gap-2">
           <Button
