@@ -1,3 +1,13 @@
+//HTTP router: Clerk webhook (/clerk-users-webhook) via Svix
+//Clerk webhook is used to sync user data between Clerk and Convex
+//Clerk webhook is triggered when a user is created, updated, or deleted
+//Clerk webhook is triggered when a user's email address is updated
+//Clerk webhook is triggered when a user's password is updated
+//Clerk webhook is triggered when a user's profile picture is updated
+//Clerk webhook is triggered when a user's username is updated
+//Clerk webhook is triggered when a user's email address is verified
+//Clerk webhook is triggered when a user's password is verified
+//Clerk webhook is triggered when a user's profile picture is verified
 import { httpRouter } from "convex/server"
 import { httpAction } from "./_generated/server"
 import { internal } from "./_generated/api"

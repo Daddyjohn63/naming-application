@@ -76,10 +76,12 @@ export default function CatCeremonyPage() {
 
   const cat = useQuery(
     api.cats.getCatByIdForOwner,
-    catIdParam !== undefined ? { catId: catIdParam } : "skip"
+    catIdParam !== undefined ? { catId: catIdParam } : "skip" //skip query if catIdParam is undefined
   )
   const retryPipeline = useMutation(api.catSummary.retrySummaryPipeline)
-  const retryFamilyNames = useMutation(api.familyNaming.retryFamilyNameGeneration)
+  const retryFamilyNames = useMutation(
+    api.familyNaming.retryFamilyNameGeneration
+  )
   const returnToProfile = useMutation(
     api.catSummary.returnToProfileForPhotoReplace
   )
@@ -242,19 +244,19 @@ export default function CatCeremonyPage() {
   const ceremonyHeader = (
     <>
       <nav
-        className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm"
+        className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground"
         aria-label="Breadcrumb"
       >
         <Link
           href="/dashboard"
-          className="hover:text-primary font-medium underline-offset-4 hover:underline"
+          className="font-medium underline-offset-4 hover:text-primary hover:underline"
         >
           Dashboard
         </Link>
         <span aria-hidden className="text-muted-foreground/70">
           /
         </span>
-        <span className="text-foreground line-clamp-1 font-semibold tracking-tight">
+        <span className="line-clamp-1 font-semibold tracking-tight text-foreground">
           {cat.title}
         </span>
       </nav>
@@ -263,7 +265,7 @@ export default function CatCeremonyPage() {
         <div className="flex flex-wrap items-center gap-2">
           <Badge
             variant="secondary"
-            className="border-primary/15 bg-accent/80 text-accent-foreground rounded-full border px-3"
+            className="rounded-full border border-primary/15 bg-accent/80 px-3 text-accent-foreground"
           >
             {ceremonyStepShortLabel(cat.ceremonyStep)}
           </Badge>
@@ -275,7 +277,10 @@ export default function CatCeremonyPage() {
   const standardPanels = (
     <>
       {photoBlockMessage !== null && photoBlockTitle !== null ? (
-        <CatPhotoBlockAlert title={photoBlockTitle} message={photoBlockMessage} />
+        <CatPhotoBlockAlert
+          title={photoBlockTitle}
+          message={photoBlockMessage}
+        />
       ) : null}
 
       {showProfileForm ? (
@@ -329,9 +334,7 @@ export default function CatCeremonyPage() {
 
       <CeremonyThreeNamesView cat={cat} />
 
-      {showFamilyCuration ? (
-        <FamilyNameCuration cat={cat} tunnelMode />
-      ) : null}
+      {showFamilyCuration ? <FamilyNameCuration cat={cat} tunnelMode /> : null}
     </>
   )
 

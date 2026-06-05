@@ -4,6 +4,7 @@
  * Internal mutations write cat profile fields. `applyCatProfileSubmit` also sets the
  * first summary substate and schedules photo validation or summary generation.
  * Parse helpers validate Zod field rules before mutations run (from actions).
+ * Internal mutations for profile submit/draft; field parsing helpers.
  */
 
 import { ConvexError, v } from "convex/values"
@@ -113,14 +114,18 @@ export const applyCatProfileSubmit = internalMutation({
     }
 
     if (hasPhoto) {
-      await ctx.scheduler.runAfter(0, internal.catSummaryActions.validateCatPhoto, {
-        catId: args.catId,
-      })
+      await ctx.scheduler.runAfter(
+        0,
+        internal.catSummaryActions.validateCatPhoto,
+        {
+          catId: args.catId,
+        }
+      )
     } else {
       await ctx.scheduler.runAfter(
         0,
         internal.catSummaryActions.generateCatSummary,
-        { catId: args.catId },
+        { catId: args.catId }
       )
     }
   },

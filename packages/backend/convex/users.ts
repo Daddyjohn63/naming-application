@@ -1,30 +1,8 @@
-// import { query, mutation } from "./_generated/server"
-// export const getMany = query({
-//   args: {},
-//   handler: async (ctx) => {
-//     const users = await ctx.db.query("users").collect()
-
-//     return users
-//   },
-// })
-
-// export const add = mutation({
-//   args: {},
-//   handler: async (ctx) => {
-//     const identity = await ctx.auth.getUserIdentity()
-//     if (identity === null) {
-//       throw new Error("Not authenticated")
-//     }
-//     const userId = await ctx.db.insert("users", {
-//       firstName: "John Doe",
-//     })
-//     return userId
-//   },
-// })
 import { internalMutation, query, QueryCtx } from "./_generated/server"
-//import { UserJSON } from "@clerk/backend"
 import { v, Validator } from "convex/values"
 import { UserJSON } from "@clerk/backend"
+
+//get all users
 export const getUsers = query({
   args: {},
   handler: async (ctx) => {
@@ -32,6 +10,7 @@ export const getUsers = query({
   },
 })
 
+//get recent users
 export const getRecentUsers = query({
   args: {},
   handler: async (ctx) => {
@@ -39,6 +18,7 @@ export const getRecentUsers = query({
   },
 })
 
+//get current user
 export const current = query({
   args: {},
   handler: async (ctx) => {
@@ -46,6 +26,7 @@ export const current = query({
   },
 })
 
+//upsert user from Clerk
 export const upsertFromClerk = internalMutation({
   args: { data: v.any() as Validator<UserJSON> },
   async handler(ctx, { data }) {
@@ -81,6 +62,7 @@ export const upsertFromClerk = internalMutation({
   },
 })
 
+//delete user from Clerk
 export const deleteFromClerk = internalMutation({
   args: { clerkUserId: v.string() },
   async handler(ctx, { clerkUserId }) {
@@ -96,12 +78,14 @@ export const deleteFromClerk = internalMutation({
   },
 })
 
+//get current user or throw error
 export async function getCurrentUserOrThrow(ctx: QueryCtx) {
   const userRecord = await getCurrentUser(ctx)
   if (!userRecord) throw new Error("Can't get current user")
   return userRecord
 }
 
+//get current user
 export async function getCurrentUser(ctx: QueryCtx) {
   const identity = await ctx.auth.getUserIdentity()
   if (identity === null) {
@@ -110,6 +94,7 @@ export async function getCurrentUser(ctx: QueryCtx) {
   return await userByClerkUserId(ctx, identity.subject)
 }
 
+//get user by Clerk user ID
 async function userByClerkUserId(ctx: QueryCtx, clerkUserId: string) {
   return await ctx.db
     .query("users")

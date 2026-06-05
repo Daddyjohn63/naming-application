@@ -1,3 +1,8 @@
+//Cats: Cat profiles / naming ceremonies (Phase 1 “one or more cat profiles”).
+//Holds funnel step, regeneration budgets, pointers to assets, and final choices.
+//Original upload stays in photoStorageId; accepted portrait text/image live on
+//cat_portrait_versions with optional acceptedPortraitVersionId here.
+//Cat CRUD, upload URLs, dashboard/sidebar queries, etc.
 import { ConvexError, v } from "convex/values"
 import { catCreateFieldsSchema } from "@workspace/shared/schemas/cat"
 import { DRAFT_CAT_DESCRIPTION_PLACEHOLDER } from "@workspace/shared/constants/cat-profile"
@@ -6,9 +11,10 @@ import { query, mutation, type QueryCtx } from "./_generated/server"
 import { getCurrentUser, getCurrentUserOrThrow } from "./users"
 import type { Doc, Id } from "./_generated/dataModel"
 
+//resolve storage public URL
 async function resolveStoragePublicUrl(
   ctx: QueryCtx,
-  storageId: Id<"_storage"> | undefined,
+  storageId: Id<"_storage"> | undefined
 ): Promise<string | undefined> {
   if (storageId === undefined) {
     return undefined
@@ -17,11 +23,12 @@ async function resolveStoragePublicUrl(
   return url === "" ? undefined : url
 }
 
+//cat with storage URLs
 async function catWithStorageUrls(ctx: QueryCtx, cat: Doc<"cats">) {
   const photoUrl = await resolveStoragePublicUrl(ctx, cat.photoStorageId)
   const certificateUrl = await resolveStoragePublicUrl(
     ctx,
-    cat.certificateStorageId,
+    cat.certificateStorageId
   )
 
   return {
@@ -31,6 +38,7 @@ async function catWithStorageUrls(ctx: QueryCtx, cat: Doc<"cats">) {
   }
 }
 
+//generate upload URL
 export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx): Promise<string> => {
@@ -38,6 +46,7 @@ export const generateUploadUrl = mutation({
   },
 })
 
+//get all cats
 export const getCats = query({
   args: {},
   handler: async (ctx) => {
@@ -47,7 +56,7 @@ export const getCats = query({
         const user = await ctx.db.get(cat.userId)
         const withUrls = await catWithStorageUrls(ctx, cat)
         return { ...withUrls, user }
-      }),
+      })
     )
   },
 })
@@ -63,9 +72,7 @@ export const listMyCatsForDashboard = query({
 
     const cats = await ctx.db
       .query("cats")
-      .withIndex("by_userId_createdAt", (q) =>
-        q.eq("userId", currentUser._id),
-      )
+      .withIndex("by_userId_createdAt", (q) => q.eq("userId", currentUser._id))
       .collect()
 
     cats.sort((a, b) => b.createdAt - a.createdAt)
@@ -83,7 +90,7 @@ export const listMyCatsForDashboard = query({
             ? { photoUrl: photoRaw.trim() }
             : {}),
         }
-      }),
+      })
     )
   },
 })
@@ -139,11 +146,12 @@ export const getCatsForSidebar = query({
           slug: cat.slug,
           ...(photoUrl !== undefined ? { photoUrl } : {}),
         }
-      }),
+      })
     )
   },
 })
 
+//get recent cats
 export const getRecentCats = query({
   args: {},
   handler: async (ctx) => {
@@ -153,11 +161,11 @@ export const getRecentCats = query({
         const user = await ctx.db.get(cat.userId)
         const withUrls = await catWithStorageUrls(ctx, cat)
         return { ...withUrls, user }
-      }),
+      })
     )
   },
 })
-
+//get cats by user ID
 export const getCatsByUserId = query({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
@@ -174,6 +182,7 @@ export const getCatsByUserId = query({
   },
 })
 
+//get cat slugs by user ID
 export const getCatSlugsByUserId = query({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
@@ -192,6 +201,7 @@ export const getCatSlugsByUserId = query({
   },
 })
 
+//get cat by slug
 export const getCatBySlug = query({
   args: { userId: v.id("users"), slug: v.string() },
   handler: async (ctx, { userId, slug }) => {
@@ -203,7 +213,7 @@ export const getCatBySlug = query({
     const cat = await ctx.db
       .query("cats")
       .withIndex("by_userId_slug", (q) =>
-        q.eq("userId", userId).eq("slug", slug),
+        q.eq("userId", userId).eq("slug", slug)
       )
       .unique()
 
@@ -261,9 +271,7 @@ export const createDraftCat = mutation({
     const now = Date.now()
     const siblings = await ctx.db
       .query("cats")
-      .withIndex("by_userId_createdAt", (q) =>
-        q.eq("userId", currentUser._id),
-      )
+      .withIndex("by_userId_createdAt", (q) => q.eq("userId", currentUser._id))
       .collect()
     const n = siblings.length + 1
     const title =
