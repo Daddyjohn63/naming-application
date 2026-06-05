@@ -118,6 +118,8 @@ export default defineSchema({
     summaryGenerationError: v.optional(v.string()),
     /** Successful KB-003 profile submits (cap in shared constants). */
     profileSubmitsUsed: v.optional(v.number()),
+    /** AI vision photo checks consumed for this cat (cap in shared constants). */
+    photoValidationAttemptsUsed: v.optional(v.number()),
     ceremonyStep,
     /** AI summary regenerations already consumed (cap at 1 per §4a). */
     summaryRegenerationsUsed: v.number(),

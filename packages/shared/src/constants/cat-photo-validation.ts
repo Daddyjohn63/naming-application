@@ -5,6 +5,12 @@
  * so product can tune behaviour without changing the prompt.
  */
 
+/**
+ * Max AI vision checks per cat ceremony (each submit with a photo consumes one).
+ * Caps token spend; owners can continue without a photo when exhausted.
+ */
+export const MAX_PHOTO_VALIDATION_ATTEMPTS = 5
+
 /** Block when the model says not a cat or confidence is below this score (§2.3a). */
 export const CAT_PHOTO_BLOCK_LIKELIHOOD_THRESHOLD = 5
 
@@ -99,6 +105,27 @@ export function resolvePhotoIssueDisplay(
     }),
     message: resolvePhotoIssueUserMessage(validation),
   }
+}
+
+/** Used AI photo checks for this cat (defaults to 0 for legacy rows). */
+export function photoValidationAttemptsUsed(
+  cat: { photoValidationAttemptsUsed?: number },
+): number {
+  return cat.photoValidationAttemptsUsed ?? 0
+}
+
+/** Remaining AI photo checks before the owner must continue without a photo. */
+export function photoValidationAttemptsRemaining(used: number): number {
+  return Math.max(0, MAX_PHOTO_VALIDATION_ATTEMPTS - used)
+}
+
+/** Short owner-facing copy for the profile form photo field. */
+export function catPhotoUploadGuidanceLines(): readonly string[] {
+  return [
+    "One cat only — group shots or photos with multiple cats will not pass.",
+    "Use a clear, well-lit photo where your cat is the main subject.",
+    `You have up to ${MAX_PHOTO_VALIDATION_ATTEMPTS} automated photo checks for this ceremony — choose your photo carefully.`,
+  ] as const
 }
 
 /** Alert title when the owner is sent back to profile for a photo issue. */

@@ -14,6 +14,7 @@ import {
   isCatProfileEditableStep,
   MAX_CAT_PROFILE_SUBMIT_COUNT,
 } from "@workspace/shared/constants/cat-profile"
+import { MAX_PHOTO_VALIDATION_ATTEMPTS } from "@workspace/shared/constants/cat-photo-validation"
 import { CAT_PROFILE_SUBMIT_ERROR_CODE } from "@workspace/shared/constants/cat-profile-errors"
 import {
   saveCatProfileDraftFieldsSchema,
@@ -57,10 +58,22 @@ export const applyCatProfileSubmit = internalMutation({
       })
     }
 
+    const isSummaryReviewResubmit = cat.ceremonyStep === "summary_review"
     const submitsUsed = cat.profileSubmitsUsed ?? 0
-    if (submitsUsed >= MAX_CAT_PROFILE_SUBMIT_COUNT) {
+    if (
+      isSummaryReviewResubmit &&
+      submitsUsed >= MAX_CAT_PROFILE_SUBMIT_COUNT
+    ) {
       throw new ConvexError({
         code: CAT_PROFILE_SUBMIT_ERROR_CODE.SUBMIT_LIMIT_REACHED,
+      })
+    }
+
+    const photoAttemptsUsed = cat.photoValidationAttemptsUsed ?? 0
+    const hasPhoto = args.photoStorageId !== undefined
+    if (hasPhoto && photoAttemptsUsed >= MAX_PHOTO_VALIDATION_ATTEMPTS) {
+      throw new ConvexError({
+        code: CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_VALIDATION_LIMIT_REACHED,
       })
     }
 
@@ -78,7 +91,6 @@ export const applyCatProfileSubmit = internalMutation({
       cat.acceptedSummaryVersionId !== undefined
 
     // Photo path runs vision validation first; no-photo skips straight to summary.
-    const hasPhoto = args.photoStorageId !== undefined
     const nextStep = hasPhoto ? "awaiting_photo_validation" : "awaiting_summary"
 
     await ctx.db.patch(args.catId, {
@@ -89,7 +101,12 @@ export const applyCatProfileSubmit = internalMutation({
       breed: args.breed,
       photoStorageId: args.photoStorageId,
       ceremonyStep: nextStep,
-      profileSubmitsUsed: submitsUsed + 1,
+      ...(isSummaryReviewResubmit
+        ? { profileSubmitsUsed: submitsUsed + 1 }
+        : {}),
+      ...(hasPhoto
+        ? { photoValidationAttemptsUsed: photoAttemptsUsed + 1 }
+        : {}),
       photoValidation: undefined,
       photoQualityAcknowledged: undefined,
       summaryGenerationError: undefined,

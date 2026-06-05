@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useAction } from "convex/react"
+import { useAction, useMutation } from "convex/react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -13,6 +13,10 @@ import {
 } from "@workspace/shared/constants/cat-profile"
 import { CAT_PROFILE_SUBMIT_ERROR_CODE } from "@workspace/shared/constants/cat-profile-errors"
 import { catPhotoConstraintsLabel } from "@workspace/shared/constants/cat-photo"
+import {
+  photoValidationAttemptsRemaining,
+  photoValidationAttemptsUsed,
+} from "@workspace/shared/constants/cat-photo-validation"
 import {
   MAX_CAT_DESCRIPTION_LENGTH,
   MAX_CAT_OPTIONAL_FIELD_LENGTH,
@@ -63,6 +67,7 @@ import { cn } from "@workspace/ui/lib/utils"
 
 import { defaultProfileFormValues } from "../../lib/cat-profile-form-values"
 import { useCatPhotoUpload } from "../hooks/use-cat-photo-upload"
+import { CatPhotoGuidance } from "./cat-photo-guidance"
 import { CatPhotoUploader } from "./image-uploader"
 
 type CatProfileFormProps = {
@@ -84,6 +89,7 @@ export function CatProfileForm({
   const router = useRouter()
   const submitProfile = useAction(api.catProfileActions.submitCatProfile)
   const saveDraft = useAction(api.catProfileActions.saveCatProfileDraft)
+  const continueWithoutPhoto = useMutation(api.catSummary.continueWithoutPhoto)
   const {
     upload,
     pending: uploadPending,
@@ -102,12 +108,24 @@ export function CatProfileForm({
   const [formError, setFormError] = React.useState<string | null>(null)
   const [submitting, setSubmitting] = React.useState(false)
   const [savingDraft, setSavingDraft] = React.useState(false)
+  const [continuingWithoutPhoto, setContinuingWithoutPhoto] =
+    React.useState(false)
 
+  const isSummaryReviewResubmit = cat.ceremonyStep === "summary_review"
   const submitsUsed = cat.profileSubmitsUsed ?? 0
   const submitsRemaining = Math.max(
     0,
     MAX_CAT_PROFILE_SUBMIT_COUNT - submitsUsed,
   )
+  const photoAttemptsUsed = photoValidationAttemptsUsed(cat)
+  const photoAttemptsRemaining =
+    photoValidationAttemptsRemaining(photoAttemptsUsed)
+  const photoChecksExhausted = photoAttemptsRemaining === 0
+  const hasPhotoSelected =
+    photoFile !== null ||
+    storedPhotoId !== undefined ||
+    (cat.photoStorageId !== undefined && photoFile === null && previewUrl === null)
+  const photoSubmitBlocked = photoChecksExhausted && hasPhotoSelected
 
   const form = useForm<SubmitCatProfileFieldsInput>({
     resolver: zodResolver(submitCatProfileFieldsSchema),
@@ -287,7 +305,31 @@ export function CatProfileForm({
   const photoError =
     serverFieldErrors.photo ?? uploadHookError ?? undefined
 
-  const busy = submitting || uploadPending || savingDraft
+  const onContinueWithoutPhoto = async () => {
+    setFormError(null)
+    setServerFieldErrors({})
+    try {
+      setContinuingWithoutPhoto(true)
+      await continueWithoutPhoto({ catId: cat._id })
+      toast.success("Generating your summary without a photo.")
+    } catch (error) {
+      const data = getConvexErrorData(error)
+      if (data?.fieldErrors !== undefined) {
+        setServerFieldErrors(
+          data.fieldErrors as Partial<Record<FieldName, string>>,
+        )
+      }
+      const message = getConvexErrorMessage(error)
+      if (data?.fieldErrors === undefined) {
+        setFormError(message)
+      }
+    } finally {
+      setContinuingWithoutPhoto(false)
+    }
+  }
+
+  const busy =
+    submitting || uploadPending || savingDraft || continuingWithoutPhoto
 
   return (
     <Card className="ceremony-panel">
@@ -297,11 +339,13 @@ export function CatProfileForm({
           Tell us about your cat. A photo is optional but helps us write a richer
           summary when you provide one. You can update your profile here until
           the summary is submitted.
-          {submitsRemaining < MAX_CAT_PROFILE_SUBMIT_COUNT ? (
+          {isSummaryReviewResubmit &&
+          submitsRemaining < MAX_CAT_PROFILE_SUBMIT_COUNT ? (
             <>
               {" "}
               ({submitsRemaining}{" "}
-              {submitsRemaining === 1 ? "submission" : "submissions"} remaining)
+              {submitsRemaining === 1 ? "profile update" : "profile updates"}{" "}
+              remaining before summary regeneration is locked.)
             </>
           ) : null}
         </CardDescription>
@@ -325,10 +369,22 @@ export function CatProfileForm({
             <FieldDescription>
               Optional · {catPhotoConstraintsLabel()}
             </FieldDescription>
+            <div className="mt-3">
+              <CatPhotoGuidance
+                cat={cat}
+                photoChecksExhausted={photoChecksExhausted}
+                continuingWithoutPhoto={continuingWithoutPhoto}
+                onContinueWithoutPhoto={
+                  photoChecksExhausted
+                    ? () => void onContinueWithoutPhoto()
+                    : undefined
+                }
+              />
+            </div>
             <CatPhotoUploader
               id="cat-photo"
               previewUrl={displayPreviewUrl ?? null}
-              disabled={busy}
+              disabled={busy || photoChecksExhausted}
               onFileSelect={(file) => {
                 clearFieldError("photo")
                 setPhotoFile(file)
@@ -475,12 +531,18 @@ export function CatProfileForm({
         <div className="flex flex-wrap gap-3">
           <Button
             type="submit"
-            disabled={busy || submitsRemaining === 0}
+            disabled={
+              busy ||
+              (isSummaryReviewResubmit && submitsRemaining === 0) ||
+              photoSubmitBlocked
+            }
             className={ceremonyCtaButtonClassName}
           >
             {submitting
               ? "Submitting…"
-              : "Submit profile and generate summary"}
+              : photoSubmitBlocked
+                ? "Remove photo or continue without one"
+                : "Submit profile and generate summary"}
           </Button>
           <Button
             type="button"

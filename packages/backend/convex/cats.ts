@@ -255,6 +255,7 @@ export const createCat = mutation({
       ceremonyStep: "draft",
       summaryRegenerationsUsed: 0,
       profileSubmitsUsed: 0,
+      photoValidationAttemptsUsed: 0,
       createdAt: now,
       updatedAt: now,
     })
@@ -283,6 +284,7 @@ export const createDraftCat = mutation({
       ceremonyStep: "draft",
       summaryRegenerationsUsed: 0,
       profileSubmitsUsed: 0,
+      photoValidationAttemptsUsed: 0,
       createdAt: now,
       updatedAt: now,
     })

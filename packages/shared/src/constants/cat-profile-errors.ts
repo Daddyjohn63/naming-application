@@ -13,6 +13,7 @@ export const CAT_PROFILE_SUBMIT_ERROR_CODE = {
   PHOTO_DIMENSIONS_TOO_SMALL: "photo_dimensions_too_small",
   PHOTO_DIMENSIONS_TOO_LARGE: "photo_dimensions_too_large",
   PHOTO_UNREADABLE: "photo_unreadable",
+  PHOTO_VALIDATION_LIMIT_REACHED: "photo_validation_limit_reached",
 } as const
 
 export type CatProfileSubmitErrorCode =
@@ -47,6 +48,8 @@ const MESSAGES: Record<CatProfileSubmitErrorCode, string> = {
     "The image is too large. Use at most 4096×4096 pixels.",
   [CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_UNREADABLE]:
     "We could not read that image. Try a different file.",
+  [CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_VALIDATION_LIMIT_REACHED]:
+    "You've used all automated photo checks for this ceremony. Continue without a photo or save a draft.",
 }
 
 export function catProfileSubmitErrorMessage(
