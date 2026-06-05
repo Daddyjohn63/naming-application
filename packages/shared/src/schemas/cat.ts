@@ -25,7 +25,7 @@ const optionalTrimmedProfileField = z
 
 const catSexSchema = z.enum(CAT_SEX_VALUES)
 
-const optionalCatSexField = z.union([catSexSchema, z.literal("")])
+const optionalCatSexField = z.union([catSexSchema, z.literal("")]).optional()
 
 export function normalizeCatSex(
   sex: CatSex | "" | undefined,

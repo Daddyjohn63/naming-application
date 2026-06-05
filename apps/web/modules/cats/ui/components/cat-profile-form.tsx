@@ -591,7 +591,7 @@ export function CatProfileForm({
             {submitting
               ? "Submitting…"
               : photoSubmitBlocked
-                ? "Remove photo or continue without one"
+                ? "Continue without photo"
                 : "Submit profile and generate summary"}
           </Button>
           <Button

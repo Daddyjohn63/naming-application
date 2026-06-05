@@ -58,7 +58,7 @@ export function CatPhotoGuidance({
             <p>
               You&apos;ve used all {MAX_PHOTO_VALIDATION_ATTEMPTS} automated
               photo checks for this ceremony. We can&apos;t run another photo
-              review, so upload a different photo won&apos;t help.
+              review, so uploading a different photo won&apos;t help.
             </p>
             <p>
               Continue without a photo to generate your summary from your

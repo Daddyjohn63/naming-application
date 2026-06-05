@@ -47,7 +47,10 @@ export const useConfirm = (
    */
   const confirm = (): Promise<boolean> => {
     return new Promise<boolean>((resolve) => {
-      setPromise({ resolve })
+      setPromise((current) => {
+        current?.resolve(false)
+        return { resolve }
+      })
     })
   }
 
