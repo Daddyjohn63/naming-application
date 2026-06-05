@@ -14,13 +14,14 @@ export function catDescriptionForForm(description: string): string {
 export function defaultProfileFormValues(
   cat: Pick<
     Doc<"cats">,
-    "title" | "description" | "existingName" | "age" | "breed"
+    "title" | "description" | "existingName" | "sex" | "age" | "breed"
   >
 ): SubmitCatProfileFieldsInput {
   return {
     title: cat.title,
     description: catDescriptionForForm(cat.description),
     existingName: cat.existingName ?? "",
+    sex: cat.sex ?? "",
     age: cat.age ?? "",
     breed: cat.breed ?? "",
   }

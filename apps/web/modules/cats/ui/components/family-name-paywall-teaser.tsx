@@ -26,9 +26,15 @@ export function FamilyNamePaywallTeaser({
   onUnlock,
 }: FamilyNamePaywallTeaserProps) {
   return (
-    <Card {...dataComponent("FamilyNamePaywallTeaser")} className="ceremony-sidebar-panel border-primary/20">
+    <Card
+      {...dataComponent("FamilyNamePaywallTeaser")}
+      className="ceremony-sidebar-panel border-primary/20"
+    >
       <CardHeader className="border-b">
-        <CardTitle className="text-base">Unlock the rest of the ceremony</CardTitle>
+        <CardTitle className="text-base">
+          Pick your favourite family name and unlock the rest of the ceremony.
+          You can always change your favourite family name later if you want to.
+        </CardTitle>
         <CardDescription>
           Your everyday family name is free. Unlock once per cat to reveal
           cat-world and ineffable names, then receive your certificate.

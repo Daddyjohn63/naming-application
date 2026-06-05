@@ -9,6 +9,9 @@ import { useForm } from "react-hook-form"
 import { api } from "@workspace/backend/_generated/api"
 import type { Doc, Id } from "@workspace/backend/_generated/dataModel"
 import {
+  CAT_SEX_LABELS,
+  CAT_SEX_VALUES,
+  CAT_STORY_PLACEHOLDER,
   MAX_CAT_PROFILE_SUBMIT_COUNT,
 } from "@workspace/shared/constants/cat-profile"
 import { CAT_PROFILE_SUBMIT_ERROR_CODE } from "@workspace/shared/constants/cat-profile-errors"
@@ -25,6 +28,7 @@ import {
 } from "@workspace/shared/constants/limits"
 import {
   saveCatProfileDraftFieldsSchema,
+  normalizeCatSex,
   submitCatProfileFieldsSchema,
   type SubmitCatProfileFieldsInput,
 } from "@workspace/shared/schemas/cat"
@@ -137,6 +141,7 @@ export function CatProfileForm({
 
   const titleValue = form.watch("title") ?? ""
   const descriptionValue = form.watch("description") ?? ""
+  const sexValue = form.watch("sex") ?? ""
 
   React.useEffect(() => {
     form.reset(defaultProfileFormValues(cat))
@@ -203,6 +208,7 @@ export function CatProfileForm({
         title: values.title,
         description: values.description,
         existingName: values.existingName,
+        sex: normalizeCatSex(values.sex),
         age: values.age,
         breed: values.breed,
         ...(photoStorageId !== undefined ? { photoStorageId } : {}),
@@ -272,6 +278,7 @@ export function CatProfileForm({
         title: parsed.data.title,
         description: parsed.data.description,
         existingName: parsed.data.existingName,
+        sex: normalizeCatSex(parsed.data.sex),
         age: parsed.data.age,
         breed: parsed.data.breed,
         ...(photoStorageId !== undefined ? { photoStorageId } : {}),
@@ -443,6 +450,7 @@ export function CatProfileForm({
               disabled={busy}
               rows={6}
               maxLength={MAX_CAT_DESCRIPTION_LENGTH}
+              placeholder={CAT_STORY_PLACEHOLDER}
               className={cn(ceremonyTextareaClassName, "min-h-[10rem]")}
               {...form.register("description", {
                 onChange: () => clearFieldError("description"),
@@ -482,6 +490,46 @@ export function CatProfileForm({
               onFocus={() => clearFieldError("existingName")}
             />
             <FieldError>{serverFieldErrors.existingName}</FieldError>
+          </Field>
+
+          <Field data-invalid={!!serverFieldErrors.sex}>
+            <FieldLabel className={ceremonyFieldLabelClassName}>Sex</FieldLabel>
+            <FieldDescription>
+              Optional. Helps us use the right pronouns in your cat&apos;s summary.
+            </FieldDescription>
+            <div
+              className="flex flex-wrap gap-2"
+              role="radiogroup"
+              aria-label="Cat sex"
+            >
+              {CAT_SEX_VALUES.map((value) => {
+                const selected = sexValue === value
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    disabled={busy}
+                    onClick={() => {
+                      form.setValue("sex", selected ? "" : value, {
+                        shouldDirty: true,
+                      })
+                      clearFieldError("sex")
+                    }}
+                    className={cn(
+                      "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                      selected
+                        ? "border-primary bg-primary/10 text-foreground shadow-sm"
+                        : "border-border bg-card text-muted-foreground hover:border-primary/35 hover:text-foreground",
+                    )}
+                  >
+                    {CAT_SEX_LABELS[value]}
+                  </button>
+                )
+              })}
+            </div>
+            <FieldError>{serverFieldErrors.sex}</FieldError>
           </Field>
 
           <div className="grid gap-5 sm:grid-cols-2">

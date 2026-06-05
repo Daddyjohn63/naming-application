@@ -64,6 +64,8 @@ const familyNameStyleId = v.union(
   v.literal("mix_it_up"),
 )
 
+const catSex = v.union(v.literal("male"), v.literal("female"))
+
 export default defineSchema({
   /**
    * App user mirrored from Clerk (webhook upsert). Owns cats and payments.
@@ -95,6 +97,8 @@ export default defineSchema({
     description: v.string(),
     /** Name the cat already goes by (optional). */
     existingName: v.optional(v.string()),
+    /** Optional sex for summary pronouns. */
+    sex: v.optional(catSex),
     /** Free-text age label, e.g. "3 years" (optional). */
     age: v.optional(v.string()),
     breed: v.optional(v.string()),

@@ -134,6 +134,7 @@ export const generateCatSummary = internalAction({
           title: cat.title,
           description: cat.description,
           existingName: cat.existingName,
+          sex: cat.sex,
           age: cat.age,
           breed: cat.breed,
         },

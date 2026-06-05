@@ -3,6 +3,7 @@
 import Image from "next/image"
 
 import type { Doc } from "@workspace/backend/_generated/dataModel"
+import { formatCatSexLabel } from "@workspace/shared/constants/cat-profile"
 import {
   Card,
   CardDescription,
@@ -73,6 +74,7 @@ export function CatProfileAwaitingSummary({
           </div>
           <dl className="flex flex-col gap-3">
             <OptionalRow label="Current name" value={cat.existingName} />
+            <OptionalRow label="Sex" value={formatCatSexLabel(cat.sex)} />
             <OptionalRow label="Age" value={cat.age} />
             <OptionalRow label="Breed" value={cat.breed} />
           </dl>
