@@ -46,7 +46,7 @@ export function CeremonyStepper({
         </p>
       ) : null}
 
-      <div className="relative px-3">
+      <div className="relative flex w-max min-w-full justify-start px-3 md:justify-center">
         <div
           className="pointer-events-none absolute inset-x-3 top-4 hidden md:block"
           aria-hidden
@@ -61,7 +61,7 @@ export function CeremonyStepper({
         </div>
 
         <ol
-          className="relative z-10 flex min-w-0 items-stretch justify-center gap-2 px-1 text-xs font-medium text-muted-foreground md:gap-3 md:text-sm"
+          className="relative z-10 flex w-max shrink-0 items-stretch gap-2 text-xs font-medium text-muted-foreground md:gap-3 md:text-sm"
           aria-label="Naming ceremony progress"
         >
           {steps.map((step, index) => {
@@ -78,7 +78,7 @@ export function CeremonyStepper({
                     "border-primary/45 text-foreground ring-primary/30 bg-card ring-2",
                   isComplete &&
                     "border-ceremony-complete/25 bg-card shadow-none",
-                  !isComplete && !isCurrent && "border-border/80 opacity-65",
+                  !isComplete && !isCurrent && "border-border/80",
                 )}
               >
               <span className="flex items-center gap-1.5">
