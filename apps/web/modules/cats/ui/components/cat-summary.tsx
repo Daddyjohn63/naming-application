@@ -21,8 +21,8 @@ export const CatSummary = ({ catId }: { catId: string }) => {
   if (latestSummary === null) return null
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="ceremony-sidebar-panel mt-2 border-primary/20">
+      <CardHeader className="border-b">
         <CardTitle>Your cats personality summary</CardTitle>
       </CardHeader>
       <CardContent>
