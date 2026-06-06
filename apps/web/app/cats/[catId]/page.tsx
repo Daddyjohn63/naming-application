@@ -43,6 +43,7 @@ import { FamilyNameCuration } from "@/modules/cats/ui/components/family-name-cur
 import { FamilyNamePipelineStatus } from "@/modules/cats/ui/components/family-name-pipeline-status"
 import { FamilyNameStylePicker } from "@/modules/cats/ui/components/family-name-style-picker"
 import { dataComponent } from "@/lib/data-component"
+import { CatSummary } from "@/modules/cats/ui/components/cat-summary"
 
 /** User-facing summary-ceremony copy plus dev-visible error details. */
 function toastSummaryMutationError(label: string, err: unknown) {
@@ -363,7 +364,12 @@ export default function CatCeremonyPage() {
       {showNamingTunnel ? (
         <CeremonyTunnelLayout
           main={namingTunnelMain}
-          sidebar={<CeremonyUnlockSidebar cat={cat} />}
+          sidebar={
+            <>
+              <CeremonyUnlockSidebar cat={cat} />
+              {/* <CatSummary catId={cat._id} /> */}
+            </>
+          }
         />
       ) : (
         <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-4 py-8 lg:max-w-4xl">
