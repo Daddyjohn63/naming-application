@@ -1,4 +1,10 @@
 import { api } from "@workspace/backend/_generated/api"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card"
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { useQuery } from "convex/react"
 
@@ -14,5 +20,16 @@ export const CatSummary = ({ catId }: { catId: string }) => {
   // Parent only mounts this past summary submit; null is unexpected.
   if (latestSummary === null) return null
 
-  return <p className="text-sm leading-relaxed">{latestSummary.summaryText}</p>
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Your cats personality summary</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm leading-relaxed">
+          {latestSummary?.summaryText ?? ""}
+        </p>
+      </CardContent>
+    </Card>
+  )
 }

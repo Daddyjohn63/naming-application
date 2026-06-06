@@ -367,7 +367,7 @@ export default function CatCeremonyPage() {
           sidebar={
             <>
               <CeremonyUnlockSidebar cat={cat} />
-              {/* <CatSummary catId={cat._id} /> */}
+              <CatSummary catId={cat._id} />
             </>
           }
         />
