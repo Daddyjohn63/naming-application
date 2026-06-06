@@ -18,7 +18,12 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@workspace/ui/components/sidebar"
-import { ArrowRightIcon, Cat, MoreHorizontalIcon, Trash2Icon } from "lucide-react"
+import {
+  ArrowRightIcon,
+  Cat,
+  MoreHorizontalIcon,
+  Trash2Icon,
+} from "lucide-react"
 
 export type NavCatItem = {
   id?: string

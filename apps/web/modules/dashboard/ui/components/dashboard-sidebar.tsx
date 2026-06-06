@@ -1,7 +1,13 @@
 "use client"
 
 import { UserButton } from "@clerk/nextjs"
-import { Cat, HomeIcon, PlusCircle, SettingsIcon, UsersIcon } from "lucide-react"
+import {
+  Cat,
+  HomeIcon,
+  PlusCircle,
+  SettingsIcon,
+  UsersIcon,
+} from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect } from "react"
@@ -52,7 +58,7 @@ const dashboardSidebarMenuClassName = "gap-1.5"
 const dashboardSidebarGroupLabelClassName =
   "text-sm font-semibold text-sidebar-foreground/80"
 const catSidebarPhotoClassName =
-  "size-8 shrink-0 rounded object-cover group-data-[collapsible=icon]:size-full group-data-[collapsible=icon]:rounded-md"
+  "size-8 shrink-0 rounded-full object-cover group-data-[collapsible=icon]:size-full group-data-[collapsible=icon]:rounded-md"
 const catSidebarPhotoButtonClassName =
   "group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:overflow-hidden"
 
@@ -72,12 +78,13 @@ function SidebarAddCatMenuItem() {
       <SidebarMenuButton
         disabled={pending}
         tooltip={pending === true ? undefined : "Add a cat"}
+        className="pl-4 [&_svg]:size-4"
         onClick={() => {
           void execute()
         }}
       >
-        <PlusCircle aria-hidden />
-        <span>{pending ? "Starting…" : "Add a cat"}</span>
+        <PlusCircle className="text-muted-foreground" aria-hidden />
+        <span className="pl-2">{pending ? "Starting…" : "Add a cat"}</span>
       </SidebarMenuButton>
     </SidebarMenuItem>
   )
