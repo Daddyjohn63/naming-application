@@ -4,6 +4,7 @@ import { Show, UserButton } from "@clerk/nextjs"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
+import { LogoLink } from "@/components/logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { dataComponent } from "@/lib/data-component"
 import { Button } from "@workspace/ui/components/button"
@@ -23,12 +24,7 @@ export function ConditionalRootHeader() {
       {...dataComponent("ConditionalRootHeader")}
       className="border-border/40 bg-background/80 sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b px-4 backdrop-blur-md supports-backdrop-filter:bg-background/70 md:h-16 md:px-6"
     >
-      <Link
-        href="/"
-        className="hover:text-primary text-sm font-semibold tracking-tight transition-colors md:text-base"
-      >
-        Naming Buddy
-      </Link>
+      <LogoLink href="/" />
       <div className="flex items-center gap-2">
         <Show when="signed-out">
           <Button variant="ghost" size="sm" asChild>

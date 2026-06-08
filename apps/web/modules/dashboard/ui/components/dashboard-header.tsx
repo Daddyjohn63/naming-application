@@ -14,8 +14,9 @@ import {
   BreadcrumbSeparator,
 } from "@workspace/ui/components/breadcrumb"
 import { Separator } from "@workspace/ui/components/separator"
-import { SidebarTrigger } from "@workspace/ui/components/sidebar"
+import { SidebarTrigger, useSidebar } from "@workspace/ui/components/sidebar"
 
+import { LogoLink } from "@/components/logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { dataComponent } from "@/lib/data-component"
 
@@ -42,6 +43,7 @@ function formatSegment(segment: string) {
 
 export function DashboardHeader() {
   const pathname = usePathname()
+  const { isMobile, setOpenMobile } = useSidebar()
   const segments = pathname.split("/").filter(Boolean)
   const crumbs = segments.map((seg, i) => ({
     href: `/${segments.slice(0, i + 1).join("/")}`,
@@ -56,6 +58,16 @@ export function DashboardHeader() {
     >
       <div className="flex min-w-0 flex-1 items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1 shrink-0" />
+        <LogoLink
+          href="/"
+          className="shrink-0 md:hidden"
+          logoClassName="size-8"
+          onClick={() => {
+            if (isMobile) {
+              setOpenMobile(false)
+            }
+          }}
+        />
         <Separator orientation="vertical" className="mr-2 h-4 w-px shrink-0" />
         <Breadcrumb className="min-w-0">
           <BreadcrumbList>

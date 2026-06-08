@@ -1,6 +1,4 @@
-import { auth } from "@clerk/nextjs/server"
 import type { Metadata } from "next"
-import { redirect } from "next/navigation"
 
 import { LandingView } from "@/modules/landing/ui/views/landing-view"
 
@@ -11,10 +9,5 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const { userId } = await auth()
-  if (userId !== null && userId !== "") {
-    redirect("/dashboard")
-  }
-
   return <LandingView />
 }

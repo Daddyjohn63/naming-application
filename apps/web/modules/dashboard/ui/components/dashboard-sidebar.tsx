@@ -1,17 +1,12 @@
 "use client"
 
 import { UserButton } from "@clerk/nextjs"
-import {
-  Cat,
-  HomeIcon,
-  PlusCircle,
-  SettingsIcon,
-  UsersIcon,
-} from "lucide-react"
+import { Cat, PlusCircle, SettingsIcon, UsersIcon } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect } from "react"
 
+import { Logo } from "@/components/logo"
 import { useCreateDraftCeremony } from "@/modules/cats/ui/hooks/use-create-draft-ceremony"
 import {
   Sidebar,
@@ -25,6 +20,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@workspace/ui/components/sidebar"
 import { api } from "@workspace/backend/_generated/api"
 import { toast } from "@workspace/ui/components/sonner"
@@ -43,14 +39,6 @@ const userSupportItems = [
     title: "Settings",
     icon: SettingsIcon,
     url: "/dashboard/settings",
-  },
-]
-
-const sidebarHeaderItems = [
-  {
-    title: "Home",
-    icon: HomeIcon,
-    url: "/dashboard",
   },
 ]
 
@@ -90,14 +78,24 @@ function SidebarAddCatMenuItem() {
   )
 }
 
+function isNavItemActive(pathname: string, url: string) {
+  if (url === "/dashboard") {
+    return pathname === "/dashboard"
+  }
+  if (url === "/") {
+    return pathname === "/"
+  }
+  return pathname.startsWith(url)
+}
+
 export const DashboardSidebar = () => {
   const pathname = usePathname()
   const cats = useQuery(api.cats.getCatsForSidebar)
-  const isActive = (url: string) => {
-    if (url === "/") {
-      return pathname === "/"
-    } else {
-      return pathname.startsWith(url)
+  const { isMobile, setOpenMobile } = useSidebar()
+
+  const closeMobileSidebar = () => {
+    if (isMobile) {
+      setOpenMobile(false)
     }
   }
 
@@ -105,20 +103,20 @@ export const DashboardSidebar = () => {
     <Sidebar {...dataComponent("DashboardSidebar")} collapsible="icon">
       <SidebarHeader>
         <SidebarMenu className={dashboardSidebarMenuClassName}>
-          {sidebarHeaderItems.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive(item.url)}
-                tooltip={item.title}
-              >
-                <Link href={item.url}>
-                  <item.icon />
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={isNavItemActive(pathname, "/")}
+              tooltip="Home"
+            >
+              <Link href="/" onClick={closeMobileSidebar}>
+                <Logo className="size-8 shrink-0" />
+                <span className="truncate group-data-[collapsible=icon]:hidden">
+                  Home
+                </span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
@@ -133,10 +131,10 @@ export const DashboardSidebar = () => {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    isActive={isActive(item.url)}
+                    isActive={isNavItemActive(pathname, item.url)}
                     tooltip={item.title}
                   >
-                    <Link href={item.url}>
+                    <Link href={item.url} onClick={closeMobileSidebar}>
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>
@@ -178,7 +176,7 @@ export const DashboardSidebar = () => {
                               : undefined
                           }
                         >
-                          <Link href={href}>
+                          <Link href={href} onClick={closeMobileSidebar}>
                             {cat.photoUrl ? (
                               // eslint-disable-next-line @next/next/no-img-element -- Convex storage URL
                               <img
