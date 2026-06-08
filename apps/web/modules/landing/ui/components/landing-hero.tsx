@@ -10,9 +10,13 @@ export function LandingHero() {
   return (
     <section
       {...dataComponent("LandingHero")}
-      className="w-full border-b border-border/40"
+      className="relative -mt-14 w-full border-b border-border/40 bg-[url('/images/hero-bg.jpg')] bg-cover bg-top bg-no-repeat md:-mt-16"
     >
-      <div className="mx-auto grid h-screen w-full max-w-6xl grid-cols-1 items-center gap-10 px-4 py-14 md:grid-cols-2 md:gap-12 md:py-16 lg:gap-16 lg:py-20">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-linear-to-b from-transparent via-background/10 to-background/70"
+      />
+      <div className="relative mx-auto grid min-h-svh w-full max-w-6xl grid-cols-1 items-center gap-10 px-4 pt-14 pb-14 md:grid-cols-2 md:gap-12 md:pt-16 md:pb-16 lg:gap-16 lg:pb-20">
         <div className="flex flex-col gap-4 md:gap-5">
           <Badge variant="secondary" className="w-fit rounded-full px-3 py-0.5">
             Gmoss wall doomscroll

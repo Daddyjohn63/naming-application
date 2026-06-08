@@ -104,10 +104,17 @@ export function PublicHeader() {
     setMobileOpen(false)
   }, [])
 
+  const isHome = pathname === "/"
+
   return (
     <header
       {...dataComponent("PublicHeader")}
-      className="border-border/50 bg-background/95 relative z-10 flex h-14 shrink-0 items-center border-b px-4 shadow-[0_1px_0_0_var(--border),0_4px_8px_-2px_rgba(0,0,0,0.06)] supports-backdrop-filter:bg-background/80 supports-backdrop-filter:backdrop-blur-sm dark:border-white/15 dark:shadow-[0_1px_0_0_rgba(255,255,255,0.14),0_8px_20px_-4px_rgba(0,0,0,0.75)] md:h-16 md:px-6"
+      className={cn(
+        "relative z-10 flex h-14 shrink-0 items-center border-b px-4 md:h-16 md:px-6",
+        isHome
+          ? "border-border/25 bg-background/40 shadow-none backdrop-blur-md supports-backdrop-filter:bg-background/30 dark:border-white/10"
+          : "border-border/50 bg-background/95 shadow-[0_1px_0_0_var(--border),0_4px_8px_-2px_rgba(0,0,0,0.06)] supports-backdrop-filter:bg-background/80 supports-backdrop-filter:backdrop-blur-sm dark:border-white/15 dark:shadow-[0_1px_0_0_rgba(255,255,255,0.14),0_8px_20px_-4px_rgba(0,0,0,0.75)]"
+      )}
     >
       <div className="flex min-w-0 flex-1 items-center">
         <LogoLink href="/" onClick={closeMobile} />
