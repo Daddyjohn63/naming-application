@@ -1,9 +1,10 @@
 import Link from "next/link"
 import type { ComponentProps } from "react"
 
-import { LogoMarkPaths } from "@/components/logo-mark"
+//import { LogoMarkPaths } from "@/components/marks/logo-mark"
 import { dataComponent } from "@/lib/data-component"
 import { cn } from "@workspace/ui/lib/utils"
+import { LogoMarkPaths } from "./marks/logo-mark"
 
 type LogoProps = React.SVGProps<SVGSVGElement>
 

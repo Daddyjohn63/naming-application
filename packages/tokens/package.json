@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "generate-css": "tsx scripts/generate-semantic-css.ts && tsx scripts/generate-ceremony-css.ts",
+    "generate-css": "tsx scripts/generate-semantic-css.ts && tsx scripts/generate-ceremony-css.ts && tsx scripts/generate-public-css.ts",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,mjs}\"",
     "typecheck": "tsc --noEmit"
@@ -20,8 +20,10 @@
   "exports": {
     "./semantic": "./src/semantic.ts",
     "./ceremony": "./src/ceremony.ts",
+    "./public": "./src/public.ts",
     "./generated/semantic-variables.css": "./src/generated/semantic-variables.css",
     "./generated/ceremony-variables.css": "./src/generated/ceremony-variables.css",
+    "./generated/public-variables.css": "./src/generated/public-variables.css",
     "./generated/*": "./src/generated/*.css"
   }
 }

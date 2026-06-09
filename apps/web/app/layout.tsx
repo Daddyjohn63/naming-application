@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 
 import "@workspace/ui/globals.css"
 import { ConditionalRootHeader } from "@/components/conditional-root-header"
+import { PublicRouteShell } from "@/components/public-route-shell"
 import { Providers } from "@/components/providers"
 import { dataComponent } from "@/lib/data-component"
 import { ClerkProvider } from "@clerk/nextjs"
@@ -36,9 +37,11 @@ export default function RootLayout({
       >
         <ClerkProvider>
           <Providers>
-            <ConditionalRootHeader />
+            <PublicRouteShell>
+              <ConditionalRootHeader />
 
-            <div className="flex flex-1 flex-col">{children}</div>
+              <div className="flex flex-1 flex-col">{children}</div>
+            </PublicRouteShell>
           </Providers>
         </ClerkProvider>
       </body>

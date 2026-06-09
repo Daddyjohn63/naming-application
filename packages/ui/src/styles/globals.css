@@ -4,6 +4,7 @@
 
 @import "@workspace/tokens/generated/semantic-variables.css";
 @import "@workspace/tokens/generated/ceremony-variables.css";
+@import "@workspace/tokens/generated/public-variables.css";
 
 @custom-variant dark (&:is(.dark *));
 @source "../../../apps/**/*.{ts,tsx}";
