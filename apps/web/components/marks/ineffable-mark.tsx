@@ -1,3 +1,24 @@
+import { dataComponent } from "@/lib/data-component"
+import { cn } from "@workspace/ui/lib/utils"
+
+type IneffableMarkProps = React.SVGProps<SVGSVGElement>
+
+/** Theme-aware ineffable mark; fill follows parent `color` via `currentColor`. */
+export function IneffableMark({ className, ...props }: IneffableMarkProps) {
+  return (
+    <svg
+      {...dataComponent("IneffableMark")}
+      viewBox="0 0 2000 2000"
+      fill="currentColor"
+      aria-hidden
+      className={cn("size-12 shrink-0", className)}
+      {...props}
+    >
+      <IneffableMarkPaths />
+    </svg>
+  )
+}
+
 /** Auto-derived from public/images/ineffable.svg — theme via parent fill. */
 export function IneffableMarkPaths() {
   return (

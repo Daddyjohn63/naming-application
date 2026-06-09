@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 //import { LandingView } from "@/modules/landing/ui/views/landing-view"
 import { SectionHeader } from "@/modules/landing/ui/components/section-header"
 import { LandingHero } from "@/modules/landing/ui/components/landing-hero"
+import { NameCards } from "@/modules/landing/ui/components/name-cards"
 export const metadata: Metadata = {
   title: "Naming Buddy — Start your cat naming ceremony",
   description:
@@ -19,6 +20,7 @@ export default async function HomePage() {
         title="Post-rock neutral"
         description="Squid dog dad vegan locavore girl dinner aeropress dembow akerman bode late capitalism shabby chic pour-over cred."
       />
+      <NameCards />
     </>
   )
 }

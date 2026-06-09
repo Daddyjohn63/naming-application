@@ -1,3 +1,24 @@
+import { dataComponent } from "@/lib/data-component"
+import { cn } from "@workspace/ui/lib/utils"
+
+type FamilyMarkProps = React.SVGProps<SVGSVGElement>
+
+/** Theme-aware family mark; fill follows parent `color` via `currentColor`. */
+export function FamilyMark({ className, ...props }: FamilyMarkProps) {
+  return (
+    <svg
+      {...dataComponent("FamilyMark")}
+      viewBox="0 0 2000 2000"
+      fill="currentColor"
+      aria-hidden
+      className={cn("size-12 shrink-0", className)}
+      {...props}
+    >
+      <FamilyMarkPaths />
+    </svg>
+  )
+}
+
 /** Auto-derived from public/images/family.svg — theme via parent fill. */
 export function FamilyMarkPaths() {
   return (

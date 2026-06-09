@@ -1,3 +1,24 @@
+import { dataComponent } from "@/lib/data-component"
+import { cn } from "@workspace/ui/lib/utils"
+
+type CatWorldMarkProps = React.SVGProps<SVGSVGElement>
+
+/** Theme-aware cat world mark; fill follows parent `color` via `currentColor`. */
+export function CatWorldMark({ className, ...props }: CatWorldMarkProps) {
+  return (
+    <svg
+      {...dataComponent("CatWorldMark")}
+      viewBox="0 0 2000 2000"
+      fill="currentColor"
+      aria-hidden
+      className={cn("size-12 shrink-0", className)}
+      {...props}
+    >
+      <CatWorldMarkPaths />
+    </svg>
+  )
+}
+
 /** Auto-derived from public/images/cat-world.svg — theme via parent fill. */
 export function CatWorldMarkPaths() {
   return (
