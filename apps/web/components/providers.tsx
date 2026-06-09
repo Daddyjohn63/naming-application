@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { usePathname } from "next/navigation"
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
 import { ConvexReactClient } from "convex/react"
 import { ConvexProviderWithClerk } from "convex/react-clerk"
@@ -10,6 +11,13 @@ import { Toaster } from "@workspace/ui/components/sonner"
 
 import { nextPreference } from "@/components/theme-toggle"
 import { dataComponent } from "@/lib/data-component"
+
+function usesAppShell(pathname: string | null | undefined) {
+  return (
+    pathname?.startsWith("/dashboard") === true ||
+    pathname?.startsWith("/cats") === true
+  )
+}
 
 if (!process.env.NEXT_PUBLIC_CONVEX_URL) {
   throw new Error("NEXT_PUBLIC_CONVEX_URL is not set")
@@ -21,6 +29,9 @@ function Providers({
   children,
   ...props
 }: React.ComponentProps<typeof NextThemesProvider>) {
+  const pathname = usePathname()
+  const forcedTheme = usesAppShell(pathname) ? undefined : "dark"
+
   return (
     <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
       <NextThemesProvider
@@ -28,6 +39,7 @@ function Providers({
         defaultTheme="light"
         enableSystem
         disableTransitionOnChange
+        forcedTheme={forcedTheme}
         {...props}
       >
         <ThemeHotkey />
@@ -56,9 +68,14 @@ function isTypingTarget(target: EventTarget | null) {
 }
 
 function ThemeHotkey() {
+  const pathname = usePathname()
   const { setTheme } = useTheme()
 
   React.useEffect(() => {
+    if (!usesAppShell(pathname)) {
+      return
+    }
+
     function onKeyDown(event: KeyboardEvent) {
       if (event.defaultPrevented || event.repeat) {
         return
@@ -85,7 +102,7 @@ function ThemeHotkey() {
     return () => {
       window.removeEventListener("keydown", onKeyDown)
     }
-  }, [setTheme])
+  }, [pathname, setTheme])
 
   return null
 }

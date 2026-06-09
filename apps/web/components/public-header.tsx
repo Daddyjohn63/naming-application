@@ -8,7 +8,6 @@ import * as React from "react"
 
 import { LogoLink } from "@/components/logo"
 import { PUBLIC_NAV_LINKS } from "@/components/public-nav"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { dataComponent } from "@/lib/data-component"
 import { Button } from "@workspace/ui/components/button"
 import {
@@ -91,7 +90,6 @@ function PublicHeaderActions({ onNavigate }: { onNavigate?: () => void }) {
           }}
         />
       </Show>
-      <ThemeToggle />
     </>
   )
 }
