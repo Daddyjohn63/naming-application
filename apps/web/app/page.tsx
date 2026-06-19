@@ -16,9 +16,9 @@ export default async function HomePage() {
       {/* <LandingView /> */}
       <LandingHero />
       <SectionHeader
-        eyebrow="Stussy cold-pressed offil"
-        title="Post-rock neutral"
-        description="Squid dog dad vegan locavore girl dinner aeropress dembow akerman bode late capitalism shabby chic pour-over cred."
+        eyebrow="Inspired by T.S Eliot's 'The Naming of Cats'"
+        title="Find your cat's three names "
+        description="Cat's have three names: a family name, a cat-world name, and an ineffable name. Use our guided ceremony to find the perfect names for your cat."
       />
       <NameCards />
     </>

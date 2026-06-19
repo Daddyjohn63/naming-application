@@ -12,23 +12,23 @@ import { cn } from "@workspace/ui/lib/utils"
 
 const NAME_CARDS = [
   {
-    title: "Family name",
+    title: "The Everyday Name",
     description:
-      "Dirtbag skateboard DSA, bouldering shoegaze ashwagandha poutine manifesting retro.",
+      "The name that the family gives the cat. Like Ginger, Max, or Oliver.",
     Mark: FamilyMark,
     markClassName: "text-foreground",
   },
   {
     title: "Cat-world name",
     description:
-      "Dirtbag skateboard DSA, bouldering shoegaze ashwagandha poutine manifesting retro.",
+      "The unique name that the cat has in the cat-world, that other cats know it by.",
     Mark: CatWorldMark,
     markClassName: "text-foreground",
   },
   {
     title: "Ineffable name",
     description:
-      "Dirtbag skateboard DSA, bouldering shoegaze ashwagandha poutine manifesting retro.",
+      "The name that only the cat knows and you never will guess. But we can try to imagine what it might be",
     Mark: IneffableMark,
     markClassName: "text-foreground",
   },
