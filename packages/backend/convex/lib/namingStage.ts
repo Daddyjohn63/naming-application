@@ -297,15 +297,17 @@ export async function setStageFavouriteFromShortlist(
   options?: { allowAfterAdvance?: boolean },
 ): Promise<ShortlistEntry> {
   const curationStep = curationStepForStage(stage)
+  const awaitingStep = awaitingStepForStage(stage)
   const allowRevisit = options?.allowAfterAdvance ?? false
 
   const allowedSteps: Doc<"cats">["ceremonyStep"][] = allowRevisit
     ? [
         curationStep,
+        awaitingStep,
         "naming_ineffable",
         "awaiting_ineffable_names",
       ]
-    : [curationStep]
+    : [curationStep, awaitingStep, "awaiting_ineffable_names"]
 
   if (!allowedSteps.includes(cat.ceremonyStep)) {
     throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.STEP_LOCKED })

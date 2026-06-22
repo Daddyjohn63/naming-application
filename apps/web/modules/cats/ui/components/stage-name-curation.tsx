@@ -218,8 +218,16 @@ export function StageNameCuration({
   }
 
   const busySaving = savingName !== null
-  const continueEnabled =
-    favouriteNormalized !== null && shortlist.length >= 1 && onConfirmContinue !== undefined
+  const busyCuration =
+    busySaving ||
+    removingName !== null ||
+    settingFavourite !== null ||
+    regenerating
+  const continueReady =
+    favouriteNormalized !== null &&
+    shortlist.length >= 1 &&
+    onConfirmContinue !== undefined
+  const continueEnabled = continueReady && !busyCuration
 
   return (
     <div {...dataComponent("StageNameCuration")} className="flex flex-col gap-6">
@@ -386,7 +394,7 @@ export function StageNameCuration({
 
       {onConfirmContinue !== undefined ? (
         <div className="flex flex-col gap-2">
-          {continueEnabled ? (
+          {continueReady ? (
             <Card className="ceremony-highlight-panel border-primary/30">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">Ready for the next stage?</CardTitle>
@@ -407,7 +415,7 @@ export function StageNameCuration({
               <div className="px-4 pb-4">
                 <Button
                   type="button"
-                  disabled={confirming}
+                  disabled={!continueEnabled || confirming}
                   onClick={() => void onConfirm()}
                 >
                   {confirming ? "Continuing…" : confirmLabel}
@@ -415,7 +423,7 @@ export function StageNameCuration({
               </div>
             </Card>
           ) : null}
-          {!continueEnabled ? (
+          {!continueReady ? (
             <p className="text-muted-foreground text-xs">
               Save at least one name and pick a favourite to continue.
             </p>

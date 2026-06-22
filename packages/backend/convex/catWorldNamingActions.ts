@@ -14,6 +14,10 @@
 import { v } from "convex/values"
 
 import { NAME_BATCH_SIZE } from "@workspace/shared/constants/naming-curation"
+import {
+  STAGED_NAMING_ERROR_CODE,
+  stagedNamingErrorMessage,
+} from "@workspace/shared/constants/staged-naming-errors"
 
 import {
   generateCatWorldNamesWithAi,
@@ -36,13 +40,36 @@ export const generateCatWorldNames = internalAction({
       { catId },
     )
 
-    if (
-      pipeline === null ||
-      pipeline.cat.ceremonyStep !== "awaiting_cat_world_names" ||
-      pipeline.summaryText === null ||
-      pipeline.summaryText.trim() === "" ||
-      pipeline.everydayName.trim() === ""
-    ) {
+    if (pipeline === null) {
+      return null
+    }
+
+    if (pipeline.cat.ceremonyStep !== "awaiting_cat_world_names") {
+      return null
+    }
+
+    if (pipeline.summaryText === null || pipeline.summaryText.trim() === "") {
+      await ctx.runMutation(
+        internal.catWorldNaming.applyCatWorldNameGenerationFailure,
+        {
+          catId,
+          errorMessage:
+            "Personality summary is missing. Go back and complete the summary step.",
+        },
+      )
+      return null
+    }
+
+    if (pipeline.everydayName.trim() === "") {
+      await ctx.runMutation(
+        internal.catWorldNaming.applyCatWorldNameGenerationFailure,
+        {
+          catId,
+          errorMessage: stagedNamingErrorMessage(
+            STAGED_NAMING_ERROR_CODE.NO_EVERYDAY_NAME,
+          ),
+        },
+      )
       return null
     }
 

@@ -11,6 +11,7 @@ import {
   type CatSex,
 } from "@workspace/shared/constants/cat-profile"
 import { classifyCatPhotoValidation } from "@workspace/shared/constants/cat-photo-validation"
+import { NAME_BATCH_SIZE } from "@workspace/shared/constants/naming-curation"
 import { SUMMARY_PIPELINE_TRANSIENT_ERROR_MESSAGE } from "@workspace/shared/utils/summary-pipeline-error"
 import {
   familyStyleLabelsForPrompt,
@@ -276,7 +277,7 @@ export async function generateFamilyNamesWithAi(args: {
 const CAT_WORLD_NAMES_SYSTEM_PROMPT = `You are Naming Buddy's cat-world name generator — the grand, distinctive second name a cat carries among other cats (T. S. Eliot's "cat-world name").
 
 Rules:
-- Return exactly 10 name options.
+- Return exactly ${NAME_BATCH_SIZE} name options.
 - Each name should feel literary, dignified, slightly mysterious, or theatrically cat-like — a name other cats might use in their secret society.
 - Ground choices in the cat's personality summary and their chosen everyday (family) name.
 - Each option needs a one-sentence rationale (max ~25 words) explaining the fit.
@@ -289,7 +290,7 @@ Rules:
 const INEFFABLE_NAMES_SYSTEM_PROMPT = `You are Naming Buddy's ineffable near-name generator — playful approximations of a cat's unknowable secret name (T. S. Eliot's third name that no human can truly know).
 
 Rules:
-- Return exactly 10 near-name options.
+- Return exactly ${NAME_BATCH_SIZE} near-name options.
 - Tone: whimsical, poetic, slightly absurd, mysterious — like a human guessing at something cats keep private.
 - Names can be neologisms, compound phrases, or almost-words that feel "close" to a secret identity without claiming to be the real thing.
 - Ground choices in the cat summary, everyday name, and cat-world name already chosen.

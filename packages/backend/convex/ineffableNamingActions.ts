@@ -10,6 +10,11 @@
 import { v } from "convex/values"
 
 import {
+  STAGED_NAMING_ERROR_CODE,
+  stagedNamingErrorMessage,
+} from "@workspace/shared/constants/staged-naming-errors"
+
+import {
   generateIneffableNamesWithAi,
   normalizeAiError,
 } from "./ai/naming"
@@ -28,14 +33,49 @@ export const generateIneffableNames = internalAction({
       { catId },
     )
 
-    if (
-      pipeline === null ||
-      pipeline.cat.ceremonyStep !== "awaiting_ineffable_names" ||
-      pipeline.summaryText === null ||
-      pipeline.summaryText.trim() === "" ||
-      pipeline.everydayName.trim() === "" ||
-      pipeline.catWorldName.trim() === ""
-    ) {
+    if (pipeline === null) {
+      return null
+    }
+
+    if (pipeline.cat.ceremonyStep !== "awaiting_ineffable_names") {
+      return null
+    }
+
+    if (pipeline.summaryText === null || pipeline.summaryText.trim() === "") {
+      await ctx.runMutation(
+        internal.ineffableNaming.applyIneffableNameGenerationFailure,
+        {
+          catId,
+          errorMessage:
+            "Personality summary is missing. Go back and complete the summary step.",
+        },
+      )
+      return null
+    }
+
+    if (pipeline.everydayName.trim() === "") {
+      await ctx.runMutation(
+        internal.ineffableNaming.applyIneffableNameGenerationFailure,
+        {
+          catId,
+          errorMessage: stagedNamingErrorMessage(
+            STAGED_NAMING_ERROR_CODE.NO_EVERYDAY_NAME,
+          ),
+        },
+      )
+      return null
+    }
+
+    if (pipeline.catWorldName.trim() === "") {
+      await ctx.runMutation(
+        internal.ineffableNaming.applyIneffableNameGenerationFailure,
+        {
+          catId,
+          errorMessage: stagedNamingErrorMessage(
+            STAGED_NAMING_ERROR_CODE.NO_CAT_WORLD_NAME,
+          ),
+        },
+      )
       return null
     }
 

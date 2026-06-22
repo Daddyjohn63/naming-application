@@ -28,7 +28,13 @@ export function allThreeCeremonyNamesChosen(
  * set — that caused an empty ineffable panel before the user clicked Continue.
  */
 export function defaultCeremonyNamingView(
-  cat: Pick<Doc<"cats">, "ceremonyStep" | "selectedCatWorldName" | "selectedIneffableName">,
+  cat: Pick<
+    Doc<"cats">,
+    | "ceremonyStep"
+    | "selectedFamilyName"
+    | "selectedCatWorldName"
+    | "selectedIneffableName"
+  >,
 ): CeremonyNamingView {
   if (allThreeCeremonyNamesChosen(cat)) {
     return "certificate"
