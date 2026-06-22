@@ -31,8 +31,12 @@ export function CatCeremonyView() {
     retrying,
     returningToProfile,
     retryingFamilyNames,
+    retryingCatWorldNames,
+    retryingIneffableNames,
     onRetryPipeline,
     onRetryFamilyNames,
+    onRetryCatWorldNames,
+    onRetryIneffableNames,
     onBackToProfile,
   } = useCatCeremonyPage()
 
@@ -62,7 +66,11 @@ export function CatCeremonyView() {
               cat={cat}
               panels={panels}
               retryingFamilyNames={retryingFamilyNames}
+              retryingCatWorldNames={retryingCatWorldNames}
+              retryingIneffableNames={retryingIneffableNames}
               onRetryFamilyNames={() => void onRetryFamilyNames()}
+              onRetryCatWorldNames={() => void onRetryCatWorldNames()}
+              onRetryIneffableNames={() => void onRetryIneffableNames()}
             />
           }
           sidebar={<CatCeremonyTunnelSidebar cat={cat} />}

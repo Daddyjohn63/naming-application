@@ -356,7 +356,44 @@ export const removeFromFamilyShortlist = mutation({
   },
 })
 
-/** Pick favourite from shortlist (changeable before unlock). */
+const FAMILY_FAVOURITE_PRE_UNLOCK_STEPS = [
+  "family_curation",
+  "family_preview",
+  "awaiting_payment",
+] as const
+
+const FAMILY_FAVOURITE_POST_UNLOCK_STEPS = [
+  "naming_cat_world",
+  "awaiting_cat_world_names",
+  "naming_ineffable",
+  "awaiting_ineffable_names",
+] as const
+
+function assertCanSetFamilyFavourite(cat: Doc<"cats">): void {
+  if (cat.ceremonyStep === "ceremony_complete") {
+    throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.STEP_LOCKED })
+  }
+
+  const preUnlock = (
+    FAMILY_FAVOURITE_PRE_UNLOCK_STEPS as readonly string[]
+  ).includes(cat.ceremonyStep)
+  const postUnlock = (
+    FAMILY_FAVOURITE_POST_UNLOCK_STEPS as readonly string[]
+  ).includes(cat.ceremonyStep)
+
+  if (preUnlock) {
+    if (cat.ceremonyPaymentId !== undefined) {
+      throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.STEP_LOCKED })
+    }
+    return
+  }
+
+  if (!postUnlock) {
+    throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.STEP_LOCKED })
+  }
+}
+
+/** Pick favourite from shortlist (changeable until ceremony complete). */
 export const setFamilyFavourite = mutation({
   args: { catId: v.string(), name: v.string() },
   handler: async (ctx, args) => {
@@ -369,15 +406,7 @@ export const setFamilyFavourite = mutation({
       throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.NOT_FOUND })
     }
     const cat = await getOwnedCatOrThrow(ctx, id, currentUser._id)
-    if (
-      cat.ceremonyStep !== "family_curation" &&
-      cat.ceremonyStep !== "awaiting_payment"
-    ) {
-      throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.STEP_LOCKED })
-    }
-    if (cat.ceremonyPaymentId !== undefined) {
-      throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.STEP_LOCKED })
-    }
+    assertCanSetFamilyFavourite(cat)
 
     const parsed = setFamilyFavouriteSchema.safeParse({ name: args.name })
     if (!parsed.success) {

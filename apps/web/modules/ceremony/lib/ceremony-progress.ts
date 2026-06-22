@@ -17,7 +17,9 @@ export const CEREMONY_STEP_SEQUENCE = [
   "awaiting_family_names",
   "family_curation",
   "awaiting_payment",
+  "awaiting_cat_world_names",
   "naming_cat_world",
+  "awaiting_ineffable_names",
   "naming_ineffable",
   "ceremony_complete",
   /** Legacy values kept for resume of older rows. */
@@ -68,8 +70,10 @@ const SERVER_STEP_TO_UI_INDEX: Record<CeremonyStepLiteral, number> = {
   family_curation: 3,
   family_preview: 3,
   awaiting_payment: 4,
-  naming_family: 3,
+  awaiting_cat_world_names: 5,
   naming_cat_world: 5,
+  naming_family: 3,
+  awaiting_ineffable_names: 6,
   naming_ineffable: 6,
   ceremony_complete: 7,
 }
@@ -86,8 +90,10 @@ const SERVER_STEP_SHORT_LABEL: Record<CeremonyStepLiteral, string> = {
   family_curation: "Family names",
   family_preview: "Family names",
   awaiting_payment: "Unlock",
+  awaiting_cat_world_names: "Cat-world",
   naming_family: "Family names",
   naming_cat_world: "Cat-world",
+  awaiting_ineffable_names: "Ineffable",
   naming_ineffable: "Ineffable",
   ceremony_complete: "Certificate",
 }

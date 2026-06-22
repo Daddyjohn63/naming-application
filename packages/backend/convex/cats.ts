@@ -273,14 +273,10 @@ export const deleteCeremony = mutation({
 
     const worldNameClaims = await ctx.db
       .query("cat_world_name_claims")
-      .withIndex("by_userId_normalizedName", (q) =>
-        q.eq("userId", currentUser._id)
-      )
+      .withIndex("by_catId", (q) => q.eq("catId", catId))
       .collect()
     for (const claim of worldNameClaims) {
-      if (claim.catId === catId) {
-        await ctx.db.delete(claim._id)
-      }
+      await ctx.db.delete(claim._id)
     }
 
     const payments = await ctx.db
