@@ -29,6 +29,16 @@ export type CatCeremonyPanelFlags = {
   showFamilyCuration: boolean
   /** KB-006A two-column tunnel once a family favourite exists. */
   showNamingTunnel: boolean
+  /** KB-009+ paid naming stages (cat-world / ineffable / certificate prep). */
+  showPaidNaming: boolean
+  /** KB-009 AI loading or error while ceremonyStep is awaiting_cat_world_names. */
+  showCatWorldNamePipeline: boolean
+  /** KB-009 curation when ceremonyStep is naming_cat_world. */
+  showCatWorldCuration: boolean
+  /** KB-010 AI loading or error while ceremonyStep is awaiting_ineffable_names. */
+  showIneffableNamePipeline: boolean
+  /** KB-010 curation when ceremonyStep is naming_ineffable. */
+  showIneffableCuration: boolean
   /**
    * Fallback card when no known panel matches the current step
    * (e.g. future ceremony steps not yet implemented in this view).
@@ -75,6 +85,22 @@ export function deriveCatCeremonyPanelFlags(
     cat.ceremonyStep === "family_preview"
   const showNamingTunnel = usesCeremonyNamingTunnel(cat)
 
+  const unlocked =
+    cat.ceremonyPaymentId !== undefined ||
+    cat.ceremonyStep === "naming_cat_world" ||
+    cat.ceremonyStep === "awaiting_cat_world_names" ||
+    cat.ceremonyStep === "naming_ineffable" ||
+    cat.ceremonyStep === "awaiting_ineffable_names" ||
+    cat.ceremonyStep === "ceremony_complete"
+
+  const showPaidNaming = showNamingTunnel && unlocked
+  const showCatWorldNamePipeline =
+    cat.ceremonyStep === "awaiting_cat_world_names"
+  const showCatWorldCuration = cat.ceremonyStep === "naming_cat_world"
+  const showIneffableNamePipeline =
+    cat.ceremonyStep === "awaiting_ineffable_names"
+  const showIneffableCuration = cat.ceremonyStep === "naming_ineffable"
+
   const showLaterStepPlaceholder =
     !showProfileForm &&
     !showSummaryPipeline &&
@@ -82,7 +108,8 @@ export function deriveCatCeremonyPanelFlags(
     !showFamilyStyle &&
     !showFamilyNamePipeline &&
     !showFamilyCuration &&
-    !showNamingTunnel
+    !showNamingTunnel &&
+    cat.ceremonyStep !== "ceremony_complete"
 
   return {
     showProfileForm,
@@ -92,6 +119,11 @@ export function deriveCatCeremonyPanelFlags(
     showFamilyNamePipeline,
     showFamilyCuration,
     showNamingTunnel,
+    showPaidNaming,
+    showCatWorldNamePipeline,
+    showCatWorldCuration,
+    showIneffableNamePipeline,
+    showIneffableCuration,
     showLaterStepPlaceholder,
   }
 }

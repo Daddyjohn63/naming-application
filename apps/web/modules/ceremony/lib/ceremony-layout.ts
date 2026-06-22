@@ -20,7 +20,9 @@ export function isCeremonyUnlocked(cat: CatNamingFields): boolean {
   }
   return (
     cat.ceremonyStep === "naming_cat_world" ||
+    cat.ceremonyStep === "awaiting_cat_world_names" ||
     cat.ceremonyStep === "naming_ineffable" ||
+    cat.ceremonyStep === "awaiting_ineffable_names" ||
     cat.ceremonyStep === "ceremony_complete"
   )
 }
@@ -43,7 +45,9 @@ export function usesCeremonyNamingTunnel(
     case "family_preview":
     case "awaiting_payment":
     case "naming_cat_world":
+    case "awaiting_cat_world_names":
     case "naming_ineffable":
+    case "awaiting_ineffable_names":
     case "ceremony_complete":
       return true
     default:
@@ -64,20 +68,34 @@ export function showCeremonyUnlockSidebar(cat: CatNamingFields): boolean {
     case "awaiting_payment":
       return true
     case "naming_cat_world":
+    case "awaiting_cat_world_names":
+      return unlocked
+    case "naming_ineffable":
+    case "awaiting_ineffable_names":
       return unlocked
     default:
       return false
   }
 }
 
-/** User may switch favourite among shortlist entries before payment succeeds. */
+/** User may switch favourite among shortlist entries until the ceremony completes. */
 export function canChangeFamilyFavourite(cat: CatNamingFields): boolean {
-  if (!hasFamilyFavourite(cat) || isCeremonyUnlocked(cat)) {
+  if (!hasFamilyFavourite(cat) || cat.ceremonyStep === "ceremony_complete") {
     return false
   }
+
+  if (!isCeremonyUnlocked(cat)) {
+    return (
+      cat.ceremonyStep === "family_curation" ||
+      cat.ceremonyStep === "family_preview" ||
+      cat.ceremonyStep === "awaiting_payment"
+    )
+  }
+
   return (
-    cat.ceremonyStep === "family_curation" ||
-    cat.ceremonyStep === "family_preview" ||
-    cat.ceremonyStep === "awaiting_payment"
+    cat.ceremonyStep === "naming_cat_world" ||
+    cat.ceremonyStep === "awaiting_cat_world_names" ||
+    cat.ceremonyStep === "naming_ineffable" ||
+    cat.ceremonyStep === "awaiting_ineffable_names"
   )
 }

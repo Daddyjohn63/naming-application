@@ -49,10 +49,18 @@ export type UseCatCeremonyPageResult = {
   returningToProfile: boolean
   /** True while family name generation retry is in flight. */
   retryingFamilyNames: boolean
+  /** True while cat-world name generation retry is in flight. */
+  retryingCatWorldNames: boolean
+  /** True while ineffable name generation retry is in flight. */
+  retryingIneffableNames: boolean
   /** Re-schedule summary generation after a transient error. */
   onRetryPipeline: () => Promise<void>
   /** Re-schedule family name generation after an error. */
   onRetryFamilyNames: () => Promise<void>
+  /** Re-schedule cat-world name generation after an error. */
+  onRetryCatWorldNames: () => Promise<void>
+  /** Re-schedule ineffable name generation after an error. */
+  onRetryIneffableNames: () => Promise<void>
   /** Return to profile form so the owner can upload a new photo. */
   onBackToProfile: () => Promise<void>
 }
@@ -74,6 +82,12 @@ export function useCatCeremonyPage(): UseCatCeremonyPageResult {
   const retryFamilyNames = useMutation(
     api.familyNaming.retryFamilyNameGeneration,
   )
+  const retryCatWorldNames = useMutation(
+    api.catWorldNaming.retryCatWorldNameGeneration,
+  )
+  const retryIneffableNames = useMutation(
+    api.ineffableNaming.retryIneffableNameGeneration,
+  )
   const returnToProfile = useMutation(
     api.catSummary.returnToProfileForPhotoReplace,
   )
@@ -81,6 +95,8 @@ export function useCatCeremonyPage(): UseCatCeremonyPageResult {
   const [retrying, setRetrying] = React.useState(false)
   const [returningToProfile, setReturningToProfile] = React.useState(false)
   const [retryingFamilyNames, setRetryingFamilyNames] = React.useState(false)
+  const [retryingCatWorldNames, setRetryingCatWorldNames] = React.useState(false)
+  const [retryingIneffableNames, setRetryingIneffableNames] = React.useState(false)
   const [editingProfileFromSummary, setEditingProfileFromSummary] =
     React.useState(false)
 
@@ -139,6 +155,40 @@ export function useCatCeremonyPage(): UseCatCeremonyPageResult {
     }
   }, [loadedCat, retryFamilyNames])
 
+  const onRetryCatWorldNames = React.useCallback(async () => {
+    if (loadedCat === null) {
+      return
+    }
+    setRetryingCatWorldNames(true)
+    try {
+      await retryCatWorldNames({ catId: loadedCat._id })
+    } catch (err) {
+      toastCatCeremonyMutationError(
+        "Failed to retry cat-world name generation",
+        err,
+      )
+    } finally {
+      setRetryingCatWorldNames(false)
+    }
+  }, [loadedCat, retryCatWorldNames])
+
+  const onRetryIneffableNames = React.useCallback(async () => {
+    if (loadedCat === null) {
+      return
+    }
+    setRetryingIneffableNames(true)
+    try {
+      await retryIneffableNames({ catId: loadedCat._id })
+    } catch (err) {
+      toastCatCeremonyMutationError(
+        "Failed to retry ineffable name generation",
+        err,
+      )
+    } finally {
+      setRetryingIneffableNames(false)
+    }
+  }, [loadedCat, retryIneffableNames])
+
   const onRetryPipeline = React.useCallback(async () => {
     if (loadedCat === null) {
       return
@@ -177,8 +227,12 @@ export function useCatCeremonyPage(): UseCatCeremonyPageResult {
     retrying,
     returningToProfile,
     retryingFamilyNames,
+    retryingCatWorldNames,
+    retryingIneffableNames,
     onRetryPipeline,
     onRetryFamilyNames,
+    onRetryCatWorldNames,
+    onRetryIneffableNames,
     onBackToProfile,
   }
 }
@@ -193,6 +247,11 @@ function emptyPanelFlags(): CatCeremonyPanelFlags {
     showFamilyNamePipeline: false,
     showFamilyCuration: false,
     showNamingTunnel: false,
+    showPaidNaming: false,
+    showCatWorldNamePipeline: false,
+    showCatWorldCuration: false,
+    showIneffableNamePipeline: false,
+    showIneffableCuration: false,
     showLaterStepPlaceholder: false,
   }
 }

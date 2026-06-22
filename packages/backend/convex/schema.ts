@@ -31,9 +31,13 @@ const ceremonyStep = v.union(
   v.literal("family_preview"),
   /** Legacy post-unlock family step — superseded by free family_curation (KB-006). */
   v.literal("naming_family"),
-  /** Literary / distinct identity names; uniqueness enforced via claims table. */
+  /** AI generating the first or regenerated cat-world name batch (KB-009). */
+  v.literal("awaiting_cat_world_names"),
+  /** Ten cat-world names ready; shortlist, favourite, global claim (KB-009). */
   v.literal("naming_cat_world"),
-  /** “Ineffable near-name” approximations (mysterious secret-name vibe). */
+  /** AI generating the first or regenerated ineffable near-name batch (KB-010). */
+  v.literal("awaiting_ineffable_names"),
+  /** Ten ineffable near-names ready; shortlist and favourite (KB-010). */
   v.literal("naming_ineffable"),
   /** Certificate generated; share/download available. */
   v.literal("ceremony_complete")
@@ -144,6 +148,32 @@ export default defineSchema({
     familyNameRegenerationsUsed: v.optional(v.number()),
     /** Last family-name generation error for retry UI. */
     familyNameGenerationError: v.optional(v.string()),
+    /** Saved cat-world names during curation (max 6, unique by normalized name). */
+    catWorldNameShortlist: v.optional(
+      v.array(
+        v.object({
+          name: v.string(),
+          rationale: v.string(),
+        }),
+      ),
+    ),
+    /** AI batch regenerations consumed for cat-world names (max 1 per §4a). */
+    catWorldNameRegenerationsUsed: v.optional(v.number()),
+    /** Last cat-world name generation error for retry UI. */
+    catWorldNameGenerationError: v.optional(v.string()),
+    /** Saved ineffable near-names during curation (max 6). */
+    ineffableNameShortlist: v.optional(
+      v.array(
+        v.object({
+          name: v.string(),
+          rationale: v.string(),
+        }),
+      ),
+    ),
+    /** AI batch regenerations consumed for ineffable names (max 1 per §4a). */
+    ineffableNameRegenerationsUsed: v.optional(v.number()),
+    /** Last ineffable name generation error for retry UI. */
+    ineffableNameGenerationError: v.optional(v.string()),
     /** Successful unlock tied to this ceremony (see cat_payments). */
     ceremonyPaymentId: v.optional(v.id("cat_payments")),
     /** Final picks + rationales copied here for certificate & fast dashboard reads. */
@@ -205,9 +235,8 @@ export default defineSchema({
   ]),
 
   /**
-   * Reserved cat-world names per user so Stage 8 can exclude already-used strings.
-   * When the user commits a cat-world choice, upsert by (userId, normalizedName).
-   * normalizedName should be lowercase/trimmed ASCII fold for comparisons.
+   * Globally reserved cat-world names (KB-009). One row per normalizedName worldwide.
+   * When the user commits a cat-world choice, insert with unique normalizedName.
    */
   cat_world_name_claims: defineTable({
     userId: v.id("users"),
@@ -216,7 +245,9 @@ export default defineSchema({
     /** Optional link to the generation row the label was picked from (audit). */
     sourceGenerationId: v.optional(v.id("cat_name_generations")),
     createdAt: v.number(),
-  }).index("by_userId_normalizedName", ["userId", "normalizedName"]),
+  })
+    .index("by_normalizedName", ["normalizedName"])
+    .index("by_catId", ["catId"]),
 
   /**
    * One-off ceremony unlock (£2.99 / $3.99). Gates progression from preview/payment

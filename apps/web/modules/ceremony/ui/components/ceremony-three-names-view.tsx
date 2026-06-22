@@ -14,6 +14,7 @@ import {
   scrollToCeremonyThreeNames,
 } from "@/modules/ceremony/lib/scroll-to-ceremony-three-names"
 import { normalizeFamilyName } from "@workspace/shared/constants/family-naming"
+import { normalizeNameForDedupe } from "@workspace/shared/constants/naming-curation"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
 import { Button } from "@workspace/ui/components/button"
 import { toast } from "@workspace/ui/components/sonner"
@@ -44,7 +45,12 @@ function slotState(
 }
 
 /**
- * KB-006A — hero everyday card, locked cat-world / ineffable placeholders, shortlist chips.
+ * KB-006A hero cards + KB-009/010 shortlist chips under each name slot.
+ *
+ * Before certificate: clicking a shortlist chip calls setFamilyFavourite,
+ * setCatWorldFavourite, or setIneffableFavourite so users can change their mind
+ * without re-running AI. Cat-world favourite changes release/reclaim the global
+ * `cat_world_name_claims` row.
  */
 export function CeremonyThreeNamesView({
   cat,
@@ -53,10 +59,22 @@ export function CeremonyThreeNamesView({
   const namingState = useQuery(api.familyNaming.getFamilyNamingStateForOwner, {
     catId: cat._id,
   })
+  const catWorldNamingState = useQuery(api.catWorldNaming.getCatWorldNamingStateForOwner, {
+    catId: cat._id,
+  })
+  const ineffableNamingState = useQuery(
+    api.ineffableNaming.getIneffableNamingStateForOwner,
+    { catId: cat._id },
+  )
   const setFavourite = useMutation(api.familyNaming.setFamilyFavourite)
+  const setCatWorldFavourite = useMutation(api.catWorldNaming.setCatWorldFavourite)
+  const setIneffableFavourite = useMutation(api.ineffableNaming.setIneffableFavourite)
   const [settingFavourite, setSettingFavourite] = React.useState<string | null>(
     null,
   )
+  const [settingStage, setSettingStage] = React.useState<
+    "family" | "cat_world" | "ineffable" | null
+  >(null)
 
   const unlocked = isCeremonyUnlocked(cat)
   const canChangeFavourite = canChangeFamilyFavourite(cat)
@@ -71,16 +89,16 @@ export function CeremonyThreeNamesView({
   const everydayState = slotState(
     cat.selectedFamilyName,
     cat.selectedFamilyRationale,
-    true,
+    false,
     unlocked,
   )
-  const catWorldState = slotState(
+  const catWorldSlotState = slotState(
     cat.selectedCatWorldName,
     cat.selectedCatWorldRationale,
     false,
     unlocked,
   )
-  const ineffableState = slotState(
+  const ineffableSlotState = slotState(
     cat.selectedIneffableName,
     cat.selectedIneffableRationale,
     false,
@@ -89,6 +107,7 @@ export function CeremonyThreeNamesView({
 
   const onSetFavourite = async (name: string) => {
     setSettingFavourite(name)
+    setSettingStage("family")
     try {
       await setFavourite({ catId: cat._id, name })
       scrollToCeremonyThreeNames()
@@ -96,8 +115,47 @@ export function CeremonyThreeNamesView({
       toast.error(getConvexErrorMessage(error))
     } finally {
       setSettingFavourite(null)
+      setSettingStage(null)
     }
   }
+
+  const onSetCatWorldFavourite = async (name: string) => {
+    setSettingFavourite(name)
+    setSettingStage("cat_world")
+    try {
+      await setCatWorldFavourite({ catId: cat._id, name })
+      scrollToCeremonyThreeNames()
+    } catch (error) {
+      toast.error(getConvexErrorMessage(error))
+    } finally {
+      setSettingFavourite(null)
+      setSettingStage(null)
+    }
+  }
+
+  const onSetIneffableFavourite = async (name: string) => {
+    setSettingFavourite(name)
+    setSettingStage("ineffable")
+    try {
+      await setIneffableFavourite({ catId: cat._id, name })
+      scrollToCeremonyThreeNames()
+    } catch (error) {
+      toast.error(getConvexErrorMessage(error))
+    } finally {
+      setSettingFavourite(null)
+      setSettingStage(null)
+    }
+  }
+
+  const canChangeCatWorldFavourite =
+    unlocked &&
+    cat.ceremonyStep !== "ceremony_complete" &&
+    (catWorldNamingState?.shortlist.length ?? 0) > 1
+
+  const canChangeIneffableFavourite =
+    unlocked &&
+    cat.ceremonyStep !== "ceremony_complete" &&
+    (ineffableNamingState?.shortlist.length ?? 0) > 1
 
   const subtitle = unlocked
     ? "Your three names will appear here as you complete each stage."
@@ -127,13 +185,7 @@ export function CeremonyThreeNamesView({
           name={cat.selectedFamilyName}
           rationale={cat.selectedFamilyRationale}
           state={everydayState}
-          badge={
-            everydayState === "filled"
-              ? "★ Your choice"
-              : everydayState === "locked"
-                ? "Locked in"
-                : undefined
-          }
+          badge={everydayState === "filled" ? "★ Your choice" : undefined}
           className="min-w-0"
         />
 
@@ -141,10 +193,10 @@ export function CeremonyThreeNamesView({
           label="Cat-world name"
           name={cat.selectedCatWorldName}
           rationale={cat.selectedCatWorldRationale}
-          state={catWorldState}
+          state={catWorldSlotState}
           className="min-w-0"
           placeholderHint={
-            unlocked && catWorldState === "placeholder"
+            unlocked && catWorldSlotState === "placeholder"
               ? "Choose in the cat-world stage"
               : "Unlock to discover"
           }
@@ -154,10 +206,10 @@ export function CeremonyThreeNamesView({
           label="Ineffable near-name"
           name={cat.selectedIneffableName}
           rationale={cat.selectedIneffableRationale}
-          state={ineffableState}
+          state={ineffableSlotState}
           className="min-w-0"
           placeholderHint={
-            unlocked && ineffableState === "placeholder"
+            unlocked && ineffableSlotState === "placeholder"
               ? "Choose in the ineffable stage"
               : "Unlock to discover"
           }
@@ -165,7 +217,7 @@ export function CeremonyThreeNamesView({
 
         {shortlist.length > 0 ? (
           <div className="flex flex-col gap-2 sm:col-start-1">
-            <p className="text-sm font-medium">Your shortlist</p>
+            <p className="text-sm font-medium">Everyday shortlist</p>
             <ul className="flex flex-wrap gap-2">
               {shortlist.map((entry) => {
                 const isFavourite =
@@ -182,7 +234,8 @@ export function CeremonyThreeNamesView({
                         className="rounded-full"
                         onClick={() => void onSetFavourite(entry.name)}
                       >
-                        {settingFavourite === entry.name
+                        {settingFavourite === entry.name &&
+                        settingStage === "family"
                           ? "Setting…"
                           : entry.name}
                       </Button>
@@ -204,10 +257,99 @@ export function CeremonyThreeNamesView({
             </ul>
             {canChangeFavourite && shortlist.length > 1 ? (
               <p className="text-muted-foreground text-xs">
-                Tap a shortlist name to change your everyday favourite before
-                unlock.
+                Tap a shortlist name to change your everyday favourite.
               </p>
             ) : null}
+          </div>
+        ) : null}
+
+        {(catWorldNamingState?.shortlist.length ?? 0) > 0 ? (
+          <div className="flex flex-col gap-2 sm:col-start-2">
+            <p className="text-sm font-medium">Cat-world shortlist</p>
+            <ul className="flex flex-wrap gap-2">
+              {(catWorldNamingState?.shortlist ?? []).map((entry) => {
+                const isFavourite =
+                  cat.selectedCatWorldName !== undefined &&
+                  normalizeNameForDedupe(cat.selectedCatWorldName) ===
+                    normalizeNameForDedupe(entry.name)
+
+                return (
+                  <li key={entry.name}>
+                    {canChangeCatWorldFavourite && !isFavourite ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={settingFavourite !== null}
+                        className="rounded-full"
+                        onClick={() => void onSetCatWorldFavourite(entry.name)}
+                      >
+                        {settingFavourite === entry.name &&
+                        settingStage === "cat_world"
+                          ? "Setting…"
+                          : entry.name}
+                      </Button>
+                    ) : (
+                      <span
+                        className={cn(
+                          "inline-flex rounded-full border px-3 py-1 text-sm font-medium",
+                          isFavourite
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-secondary text-secondary-foreground",
+                        )}
+                      >
+                        {entry.name}
+                      </span>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        ) : null}
+
+        {(ineffableNamingState?.shortlist.length ?? 0) > 0 ? (
+          <div className="flex flex-col gap-2 sm:col-start-3">
+            <p className="text-sm font-medium">Ineffable shortlist</p>
+            <ul className="flex flex-wrap gap-2">
+              {(ineffableNamingState?.shortlist ?? []).map((entry) => {
+                const isFavourite =
+                  cat.selectedIneffableName !== undefined &&
+                  normalizeNameForDedupe(cat.selectedIneffableName) ===
+                    normalizeNameForDedupe(entry.name)
+
+                return (
+                  <li key={entry.name}>
+                    {canChangeIneffableFavourite && !isFavourite ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={settingFavourite !== null}
+                        className="rounded-full"
+                        onClick={() => void onSetIneffableFavourite(entry.name)}
+                      >
+                        {settingFavourite === entry.name &&
+                        settingStage === "ineffable"
+                          ? "Setting…"
+                          : entry.name}
+                      </Button>
+                    ) : (
+                      <span
+                        className={cn(
+                          "inline-flex rounded-full border px-3 py-1 text-sm font-medium",
+                          isFavourite
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-secondary text-secondary-foreground",
+                        )}
+                      >
+                        {entry.name}
+                      </span>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
           </div>
         ) : null}
       </div>

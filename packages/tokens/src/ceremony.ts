@@ -61,7 +61,7 @@ export const ceremonyLightVars: Record<CeremonyVariableName, string> = {
 export const ceremonyDarkVars: Partial<
   Record<CeremonyVariableName, string>
 > = {
-  background: "oklch(0.22 0.015 55)",
+  background: "#000000",
   foreground: "oklch(0.96 0.008 90)",
   card: "oklch(0.26 0.018 55)",
   "card-foreground": "oklch(0.96 0.008 90)",

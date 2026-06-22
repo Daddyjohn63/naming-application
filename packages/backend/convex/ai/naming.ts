@@ -11,6 +11,7 @@ import {
   type CatSex,
 } from "@workspace/shared/constants/cat-profile"
 import { classifyCatPhotoValidation } from "@workspace/shared/constants/cat-photo-validation"
+import { NAME_BATCH_SIZE } from "@workspace/shared/constants/naming-curation"
 import { SUMMARY_PIPELINE_TRANSIENT_ERROR_MESSAGE } from "@workspace/shared/utils/summary-pipeline-error"
 import {
   familyStyleLabelsForPrompt,
@@ -21,6 +22,10 @@ import {
   familyNameBatchSchema,
   type FamilyNameBatch,
 } from "@workspace/shared/schemas/family-naming"
+import {
+  nameBatchSchema,
+  type NameBatch,
+} from "@workspace/shared/schemas/staged-naming"
 
 /** Bump when prompt text changes — useful for logging and future funnel analytics. */
 export const NAMING_PROMPT_VERSION = "family-summary-prompt-v2"
@@ -148,9 +153,9 @@ export async function validateCatPhotoWithAi(args: {
 }): Promise<PhotoValidationResult> {
   const { output } = await generateText({
     model: openai("gpt-4o-mini"),
+    system: PHOTO_VALIDATION_SYSTEM_PROMPT,
     output: Output.object({ schema: catPhotoValidationSchema }),
     messages: [
-      { role: "system", content: PHOTO_VALIDATION_SYSTEM_PROMPT },
       {
         role: "user",
         content: [
@@ -186,10 +191,8 @@ export async function generateCatSummaryWithAi(args: {
 
   const { text } = await generateText({
     model: openai("gpt-4o-mini"),
-    messages: [
-      { role: "system", content: SUMMARY_SYSTEM_PROMPT },
-      { role: "user", content: userContent },
-    ],
+    system: SUMMARY_SYSTEM_PROMPT,
+    messages: [{ role: "user", content: userContent }],
   })
 
   return text.trim()
@@ -262,11 +265,122 @@ export async function generateFamilyNamesWithAi(args: {
 
   const { output } = await generateText({
     model: openai("gpt-4o-mini"),
+    system: FAMILY_NAMES_SYSTEM_PROMPT,
     output: Output.object({ schema: familyNameBatchSchema }),
-    messages: [
-      { role: "system", content: FAMILY_NAMES_SYSTEM_PROMPT },
-      { role: "user", content: userText },
-    ],
+    messages: [{ role: "user", content: userText }],
+  })
+
+  return output
+}
+
+/** §2.8 — cat-world names (second ceremony name); structured JSON via nameBatchSchema. */
+const CAT_WORLD_NAMES_SYSTEM_PROMPT = `You are Naming Buddy's cat-world name generator — the grand, distinctive second name a cat carries among other cats (T. S. Eliot's "cat-world name").
+
+Rules:
+- Return exactly ${NAME_BATCH_SIZE} name options.
+- Each name should feel literary, dignified, slightly mysterious, or theatrically cat-like — a name other cats might use in their secret society.
+- Ground choices in the cat's personality summary and their chosen everyday (family) name.
+- Each option needs a one-sentence rationale (max ~25 words) explaining the fit.
+- No duplicate names within the batch.
+- Avoid names already in the excluded list.
+- Names must be speakable and memorable — not random syllable strings.
+- Respond with valid JSON only — no markdown, no preamble.`
+
+/** §2.9 — ineffable near-names (third ceremony name); no global uniqueness. */
+const INEFFABLE_NAMES_SYSTEM_PROMPT = `You are Naming Buddy's ineffable near-name generator — playful approximations of a cat's unknowable secret name (T. S. Eliot's third name that no human can truly know).
+
+Rules:
+- Return exactly ${NAME_BATCH_SIZE} near-name options.
+- Tone: whimsical, poetic, slightly absurd, mysterious — like a human guessing at something cats keep private.
+- Names can be neologisms, compound phrases, or almost-words that feel "close" to a secret identity without claiming to be the real thing.
+- Ground choices in the cat summary, everyday name, and cat-world name already chosen.
+- Each option needs a short poetic rationale (max ~25 words).
+- No duplicate names within the batch.
+- Avoid names already in the excluded list.
+- Respond with valid JSON only — no markdown, no preamble.`
+
+function buildCatWorldNamesUserText(args: {
+  summaryText: string
+  everydayName: string
+  excludedNames: readonly string[]
+  generationIndex: number
+}): string {
+  const excluded =
+    args.excludedNames.length > 0
+      ? args.excludedNames.join(", ")
+      : "(none)"
+
+  return `Cat personality summary:
+${args.summaryText}
+
+Everyday (family) name already chosen: ${args.everydayName}
+
+Generation batch: ${args.generationIndex} (0 = first batch, 1 = regeneration — must differ meaningfully from batch 0)
+
+Excluded names (do not reuse): ${excluded}
+
+Generate 10 cat-world name options with rationales.`
+}
+
+function buildIneffableNamesUserText(args: {
+  summaryText: string
+  everydayName: string
+  catWorldName: string
+  excludedNames: readonly string[]
+  generationIndex: number
+}): string {
+  const excluded =
+    args.excludedNames.length > 0
+      ? args.excludedNames.join(", ")
+      : "(none)"
+
+  return `Cat personality summary:
+${args.summaryText}
+
+Everyday name: ${args.everydayName}
+Cat-world name: ${args.catWorldName}
+
+Generation batch: ${args.generationIndex} (0 = first batch, 1 = regeneration)
+
+Excluded names (do not reuse): ${excluded}
+
+Generate 10 ineffable near-name options with short poetic rationales.`
+}
+
+/** Generate a batch of 10 cat-world names + rationales (KB-009). Uses `system:` option per AI SDK guidance. */
+export async function generateCatWorldNamesWithAi(args: {
+  summaryText: string
+  everydayName: string
+  excludedNames: readonly string[]
+  generationIndex: number
+}): Promise<NameBatch> {
+  const userText = buildCatWorldNamesUserText(args)
+
+  const { output } = await generateText({
+    model: openai("gpt-4o-mini"),
+    system: CAT_WORLD_NAMES_SYSTEM_PROMPT,
+    output: Output.object({ schema: nameBatchSchema }),
+    messages: [{ role: "user", content: userText }],
+  })
+
+  return output
+}
+
+/** Generate a batch of 10 ineffable near-names + rationales (KB-010). Uses `system:` option per AI SDK guidance. */
+export async function generateIneffableNamesWithAi(args: {
+  summaryText: string
+  everydayName: string
+  catWorldName: string
+  excludedNames: readonly string[]
+  generationIndex: number
+}): Promise<NameBatch> {
+  const userText = buildIneffableNamesUserText(args)
+
+  const { output } = await generateText({
+    model: openai("gpt-4o-mini"),
+    system: INEFFABLE_NAMES_SYSTEM_PROMPT,
+    output: Output.object({ schema: nameBatchSchema }),
+    messages: [{ role: "user", content: userText }],
   })
 
   return output
