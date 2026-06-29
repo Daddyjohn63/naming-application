@@ -58,7 +58,7 @@ const MESSAGES: Record<FamilyNamingErrorCode, string> = {
   [FAMILY_NAMING_ERROR_CODE.CUSTOM_NAME_LIMIT]:
     "You can add one name of your own. Remove it to add a different one.",
   [FAMILY_NAMING_ERROR_CODE.NAME_ALREADY_SUGGESTED]:
-    "That name is already in our suggestions — save it from the list above instead.",
+    "That name was already suggested in an earlier family name batch. Choose a different name to add as your own.",
   [FAMILY_NAMING_ERROR_CODE.INVALID_NAME]:
     "Enter a name between 1 and 80 characters.",
 }
