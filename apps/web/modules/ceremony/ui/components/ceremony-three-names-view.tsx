@@ -13,6 +13,7 @@ import {
   CEREMONY_THREE_NAMES_SECTION_ID,
   scrollToCeremonyThreeNames,
 } from "@/modules/ceremony/lib/scroll-to-ceremony-three-names"
+import { scrollToCeremonyUnlockOnMobile } from "@/modules/ceremony/lib/scroll-to-ceremony-unlock"
 import { normalizeFamilyName } from "@workspace/shared/constants/family-naming"
 import { normalizeNameForDedupe } from "@workspace/shared/constants/naming-curation"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
@@ -163,6 +164,10 @@ export function CeremonyThreeNamesView({
       ? "Your everyday name is chosen — complete unlock for the rest of the ceremony."
       : "Your everyday name is chosen — unlock for the rest of the ceremony."
 
+  const scrollLockedNameToUnlock = () => {
+    scrollToCeremonyUnlockOnMobile()
+  }
+
   return (
     <section
       {...dataComponent("CeremonyThreeNamesView")}
@@ -194,11 +199,17 @@ export function CeremonyThreeNamesView({
           name={cat.selectedCatWorldName}
           rationale={cat.selectedCatWorldRationale}
           state={catWorldSlotState}
+          badge={catWorldSlotState === "filled" ? "★ Your choice" : undefined}
           className="min-w-0"
           placeholderHint={
             unlocked && catWorldSlotState === "placeholder"
               ? "Choose in the cat-world stage"
               : "Unlock to discover"
+          }
+          onPlaceholderHintClick={
+            !unlocked && catWorldSlotState === "placeholder"
+              ? scrollLockedNameToUnlock
+              : undefined
           }
         />
 
@@ -207,11 +218,17 @@ export function CeremonyThreeNamesView({
           name={cat.selectedIneffableName}
           rationale={cat.selectedIneffableRationale}
           state={ineffableSlotState}
+          badge={ineffableSlotState === "filled" ? "★ Your choice" : undefined}
           className="min-w-0"
           placeholderHint={
             unlocked && ineffableSlotState === "placeholder"
               ? "Choose in the ineffable stage"
               : "Unlock to discover"
+          }
+          onPlaceholderHintClick={
+            !unlocked && ineffableSlotState === "placeholder"
+              ? scrollLockedNameToUnlock
+              : undefined
           }
         />
 
@@ -305,6 +322,11 @@ export function CeremonyThreeNamesView({
                 )
               })}
             </ul>
+            {canChangeCatWorldFavourite ? (
+              <p className="text-muted-foreground text-xs">
+                Tap a shortlist name to change your cat-world favourite.
+              </p>
+            ) : null}
           </div>
         ) : null}
 
@@ -350,6 +372,11 @@ export function CeremonyThreeNamesView({
                 )
               })}
             </ul>
+            {canChangeIneffableFavourite ? (
+              <p className="text-muted-foreground text-xs">
+                Tap a shortlist name to change your ineffable near-name favourite.
+              </p>
+            ) : null}
           </div>
         ) : null}
       </div>

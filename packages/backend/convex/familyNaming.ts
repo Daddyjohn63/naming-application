@@ -516,7 +516,10 @@ export const beginUnlock = mutation({
       throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.NOT_FOUND })
     }
     const cat = await getOwnedCatOrThrow(ctx, id, currentUser._id)
-    if (cat.ceremonyStep !== "family_curation") {
+    if (
+      cat.ceremonyStep !== "family_curation" &&
+      cat.ceremonyStep !== "family_preview"
+    ) {
       throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.STEP_LOCKED })
     }
     if (

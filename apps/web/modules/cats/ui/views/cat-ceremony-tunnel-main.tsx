@@ -24,6 +24,7 @@ import {
 } from "@/modules/ceremony/ui/components/ceremony-stage-switcher"
 import { CeremonyStageContinuePrompt } from "@/modules/ceremony/ui/components/ceremony-stage-continue-prompt"
 import { CeremonyThreeNamesView } from "@/modules/ceremony/ui/components/ceremony-three-names-view"
+import { CeremonyUnlockPrompt } from "@/modules/ceremony/ui/components/ceremony-unlock-prompt"
 import { defaultCeremonyNamingView } from "@/modules/ceremony/lib/ceremony-naming-view"
 import { useCeremonyStageContinue } from "@/modules/ceremony/lib/use-ceremony-stage-continue"
 import { FamilyNameCuration } from "@/modules/cats/ui/components/family-name-curation"
@@ -124,9 +125,9 @@ export function CatCeremonyTunnelMain({
 
       <CeremonyThreeNamesView cat={cat} />
 
-      {panels.showPaidNaming &&
-      showContinueToIneffable &&
-      activeView !== "ineffable" ? (
+      <CeremonyUnlockPrompt cat={cat} />
+
+      {panels.showPaidNaming && showContinueToIneffable ? (
         <CeremonyStageContinuePrompt
           title={
             needsCatWorldConfirm
@@ -174,12 +175,6 @@ export function CatCeremonyTunnelMain({
                   state={catWorldNamingState}
                   title="Cat-world name suggestions"
                   description="Save up to three names from this batch"
-                  onConfirmContinue={
-                    cat.ceremonyStep === "naming_cat_world"
-                      ? onContinueToIneffable
-                      : undefined
-                  }
-                  confirmLabel="Continue to ineffable names"
                 />
               ) : null}
             </>
@@ -187,26 +182,6 @@ export function CatCeremonyTunnelMain({
 
           {activeView === "ineffable" ? (
             <>
-              {showContinueToIneffable ? (
-                <CeremonyStageContinuePrompt
-                  title={
-                    needsCatWorldConfirm
-                      ? "Confirm your cat-world name first"
-                      : "Start your ineffable near-names"
-                  }
-                  description={
-                    needsCatWorldConfirm
-                      ? "lock it in to unlock the ineffable naming stage."
-                      : "We'll generate ten whimsical near-names for you to choose from."
-                  }
-                  highlightName={
-                    needsCatWorldConfirm ? cat.selectedCatWorldName : undefined
-                  }
-                  buttonLabel="Continue to ineffable names"
-                  continuing={continuingToIneffable}
-                  onContinue={() => void onContinueToIneffable()}
-                />
-              ) : null}
               {panels.showIneffableNamePipeline ? (
                 <StageNamePipelineStatus
                   stage="ineffable"

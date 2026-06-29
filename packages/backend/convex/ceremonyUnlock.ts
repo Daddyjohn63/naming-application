@@ -46,6 +46,11 @@ export const completeStubUnlock = mutation({
     if (cat.ceremonyPaymentId !== undefined) {
       throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.STEP_LOCKED })
     }
+    if (process.env.ENABLE_STUB_UNLOCK !== "true") {
+      throw new ConvexError({
+        code: STAGED_NAMING_ERROR_CODE.STUB_UNLOCK_DISABLED,
+      })
+    }
 
     const now = Date.now()
     const paymentId = await ctx.db.insert("cat_payments", {
