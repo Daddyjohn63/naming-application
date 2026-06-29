@@ -6,8 +6,18 @@ import { useMutation } from "convex/react"
 import { api } from "@workspace/backend/_generated/api"
 import type { Doc } from "@workspace/backend/_generated/dataModel"
 import { isCeremonyUnlocked } from "@/modules/ceremony/lib/ceremony-layout"
+import {
+  FAMILY_UNLOCK_CHECKOUT_STEPS,
+} from "@workspace/shared/constants/naming-curation"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
 import { toast } from "@workspace/ui/components/sonner"
+
+function isStubUnlockUiEnabled(): boolean {
+  return (
+    process.env.NEXT_PUBLIC_ENABLE_STUB_UNLOCK === "true" ||
+    process.env.NODE_ENV === "development"
+  )
+}
 
 type CeremonyUnlockCat = Pick<
   Doc<"cats">,
@@ -31,11 +41,14 @@ export function useCeremonyUnlock(cat: CeremonyUnlockCat) {
     cat.selectedFamilyName !== undefined &&
     cat.selectedFamilyRationale !== undefined
 
-  const unlockEnabled =
-    step === "family_curation" && hasFavourite && !unlocked
+  const isFamilyUnlockCheckoutStep = (
+    FAMILY_UNLOCK_CHECKOUT_STEPS as readonly string[]
+  ).includes(step)
 
-  const showUnlockCheckout = step === "family_curation" && !unlocked
-  const showStubUnlock = step === "awaiting_payment"
+  const unlockEnabled = isFamilyUnlockCheckoutStep && hasFavourite && !unlocked
+
+  const showUnlockCheckout = isFamilyUnlockCheckoutStep && !unlocked
+  const showStubUnlock = step === "awaiting_payment" && isStubUnlockUiEnabled()
   const showUnlockPrompt = showUnlockCheckout || showStubUnlock
 
   const onBeginUnlock = React.useCallback(async () => {

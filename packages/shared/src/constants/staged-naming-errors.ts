@@ -24,6 +24,7 @@ export const STAGED_NAMING_ERROR_CODE = {
   NO_FAVOURITE: "no_favourite",
   NAME_GLOBALLY_TAKEN: "name_globally_taken",
   ALL_NAMES_COMPLETE: "all_names_complete",
+  STUB_UNLOCK_DISABLED: "stub_unlock_disabled",
 } as const
 
 export type StagedNamingErrorCode =
@@ -64,6 +65,8 @@ const MESSAGES: Record<StagedNamingErrorCode, string> = {
     "That cat-world name was just claimed by another ceremony. Pick another from your shortlist or regenerate if you still can.",
   [STAGED_NAMING_ERROR_CODE.ALL_NAMES_COMPLETE]:
     "All three names are chosen — you're ready for your certificate.",
+  [STAGED_NAMING_ERROR_CODE.STUB_UNLOCK_DISABLED]:
+    "Stub unlock is not available in this environment.",
 }
 
 export function stagedNamingErrorMessage(

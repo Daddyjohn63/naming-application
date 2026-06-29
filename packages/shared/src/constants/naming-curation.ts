@@ -33,3 +33,12 @@ export type IneffableCurationStep = (typeof INEFFABLE_CURATION_STEPS)[number]
 
 /** Stub unlock price — $3.99 USD (informational in UI; no charge on stub). */
 export const CEREMONY_UNLOCK_AMOUNT_MINOR_USD = 399
+
+/** Pre-unlock checkout steps that share the family curation unlock UX. */
+export const FAMILY_UNLOCK_CHECKOUT_STEPS = [
+  "family_curation",
+  "family_preview",
+] as const
+
+export type FamilyUnlockCheckoutStep =
+  (typeof FAMILY_UNLOCK_CHECKOUT_STEPS)[number]

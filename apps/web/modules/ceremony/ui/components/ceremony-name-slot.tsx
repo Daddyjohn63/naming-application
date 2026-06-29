@@ -92,16 +92,19 @@ export function CeremonyNameSlot({
             aria-hidden
           />
           {onPlaceholderHintClick !== undefined ? (
-            <button
-              type="button"
-              className={cn(
-                "text-primary text-sm font-medium underline-offset-4 hover:underline lg:pointer-events-none lg:cursor-default lg:text-muted-foreground lg:no-underline",
-              )}
-              aria-label={`${placeholderHint}, scroll to unlock`}
-              onClick={onPlaceholderHintClick}
-            >
-              {placeholderHint}
-            </button>
+            <>
+              <button
+                type="button"
+                className="text-primary text-sm font-medium underline-offset-4 hover:underline lg:hidden"
+                aria-label={`${placeholderHint}, scroll to unlock`}
+                onClick={onPlaceholderHintClick}
+              >
+                {placeholderHint}
+              </button>
+              <p className="hidden text-sm font-medium text-muted-foreground lg:block">
+                {placeholderHint}
+              </p>
+            </>
           ) : (
             <p className="text-sm font-medium">{placeholderHint}</p>
           )}

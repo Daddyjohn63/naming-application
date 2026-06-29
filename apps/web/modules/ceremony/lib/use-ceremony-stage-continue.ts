@@ -69,26 +69,36 @@ export function useCeremonyStageContinue(
   const [continuingToCatWorld, setContinuingToCatWorld] = React.useState(false)
   const [continuing, setContinuing] = React.useState(false)
 
+  const catWorldStateLoaded = catWorldState !== undefined
   const hasCatWorldBatch =
-    catWorldState?.currentBatch !== null &&
-    catWorldState?.currentBatch !== undefined
+    catWorldState !== undefined &&
+    catWorldState !== null &&
+    catWorldState.currentBatch !== null
 
+  const ineffableStateLoaded = ineffableState !== undefined
   const hasIneffableBatch =
-    ineffableState?.currentBatch !== null &&
-    ineffableState?.currentBatch !== undefined
+    ineffableState !== undefined &&
+    ineffableState !== null &&
+    ineffableState.currentBatch !== null
 
   const continueToCatWorld = React.useCallback(async () => {
+    if (!catWorldStateLoaded || catWorldState === null) {
+      return
+    }
+    if (catWorldState.currentBatch !== null) {
+      return
+    }
+
     setContinuingToCatWorld(true)
     try {
       await startCatWorldNaming({ catId: cat._id })
       toast.success("Generating cat-world names…")
     } catch (error) {
       toast.error(getConvexErrorMessage(error))
-      throw error
     } finally {
       setContinuingToCatWorld(false)
     }
-  }, [cat._id, startCatWorldNaming])
+  }, [cat._id, catWorldState, catWorldStateLoaded, startCatWorldNaming])
 
   const continueToIneffable = React.useCallback(async () => {
     setContinuing(true)
@@ -107,11 +117,17 @@ export function useCeremonyStageContinue(
   }, [cat, confirmCatWorld, startIneffableNaming])
 
   const showContinueToCatWorld =
-    needsCatWorldGenerationStart(cat) && !hasCatWorldBatch
+    needsCatWorldGenerationStart(cat) &&
+    catWorldStateLoaded &&
+    catWorldState !== null &&
+    !hasCatWorldBatch
 
   const showContinueToIneffable =
     needsCatWorldConfirm(cat) ||
-    (cat.ceremonyStep === "naming_ineffable" && !hasIneffableBatch)
+    (cat.ceremonyStep === "naming_ineffable" &&
+      ineffableStateLoaded &&
+      ineffableState !== null &&
+      !hasIneffableBatch)
 
   return {
     continuingToCatWorld,
