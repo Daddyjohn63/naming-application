@@ -29,14 +29,25 @@ export function needsIneffableGenerationStart(
   )
 }
 
+/** True when unlock is done but the first cat-world name batch has not started yet. */
+export function needsCatWorldGenerationStart(
+  cat: Pick<Doc<"cats">, "ceremonyStep" | "selectedCatWorldName">,
+): boolean {
+  return (
+    cat.ceremonyStep === "naming_cat_world" &&
+    cat.selectedCatWorldName === undefined
+  )
+}
+
 /**
- * Client hook for the cat-world → ineffable handoff (sidebar + banner + curation).
+ * Client hook for paid-stage continue CTAs (sidebar + banner + curation).
  *
- * Two server steps are bundled into one button for UX:
+ * Cat-world: `startCatWorldNaming` once after unlock — hidden while generating or
+ * once a batch exists (main column owns pipeline + curation UI).
+ *
+ * Ineffable handoff bundles two server steps:
  * 1. confirmCatWorldFavourite — lock stage advance when favourite picked on naming_cat_world
  * 2. startIneffableNaming — set awaiting_ineffable_names and schedule AI
- *
- * showContinueToIneffable is true when either step is still pending.
  */
 export function useCeremonyStageContinue(
   cat: Pick<
@@ -45,17 +56,39 @@ export function useCeremonyStageContinue(
   >,
 ) {
   const confirmCatWorld = useMutation(api.catWorldNaming.confirmCatWorldFavourite)
+  const startCatWorldNaming = useMutation(api.catWorldNaming.startCatWorldNaming)
   const startIneffableNaming = useMutation(api.ineffableNaming.startIneffableNaming)
+  const catWorldState = useQuery(api.catWorldNaming.getCatWorldNamingStateForOwner, {
+    catId: cat._id,
+  })
   const ineffableState = useQuery(
     api.ineffableNaming.getIneffableNamingStateForOwner,
     { catId: cat._id },
   )
 
+  const [continuingToCatWorld, setContinuingToCatWorld] = React.useState(false)
   const [continuing, setContinuing] = React.useState(false)
+
+  const hasCatWorldBatch =
+    catWorldState?.currentBatch !== null &&
+    catWorldState?.currentBatch !== undefined
 
   const hasIneffableBatch =
     ineffableState?.currentBatch !== null &&
     ineffableState?.currentBatch !== undefined
+
+  const continueToCatWorld = React.useCallback(async () => {
+    setContinuingToCatWorld(true)
+    try {
+      await startCatWorldNaming({ catId: cat._id })
+      toast.success("Generating cat-world names…")
+    } catch (error) {
+      toast.error(getConvexErrorMessage(error))
+      throw error
+    } finally {
+      setContinuingToCatWorld(false)
+    }
+  }, [cat._id, startCatWorldNaming])
 
   const continueToIneffable = React.useCallback(async () => {
     setContinuing(true)
@@ -73,11 +106,17 @@ export function useCeremonyStageContinue(
     }
   }, [cat, confirmCatWorld, startIneffableNaming])
 
+  const showContinueToCatWorld =
+    needsCatWorldGenerationStart(cat) && !hasCatWorldBatch
+
   const showContinueToIneffable =
     needsCatWorldConfirm(cat) ||
     (cat.ceremonyStep === "naming_ineffable" && !hasIneffableBatch)
 
   return {
+    continuingToCatWorld,
+    continueToCatWorld,
+    showContinueToCatWorld,
     continuing,
     continueToIneffable,
     showContinueToIneffable,
