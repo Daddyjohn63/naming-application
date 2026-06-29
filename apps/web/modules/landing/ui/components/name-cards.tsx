@@ -12,7 +12,7 @@ import { cn } from "@workspace/ui/lib/utils"
 
 const NAME_CARDS = [
   {
-    title: "The Everyday Name",
+    title: "Family name",
     description:
       "The name that the family gives the cat. Like Ginger, Max, or Oliver.",
     Mark: FamilyMark,

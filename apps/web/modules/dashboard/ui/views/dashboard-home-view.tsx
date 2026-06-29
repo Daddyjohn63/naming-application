@@ -6,14 +6,13 @@ import * as React from "react"
 import { api } from "@workspace/backend/_generated/api"
 import { CreateCeremonyButton } from "@/modules/cats/ui/components/create-ceremony-button"
 import { useCreateDraftCeremony } from "@/modules/cats/ui/hooks/use-create-draft-ceremony"
-import { ceremonyStepShortLabel } from "@/modules/ceremony/lib/ceremony-progress"
+import { CeremonyStepBadge } from "@/modules/ceremony/ui/components/ceremony-step-badge"
 import { ceremonyCtaButtonClassName } from "@/modules/ceremony/lib/ceremony-styles"
 import {
   Alert,
   AlertDescription,
   AlertTitle,
 } from "@workspace/ui/components/alert"
-import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 import {
   Card,
@@ -170,9 +169,10 @@ function CatCeremonyCard({ cat }: CatCeremonyCardProps) {
             </CardDescription>
           </CardHeader>
           <CardFooter>
-            <Badge variant="outline" className="text-xs font-normal">
-              {ceremonyStepShortLabel(cat.ceremonyStep)}
-            </Badge>
+            <CeremonyStepBadge
+              step={cat.ceremonyStep}
+              className="text-xs font-normal"
+            />
           </CardFooter>
         </Card>
       </Link>

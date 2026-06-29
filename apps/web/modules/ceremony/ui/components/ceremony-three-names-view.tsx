@@ -164,8 +164,8 @@ export function CeremonyThreeNamesView({
   const subtitle = unlocked
     ? "Your three names will appear here as you complete each stage."
     : cat.ceremonyStep === "awaiting_payment"
-      ? "Your everyday name is chosen — complete unlock for the rest of the ceremony."
-      : "Your everyday name is chosen — unlock for the rest of the ceremony."
+      ? "Your family name is chosen — complete unlock for the rest of the ceremony."
+      : "Your family name is chosen — unlock for the rest of the ceremony."
 
   const scrollLockedNameToUnlock = () => {
     scrollToCeremonyUnlockOnMobile()
@@ -189,7 +189,7 @@ export function CeremonyThreeNamesView({
 
       <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
         <CeremonyNameSlot
-          label="Everyday name"
+          label="Family name"
           name={cat.selectedFamilyName}
           rationale={cat.selectedFamilyRationale}
           state={everydayState}
@@ -237,7 +237,7 @@ export function CeremonyThreeNamesView({
 
         {shortlist.length > 0 ? (
           <div className="flex flex-col gap-2 sm:col-start-1">
-            <p className="text-sm font-medium">Everyday shortlist</p>
+            <p className="text-sm font-medium">Family name shortlist</p>
             <ul className="flex flex-wrap gap-2">
               {shortlist.map((entry) => {
                 const isFavourite =
@@ -279,7 +279,7 @@ export function CeremonyThreeNamesView({
             </ul>
             {canChangeFavourite && shortlist.length > 1 ? (
               <p className="text-muted-foreground text-xs">
-                Tap a shortlist name to change your everyday favourite.
+                Tap a shortlist name to change your family name favourite.
               </p>
             ) : null}
           </div>

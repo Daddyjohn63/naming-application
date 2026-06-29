@@ -66,7 +66,7 @@ export function CeremonyUnlockPrompt({
         <CardDescription className="text-sm leading-relaxed">
           {showStubUnlock ? (
             <>
-              Your everyday name and shortlist stay saved if checkout is
+              Your family name and shortlist stay saved if checkout is
               interrupted.
             </>
           ) : cat.selectedFamilyName !== undefined ? (
@@ -81,7 +81,7 @@ export function CeremonyUnlockPrompt({
             </>
           ) : (
             <>
-              Your everyday family name is free. Unlock once per cat to reveal
+              Your family name is free. Unlock once per cat to reveal
               cat-world and ineffable names, then receive your certificate.
             </>
           )}

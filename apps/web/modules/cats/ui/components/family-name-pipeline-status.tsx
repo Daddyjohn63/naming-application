@@ -54,7 +54,7 @@ export function FamilyNamePipelineStatus({
         <div className="flex flex-col gap-1">
           <CardTitle className="text-base">Generating family names…</CardTitle>
           <CardDescription>
-            We&apos;re crafting ten everyday names from your summary and style.
+            We&apos;re crafting ten family names from your summary and style.
             You can leave and come back — your progress is saved.
           </CardDescription>
         </div>

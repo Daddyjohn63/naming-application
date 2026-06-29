@@ -40,7 +40,7 @@ const MESSAGES: Record<StagedNamingErrorCode, string> = {
   [STAGED_NAMING_ERROR_CODE.NOT_UNLOCKED]:
     "Complete unlock before choosing cat-world names.",
   [STAGED_NAMING_ERROR_CODE.NO_EVERYDAY_NAME]:
-    "Choose an everyday name before continuing.",
+    "Choose a family name before continuing.",
   [STAGED_NAMING_ERROR_CODE.NO_CAT_WORLD_NAME]:
     "Choose a cat-world name before continuing to the ineffable stage.",
   [STAGED_NAMING_ERROR_CODE.GENERATION_IN_PROGRESS]:

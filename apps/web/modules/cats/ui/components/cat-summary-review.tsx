@@ -183,7 +183,10 @@ export function CatSummaryReview({
         <CardTitle className="text-base">Personality summary</CardTitle>
         <CardDescription>
           Read through your cat&apos;s profile. Edit anything that doesn&apos;t
-          sound right, save your draft, then submit when you&apos;re happy.
+          sound right, save your draft, then submit when you&apos;re happy. You
+          will then move onto the next step where you can choose a family name
+          style and generate a list of suggested family names for you to choose
+          from. Or, you can add your own name.
         </CardDescription>
       </CardHeader>
 

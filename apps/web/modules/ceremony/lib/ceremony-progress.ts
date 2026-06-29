@@ -98,6 +98,29 @@ const SERVER_STEP_SHORT_LABEL: Record<CeremonyStepLiteral, string> = {
   ceremony_complete: "Certificate",
 }
 
+/** Tailwind classes for stage badges — one distinct palette per UI stepper pill. */
+const UI_STEP_BADGE_CLASS: Record<CeremonyUiStepId, string> = {
+  profile:
+    "border-sky-300/80 bg-sky-100 text-sky-900 dark:border-sky-700 dark:bg-sky-950/80 dark:text-sky-200",
+  summary:
+    "border-indigo-300/80 bg-indigo-100 text-indigo-900 dark:border-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-200",
+  family_style:
+    "border-amber-300/80 bg-amber-100 text-amber-950 dark:border-amber-700 dark:bg-amber-950/80 dark:text-amber-200",
+  family_names:
+    "border-orange-300/80 bg-orange-100 text-orange-950 dark:border-orange-700 dark:bg-orange-950/80 dark:text-orange-200",
+  unlock:
+    "border-rose-300/80 bg-rose-100 text-rose-950 dark:border-rose-700 dark:bg-rose-950/80 dark:text-rose-200",
+  naming_cat_world:
+    "border-emerald-300/80 bg-emerald-100 text-emerald-950 dark:border-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-200",
+  naming_ineffable:
+    "border-violet-300/80 bg-violet-100 text-violet-950 dark:border-violet-700 dark:bg-violet-950/80 dark:text-violet-200",
+  certificate:
+    "border-lime-300/80 bg-lime-100 text-lime-950 dark:border-lime-700 dark:bg-lime-950/80 dark:text-lime-200",
+}
+
+const FALLBACK_STEP_BADGE_CLASS =
+  "border-border bg-muted text-muted-foreground"
+
 /** Stepper pill index for a server step, or -1 if unmapped. */
 export function ceremonyStepIndex(step: string): number {
   if (CEREMONY_STEP_SEQUENCE.includes(step as CeremonyStepLiteral)) {
@@ -117,10 +140,20 @@ export function ceremonyStepsForUi(): readonly {
   }))
 }
 
-/** Short label for the current step badge on /cats/[catId]. */
+/** Short label for the current step badge on /cats/[catId] and dashboard cards. */
 export function ceremonyStepShortLabel(step: string): string {
   if (CEREMONY_STEP_SEQUENCE.includes(step as CeremonyStepLiteral)) {
     return SERVER_STEP_SHORT_LABEL[step as CeremonyStepLiteral]
   }
   return step.replaceAll("_", " ")
+}
+
+/** Colour classes for ceremony step badges (dashboard + ceremony header). */
+export function ceremonyStepBadgeClassName(step: string): string {
+  const index = ceremonyStepIndex(step)
+  if (index >= 0 && index < CEREMONY_UI_STEP_SEQUENCE.length) {
+    const uiId = CEREMONY_UI_STEP_SEQUENCE[index]
+    return UI_STEP_BADGE_CLASS[uiId]
+  }
+  return FALLBACK_STEP_BADGE_CLASS
 }
