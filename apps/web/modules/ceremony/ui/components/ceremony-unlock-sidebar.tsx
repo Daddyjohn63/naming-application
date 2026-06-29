@@ -65,18 +65,18 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
 
   const description =
     step === "awaiting_payment"
-      ? "Your everyday name and shortlist stay saved if checkout is interrupted."
+      ? "Your family name and shortlist stay saved if checkout is interrupted."
       : step === "awaiting_cat_world_names"
         ? "We're crafting distinctive cat-world names — this usually takes a moment."
         : step === "naming_cat_world" && cat.selectedCatWorldName === undefined
-          ? "Choose a cat-world name next. You can still switch your everyday favourite from the shortlist above."
+          ? "Choose a cat-world name next. You can still switch your family name favourite from the shortlist above."
           : step === "naming_cat_world" && cat.selectedCatWorldName !== undefined
             ? "Continue in the main column when you're ready for your ineffable near-name."
             : step === "naming_ineffable" && cat.selectedIneffableName === undefined
               ? "One more stage — playful approximations of the secret name."
               : unlocked
                 ? "Switch stages in the main column to review or change your picks before the certificate."
-                : "Your everyday family name is free. Unlock once per cat to reveal cat-world and ineffable names, then receive your certificate."
+                : "Your family name is free. Unlock once per cat to reveal cat-world and ineffable names, then receive your certificate."
 
   return (
     <Card {...dataComponent("CeremonyUnlockSidebar")} className="ceremony-sidebar-panel border-primary/20">

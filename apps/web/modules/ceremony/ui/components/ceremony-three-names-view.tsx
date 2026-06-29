@@ -14,7 +14,10 @@ import {
   scrollToCeremonyThreeNames,
 } from "@/modules/ceremony/lib/scroll-to-ceremony-three-names"
 import { scrollToCeremonyUnlockOnMobile } from "@/modules/ceremony/lib/scroll-to-ceremony-unlock"
-import { normalizeFamilyName } from "@workspace/shared/constants/family-naming"
+import {
+  isCustomFamilyShortlistEntry,
+  normalizeFamilyName,
+} from "@workspace/shared/constants/family-naming"
 import { normalizeNameForDedupe } from "@workspace/shared/constants/naming-curation"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
 import { Button } from "@workspace/ui/components/button"
@@ -161,8 +164,8 @@ export function CeremonyThreeNamesView({
   const subtitle = unlocked
     ? "Your three names will appear here as you complete each stage."
     : cat.ceremonyStep === "awaiting_payment"
-      ? "Your everyday name is chosen — complete unlock for the rest of the ceremony."
-      : "Your everyday name is chosen — unlock for the rest of the ceremony."
+      ? "Your family name is chosen — complete unlock for the rest of the ceremony."
+      : "Your family name is chosen — unlock for the rest of the ceremony."
 
   const scrollLockedNameToUnlock = () => {
     scrollToCeremonyUnlockOnMobile()
@@ -186,7 +189,7 @@ export function CeremonyThreeNamesView({
 
       <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
         <CeremonyNameSlot
-          label="Everyday name"
+          label="Family name"
           name={cat.selectedFamilyName}
           rationale={cat.selectedFamilyRationale}
           state={everydayState}
@@ -234,11 +237,13 @@ export function CeremonyThreeNamesView({
 
         {shortlist.length > 0 ? (
           <div className="flex flex-col gap-2 sm:col-start-1">
-            <p className="text-sm font-medium">Everyday shortlist</p>
+            <p className="text-sm font-medium">Family name shortlist</p>
             <ul className="flex flex-wrap gap-2">
               {shortlist.map((entry) => {
                 const isFavourite =
                   favouriteNormalized === normalizeFamilyName(entry.name)
+                const isCustom = isCustomFamilyShortlistEntry(entry)
+                const label = isCustom ? `${entry.name} (your idea)` : entry.name
 
                 return (
                   <li key={entry.name}>
@@ -254,7 +259,7 @@ export function CeremonyThreeNamesView({
                         {settingFavourite === entry.name &&
                         settingStage === "family"
                           ? "Setting…"
-                          : entry.name}
+                          : label}
                       </Button>
                     ) : (
                       <span
@@ -265,7 +270,7 @@ export function CeremonyThreeNamesView({
                             : "bg-secondary text-secondary-foreground",
                         )}
                       >
-                        {entry.name}
+                        {label}
                       </span>
                     )}
                   </li>
@@ -274,7 +279,7 @@ export function CeremonyThreeNamesView({
             </ul>
             {canChangeFavourite && shortlist.length > 1 ? (
               <p className="text-muted-foreground text-xs">
-                Tap a shortlist name to change your everyday favourite.
+                Tap a shortlist name to change your family name favourite.
               </p>
             ) : null}
           </div>

@@ -68,7 +68,7 @@ export function FamilyNameStylePicker({ cat }: FamilyNameStylePickerProps) {
       <CardHeader className="border-b">
         <CardTitle className="text-base">Family name style</CardTitle>
         <CardDescription>
-          Pick the flavour for your cat&apos;s everyday name — the one you call
+          Pick the flavour for your cat&apos;s family name — the one you call
           across the room. You can choose more than one; Mix-it-up picks a random
           blend for you.
         </CardDescription>

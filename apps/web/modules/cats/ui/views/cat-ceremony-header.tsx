@@ -7,9 +7,8 @@
 
 import Link from "next/link"
 
-import { ceremonyStepShortLabel } from "@/modules/ceremony/lib/ceremony-progress"
+import { CeremonyStepBadge } from "@/modules/ceremony/ui/components/ceremony-step-badge"
 import type { CatCeremonyDoc } from "@/modules/cats/lib/cat-ceremony-types"
-import { Badge } from "@workspace/ui/components/badge"
 import { dataComponent } from "@/lib/data-component"
 
 type CatCeremonyHeaderProps = {
@@ -40,12 +39,7 @@ export function CatCeremonyHeader({ cat }: CatCeremonyHeaderProps) {
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge
-            variant="secondary"
-            className="rounded-full border border-primary/15 bg-accent/80 px-3 text-accent-foreground"
-          >
-            {ceremonyStepShortLabel(cat.ceremonyStep)}
-          </Badge>
+          <CeremonyStepBadge step={cat.ceremonyStep} />
         </div>
       </div>
     </>

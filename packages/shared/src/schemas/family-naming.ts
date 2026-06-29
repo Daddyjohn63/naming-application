@@ -47,6 +47,8 @@ export const addFamilyShortlistEntrySchema = z.object({
   name: z.string().trim().min(1).max(80),
 })
 
+export const addCustomFamilyShortlistEntrySchema = addFamilyShortlistEntrySchema
+
 export const setFamilyFavouriteSchema = z.object({
   name: z.string().trim().min(1).max(80),
 })
