@@ -18,6 +18,9 @@ export const FAMILY_NAMING_ERROR_CODE = {
   NAME_NOT_IN_SHORTLIST: "name_not_in_shortlist",
   REGEN_EXHAUSTED: "regen_exhausted",
   NO_FAVOURITE: "no_favourite",
+  CUSTOM_NAME_LIMIT: "custom_name_limit",
+  NAME_ALREADY_SUGGESTED: "name_already_suggested",
+  INVALID_NAME: "invalid_name",
 } as const
 
 export type FamilyNamingErrorCode =
@@ -52,6 +55,12 @@ const MESSAGES: Record<FamilyNamingErrorCode, string> = {
     "You've already used your one regeneration for family names.",
   [FAMILY_NAMING_ERROR_CODE.NO_FAVOURITE]:
     "Choose a favourite from your shortlist before unlocking.",
+  [FAMILY_NAMING_ERROR_CODE.CUSTOM_NAME_LIMIT]:
+    "You can add one name of your own. Remove it to add a different one.",
+  [FAMILY_NAMING_ERROR_CODE.NAME_ALREADY_SUGGESTED]:
+    "That name is already in our suggestions — save it from the list above instead.",
+  [FAMILY_NAMING_ERROR_CODE.INVALID_NAME]:
+    "Enter a name between 1 and 80 characters.",
 }
 
 export function familyNamingErrorMessage(

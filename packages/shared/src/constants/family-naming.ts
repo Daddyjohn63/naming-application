@@ -40,6 +40,20 @@ export const FAMILY_NAME_BATCH_SIZE = 10
 export const MAX_FAMILY_SHORTLIST_TOTAL = 6
 export const MAX_FAMILY_SHORTLIST_PER_BATCH = 3
 export const MAX_FAMILY_NAME_REGENERATIONS = 1
+/** User-provided family names allowed per ceremony (not from AI batches). */
+export const MAX_CUSTOM_FAMILY_NAMES = 1
+
+export const FAMILY_SHORTLIST_SOURCES = ["ai", "custom"] as const
+export type FamilyShortlistSource = (typeof FAMILY_SHORTLIST_SOURCES)[number]
+
+/** Rationale stored when the user adds their own family name. */
+export const CUSTOM_FAMILY_NAME_RATIONALE = "A name you chose yourself."
+
+export function isCustomFamilyShortlistEntry(entry: {
+  source?: FamilyShortlistSource
+}): boolean {
+  return entry.source === "custom"
+}
 
 /** Ceremony steps where KB-006 curation UI is active (including generation substates). */
 export const FAMILY_CURATION_CEREMONY_STEPS = [

@@ -141,6 +141,7 @@ export default defineSchema({
         v.object({
           name: v.string(),
           rationale: v.string(),
+          source: v.optional(v.union(v.literal("ai"), v.literal("custom"))),
         }),
       ),
     ),

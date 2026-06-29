@@ -5,16 +5,20 @@
 import { ConvexError, v } from "convex/values"
 
 import {
+  CUSTOM_FAMILY_NAME_RATIONALE,
   FAMILY_NAME_STYLE_IDS,
+  MAX_CUSTOM_FAMILY_NAMES,
   MAX_FAMILY_NAME_REGENERATIONS,
   MAX_FAMILY_SHORTLIST_PER_BATCH,
   MAX_FAMILY_SHORTLIST_TOTAL,
   normalizeFamilyName,
   resolveMixItUpStyles,
   type FamilyNameStyleId,
+  type FamilyShortlistSource,
 } from "@workspace/shared/constants/family-naming"
 import { FAMILY_NAMING_ERROR_CODE } from "@workspace/shared/constants/family-naming-errors"
 import {
+  addCustomFamilyShortlistEntrySchema,
   addFamilyShortlistEntrySchema,
   regenerateFamilyNamesSchema,
   setFamilyFavouriteSchema,
@@ -33,7 +37,11 @@ import {
 import { getCurrentUser } from "./users"
 import type { Doc, Id } from "./_generated/dataModel"
 
-type ShortlistEntry = { name: string; rationale: string }
+type ShortlistEntry = {
+  name: string
+  rationale: string
+  source?: FamilyShortlistSource
+}
 
 async function getOwnedCatOrThrow(
   ctx: QueryCtx | MutationCtx,
@@ -128,6 +136,31 @@ function countSavedFromBatch(
   ).length
 }
 
+function countCustomShortlistEntries(shortlist: ShortlistEntry[]): number {
+  return shortlist.filter((entry) => entry.source === "custom").length
+}
+
+async function isNameInFamilyGenerations(
+  ctx: QueryCtx | MutationCtx,
+  catId: Id<"cats">,
+  normalizedName: string,
+): Promise<boolean> {
+  const generations = await ctx.db
+    .query("cat_name_generations")
+    .withIndex("by_catId_stage_generationIndex", (q) =>
+      q.eq("catId", catId).eq("stage", "family"),
+    )
+    .collect()
+  for (const generation of generations) {
+    for (const { name } of generation.names) {
+      if (normalizeFamilyName(name) === normalizedName) {
+        return true
+      }
+    }
+  }
+  return false
+}
+
 async function scheduleFamilyGeneration(
   ctx: MutationCtx,
   catId: Id<"cats">,
@@ -182,6 +215,7 @@ export const getFamilyNamingStateForOwner = query({
               shortlist,
               currentBatch.names.map((n) => n.name),
             ),
+      customShortlistCount: countCustomShortlistEntries(shortlist),
     }
   },
 })
@@ -310,7 +344,68 @@ export const addToFamilyShortlist = mutation({
     await ctx.db.patch(id, {
       familyNameShortlist: [
         ...shortlist,
-        { name: batchEntry.name, rationale: batchEntry.rationale },
+        {
+          name: batchEntry.name,
+          rationale: batchEntry.rationale,
+          source: "ai",
+        },
+      ],
+      updatedAt: now,
+    })
+  },
+})
+
+/** Save a user-provided family name to the shortlist (max 1 custom per ceremony). */
+export const addCustomFamilyNameToShortlist = mutation({
+  args: { catId: v.string(), name: v.string() },
+  handler: async (ctx, args) => {
+    const currentUser = await getCurrentUser(ctx)
+    if (currentUser === null) {
+      throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.NOT_AUTHENTICATED })
+    }
+    const id = ctx.db.normalizeId("cats", args.catId)
+    if (id === null) {
+      throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.NOT_FOUND })
+    }
+    const cat = await getOwnedCatOrThrow(ctx, id, currentUser._id)
+    if (cat.ceremonyStep !== "family_curation") {
+      throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.STEP_LOCKED })
+    }
+
+    const parsed = addCustomFamilyShortlistEntrySchema.safeParse({ name: args.name })
+    if (!parsed.success) {
+      throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.INVALID_NAME })
+    }
+
+    const shortlist = shortlistOf(cat)
+    if (shortlist.length >= MAX_FAMILY_SHORTLIST_TOTAL) {
+      throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.SHORTLIST_FULL })
+    }
+
+    if (countCustomShortlistEntries(shortlist) >= MAX_CUSTOM_FAMILY_NAMES) {
+      throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.CUSTOM_NAME_LIMIT })
+    }
+
+    const normalized = normalizeFamilyName(parsed.data.name)
+    if (shortlist.some((entry) => normalizeFamilyName(entry.name) === normalized)) {
+      throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.DUPLICATE_NAME })
+    }
+
+    if (await isNameInFamilyGenerations(ctx, id, normalized)) {
+      throw new ConvexError({
+        code: FAMILY_NAMING_ERROR_CODE.NAME_ALREADY_SUGGESTED,
+      })
+    }
+
+    const now = Date.now()
+    await ctx.db.patch(id, {
+      familyNameShortlist: [
+        ...shortlist,
+        {
+          name: parsed.data.name,
+          rationale: CUSTOM_FAMILY_NAME_RATIONALE,
+          source: "custom",
+        },
       ],
       updatedAt: now,
     })

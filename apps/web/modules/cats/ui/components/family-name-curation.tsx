@@ -12,6 +12,8 @@ import type { Doc } from "@workspace/backend/_generated/dataModel"
 import {
   FAMILY_NAME_STYLE_IDS,
   FAMILY_NAME_STYLE_LABELS,
+  isCustomFamilyShortlistEntry,
+  MAX_CUSTOM_FAMILY_NAMES,
   MAX_FAMILY_NAME_REGENERATIONS,
   MAX_FAMILY_SHORTLIST_PER_BATCH,
   MAX_FAMILY_SHORTLIST_TOTAL,
@@ -27,6 +29,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card"
+import { Input } from "@workspace/ui/components/input"
+import { Label } from "@workspace/ui/components/label"
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { toast } from "@workspace/ui/components/sonner"
 import { cn } from "@workspace/ui/lib/utils"
@@ -54,6 +58,9 @@ export function FamilyNameCuration({
   })
 
   const addToShortlist = useMutation(api.familyNaming.addToFamilyShortlist)
+  const addCustomToShortlist = useMutation(
+    api.familyNaming.addCustomFamilyNameToShortlist,
+  )
   const removeFromShortlist = useMutation(api.familyNaming.removeFromFamilyShortlist)
   const setFavourite = useMutation(api.familyNaming.setFamilyFavourite)
   const regenerateNames = useMutation(api.familyNaming.regenerateFamilyNames)
@@ -66,6 +73,8 @@ export function FamilyNameCuration({
   const [regenerating, setRegenerating] = React.useState(false)
   const [unlocking, setUnlocking] = React.useState(false)
   const [showRegenStyles, setShowRegenStyles] = React.useState(false)
+  const [customName, setCustomName] = React.useState("")
+  const [addingCustomName, setAddingCustomName] = React.useState(false)
   const [regenStyleSelection, setRegenStyleSelection] = React.useState<
     FamilyNameStyleId[]
   >([])
@@ -123,6 +132,12 @@ export function FamilyNameCuration({
   const savedFromBatch = state.savedFromCurrentBatchCount
   const batchSaveRemaining = MAX_FAMILY_SHORTLIST_PER_BATCH - savedFromBatch
   const shortlistRemaining = MAX_FAMILY_SHORTLIST_TOTAL - shortlist.length
+  const customShortlistCount = state.customShortlistCount
+  const customShortlistEntry = shortlist.find((entry) =>
+    isCustomFamilyShortlistEntry(entry),
+  )
+  const canAddCustomName =
+    customShortlistCount < MAX_CUSTOM_FAMILY_NAMES && shortlistRemaining > 0
 
   const shortlistNormalized = new Set(
     shortlist.map((entry) => normalizeFamilyName(entry.name)),
@@ -151,6 +166,25 @@ export function FamilyNameCuration({
       toast.error(getConvexErrorMessage(error))
     } finally {
       setSavingName(null)
+    }
+  }
+
+  const onAddCustomName = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const trimmed = customName.trim()
+    if (trimmed.length === 0) {
+      toast.error("Enter a name to add.")
+      return
+    }
+    setAddingCustomName(true)
+    try {
+      await addCustomToShortlist({ catId: cat._id, name: trimmed })
+      setCustomName("")
+      toast.success(`Added "${trimmed}" to your shortlist.`)
+    } catch (error) {
+      toast.error(getConvexErrorMessage(error))
+    } finally {
+      setAddingCustomName(false)
     }
   }
 
@@ -197,7 +231,7 @@ export function FamilyNameCuration({
     }
   }
 
-  const busySaving = savingName !== null
+  const busySaving = savingName !== null || addingCustomName
   const unlockEnabled =
     favouriteNormalized !== null && shortlist.length >= 1
   const showShortlistPanel = !tunnelMode && shortlist.length > 0
@@ -376,6 +410,69 @@ export function FamilyNameCuration({
             )
           })}
         </ul>
+
+        {canAddCustomName ? (
+          <div className="border-t bg-muted/10 px-4 py-4">
+            <form
+              className="flex flex-col gap-3"
+              onSubmit={(event) => void onAddCustomName(event)}
+            >
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="custom-family-name" className="text-sm">
+                  Already have a name in mind?
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  Add one name you thought of yourself to your shortlist.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <Input
+                  id="custom-family-name"
+                  value={customName}
+                  maxLength={80}
+                  placeholder="e.g. Mittens"
+                  disabled={addingCustomName || busySaving}
+                  onChange={(event) => setCustomName(event.target.value)}
+                  className="sm:max-w-xs"
+                />
+                <Button
+                  type="submit"
+                  size="sm"
+                  variant="secondary"
+                  disabled={
+                    addingCustomName ||
+                    busySaving ||
+                    customName.trim().length === 0
+                  }
+                >
+                  {addingCustomName ? "Adding…" : "Add to shortlist"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        ) : customShortlistEntry !== undefined ? (
+          <div className="border-t bg-muted/10 px-4 py-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-medium">Your own name</p>
+                <p className="text-sm text-muted-foreground">
+                  {customShortlistEntry.name}
+                </p>
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                disabled={removingName !== null || settingFavourite !== null}
+                onClick={() => void onRemoveName(customShortlistEntry.name)}
+              >
+                {removingName === customShortlistEntry.name
+                  ? "Removing…"
+                  : "Remove"}
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </Card>
 
       {showShortlistPanel ? (
@@ -398,23 +495,41 @@ export function FamilyNameCuration({
                 >
                   <div>
                     <span className="font-medium">{entry.name}</span>
+                    {isCustomFamilyShortlistEntry(entry) ? (
+                      <Badge variant="outline" className="ml-2 rounded-full">
+                        Your idea
+                      </Badge>
+                    ) : null}
                     {isFavourite ? (
                       <Badge className="bg-primary ml-2 rounded-full">Favourite</Badge>
                     ) : null}
                   </div>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={isFavourite ? "default" : "outline"}
-                    disabled={settingFavourite !== null}
-                    onClick={() => void onSetFavourite(entry.name)}
-                  >
-                    {settingFavourite === entry.name
-                      ? "Setting…"
-                      : isFavourite
-                        ? "Favourite"
-                        : "Set favourite"}
-                  </Button>
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={isFavourite ? "default" : "outline"}
+                      disabled={settingFavourite !== null}
+                      onClick={() => void onSetFavourite(entry.name)}
+                    >
+                      {settingFavourite === entry.name
+                        ? "Setting…"
+                        : isFavourite
+                          ? "Favourite"
+                          : "Set favourite"}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      disabled={
+                        removingName !== null || settingFavourite !== null
+                      }
+                      onClick={() => void onRemoveName(entry.name)}
+                    >
+                      {removingName === entry.name ? "Removing…" : "Remove"}
+                    </Button>
+                  </div>
                 </li>
               )
             })}

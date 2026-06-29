@@ -14,7 +14,10 @@ import {
   scrollToCeremonyThreeNames,
 } from "@/modules/ceremony/lib/scroll-to-ceremony-three-names"
 import { scrollToCeremonyUnlockOnMobile } from "@/modules/ceremony/lib/scroll-to-ceremony-unlock"
-import { normalizeFamilyName } from "@workspace/shared/constants/family-naming"
+import {
+  isCustomFamilyShortlistEntry,
+  normalizeFamilyName,
+} from "@workspace/shared/constants/family-naming"
 import { normalizeNameForDedupe } from "@workspace/shared/constants/naming-curation"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
 import { Button } from "@workspace/ui/components/button"
@@ -239,6 +242,8 @@ export function CeremonyThreeNamesView({
               {shortlist.map((entry) => {
                 const isFavourite =
                   favouriteNormalized === normalizeFamilyName(entry.name)
+                const isCustom = isCustomFamilyShortlistEntry(entry)
+                const label = isCustom ? `${entry.name} (your idea)` : entry.name
 
                 return (
                   <li key={entry.name}>
@@ -254,7 +259,7 @@ export function CeremonyThreeNamesView({
                         {settingFavourite === entry.name &&
                         settingStage === "family"
                           ? "Setting…"
-                          : entry.name}
+                          : label}
                       </Button>
                     ) : (
                       <span
@@ -265,7 +270,7 @@ export function CeremonyThreeNamesView({
                             : "bg-secondary text-secondary-foreground",
                         )}
                       >
-                        {entry.name}
+                        {label}
                       </span>
                     )}
                   </li>
