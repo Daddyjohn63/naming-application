@@ -118,8 +118,7 @@ const UI_STEP_BADGE_CLASS: Record<CeremonyUiStepId, string> = {
     "border-lime-300/80 bg-lime-100 text-lime-950 dark:border-lime-700 dark:bg-lime-950/80 dark:text-lime-200",
 }
 
-const FALLBACK_STEP_BADGE_CLASS =
-  "border-border bg-muted text-muted-foreground"
+const FALLBACK_STEP_BADGE_CLASS = "border-border bg-muted text-muted-foreground"
 
 /** Stepper pill index for a server step, or -1 if unmapped. */
 export function ceremonyStepIndex(step: string): number {
@@ -151,8 +150,11 @@ export function ceremonyStepShortLabel(step: string): string {
 /** Colour classes for ceremony step badges (dashboard + ceremony header). */
 export function ceremonyStepBadgeClassName(step: string): string {
   const index = ceremonyStepIndex(step)
-  if (index >= 0 && index < CEREMONY_UI_STEP_SEQUENCE.length) {
-    const uiId = CEREMONY_UI_STEP_SEQUENCE[index]
+  const uiId =
+    index >= 0 && index < CEREMONY_UI_STEP_SEQUENCE.length
+      ? CEREMONY_UI_STEP_SEQUENCE[index]
+      : undefined
+  if (uiId !== undefined) {
     return UI_STEP_BADGE_CLASS[uiId]
   }
   return FALLBACK_STEP_BADGE_CLASS
