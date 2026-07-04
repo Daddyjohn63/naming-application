@@ -7,7 +7,7 @@ import { Badge } from "@workspace/ui/components/badge"
 type CeremonyStep = {
   title: string
   description: string
-  phase: "Free" | "Unlocked"
+  phase: "Free" | "Paid"
 }
 
 const CEREMONY_STEPS: readonly CeremonyStep[] = [
@@ -32,25 +32,25 @@ const CEREMONY_STEPS: readonly CeremonyStep[] = [
   {
     title: "Unlock the full ceremony",
     description: `A single payment of ${UNLOCK_PRICE_USD} for this cat opens the remaining stages — cat-world name, ineffable near-name, and the certificate. You never leave the ceremony page, and nothing is charged before this moment.`,
-    phase: "Unlocked",
+    phase: "Paid",
   },
   {
     title: "Claim their cat-world name",
     description:
       "The grander, more mysterious name your cat goes by among other cats. Ten suggestions, the same shortlist-and-favourite flow — and the name you confirm is globally unique. No other cat, anywhere, can ever share it.",
-    phase: "Unlocked",
+    phase: "Paid",
   },
   {
     title: "Approximate the ineffable",
     description:
       "One name will always stay just out of reach — the secret one your cat keeps entirely to themselves. So we guess, wonderfully: ten strange and lovely near-names with short poetic rationales. Pick the one that feels closest to the truth.",
-    phase: "Unlocked",
+    phase: "Paid",
   },
   {
     title: "Download the certificate",
     description:
       "All three names on a storybook keepsake certificate, with their photo and the ceremony date. Download it as a PDF and reopen it from your dashboard any time.",
-    phase: "Unlocked",
+    phase: "Paid",
   },
 ] as const
 
