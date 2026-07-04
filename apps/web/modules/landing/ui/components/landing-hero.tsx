@@ -18,7 +18,8 @@ export function LandingHero() {
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-linear-to-b from-transparent via-transparent to-background/60"
       />
-      <div className="relative mx-auto grid min-h-svh w-full max-w-6xl grid-cols-1 items-center gap-10 px-4 pt-14 pb-14 md:grid-cols-2 md:gap-12 md:pt-16 md:pb-16 lg:gap-16 lg:pb-20">
+      {/* Mobile: pt-28 = 56px header offset + 56px breathing room (stacked layout can't rely on items-center). Desktop: pt-16 only offsets the header — vertical centering handles the rest. */}
+      <div className="relative mx-auto grid min-h-svh w-full max-w-6xl grid-cols-1 items-center gap-10 px-4 pt-28 pb-14 md:grid-cols-2 md:gap-12 md:pt-16 md:pb-16 lg:gap-16 lg:pb-20">
         <div className="flex flex-col gap-4 md:gap-5">
           <Badge variant="secondary" className="w-fit rounded-full px-3 py-0.5">
             Inspired by T. S. Eliot&apos;s <em>The Naming of Cats</em>
