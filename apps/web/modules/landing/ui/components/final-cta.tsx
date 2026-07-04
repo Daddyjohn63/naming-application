@@ -12,7 +12,7 @@ export function FinalCta() {
       className="w-full border-b border-border/40"
     >
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 px-6 py-24 text-center sm:py-32 lg:px-8">
-        <Logo className="size-16 text-foreground" />
+        <Logo className="size-24 text-foreground" />
         <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
           Your cat already knows their name. Time to catch up.
         </h2>
