@@ -28,7 +28,7 @@ const NAME_CARDS = [
   {
     title: "Ineffable name",
     description:
-      "The name that only the cat knows and you never will guess. But we can try to imagine what it might be",
+      "The secret name only the cat knows and keeps to themselves. But we can try to imagine what it might be",
     Mark: IneffableMark,
     markClassName: "text-foreground",
   },
