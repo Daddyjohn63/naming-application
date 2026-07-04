@@ -1,4 +1,5 @@
 import { dataComponent } from "@/lib/data-component"
+import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
 import {
   Accordion,
   AccordionContent,
@@ -14,8 +15,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "What does it cost, and when am I charged?",
-    answer:
-      "Everything up to and including your cat's everyday family name is free. Finishing the ceremony — the cat-world name, the ineffable near-name, and the certificate — is a one-time $3.99 (USD) per cat. You're only charged when you tap Unlock, never at sign-up, and payment happens right on the ceremony page without redirecting you anywhere.",
+    answer: `Everything up to and including your cat's everyday family name is free. Finishing the ceremony — the cat-world name, the ineffable near-name, and the certificate — is a one-time ${UNLOCK_PRICE_USD} (USD) per cat. You're only charged when you tap Unlock, never at sign-up, and payment happens right on the ceremony page without redirecting you anywhere.`,
   },
   {
     question: "Is the cat-world name really unique?",
@@ -34,8 +34,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "Can I name more than one cat?",
-    answer:
-      "Yes — your dashboard supports as many cats as live with you (or visit regularly). Each cat gets their own profile, summary, names, and certificate. Each ceremony is unlocked separately at $3.99.",
+    answer: `Yes — your dashboard supports as many cats as live with you (or visit regularly). Each cat gets their own profile, summary, names, and certificate. Each ceremony is unlocked separately at ${UNLOCK_PRICE_USD}.`,
   },
   {
     question: "Can I stop halfway and come back later?",

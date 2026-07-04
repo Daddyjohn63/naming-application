@@ -2,6 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 
 import { dataComponent } from "@/lib/data-component"
+import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 
@@ -45,7 +46,7 @@ export function LandingHero() {
           </nav>
           <p className="text-sm text-muted-foreground">
             Free to begin — profile, AI summary, and family names cost nothing.
-            Unlock the full ceremony for a one-time $3.99 per cat.
+            Unlock the full ceremony for a one-time {UNLOCK_PRICE_USD} per cat.
           </p>
         </div>
 

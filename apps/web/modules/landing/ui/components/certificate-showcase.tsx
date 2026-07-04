@@ -1,7 +1,7 @@
 import Image from "next/image"
-import { CheckIcon } from "lucide-react"
 
 import { dataComponent } from "@/lib/data-component"
+import { FeatureList } from "@/modules/landing/ui/components/feature-list"
 
 const CERTIFICATE_FEATURES = [
   "Their photo in an illustrated storybook frame",
@@ -42,19 +42,7 @@ export function CertificateShowcase() {
             place — proof, at last, that your cat is exactly who they always
             suspected they were.
           </p>
-          <ul className="flex flex-col gap-3">
-            {CERTIFICATE_FEATURES.map((feature) => (
-              <li key={feature} className="flex items-start gap-3">
-                <CheckIcon
-                  aria-hidden
-                  className="mt-1 size-4 shrink-0 text-primary"
-                />
-                <span className="text-pretty text-muted-foreground">
-                  {feature}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <FeatureList features={CERTIFICATE_FEATURES} />
         </div>
       </div>
     </section>

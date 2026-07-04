@@ -1,6 +1,7 @@
 import Image from "next/image"
 
 import { dataComponent } from "@/lib/data-component"
+import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
 import { Badge } from "@workspace/ui/components/badge"
 
 type CeremonyStep = {
@@ -30,8 +31,7 @@ const CEREMONY_STEPS: readonly CeremonyStep[] = [
   },
   {
     title: "Unlock the full ceremony",
-    description:
-      "A single payment of $3.99 for this cat opens the remaining stages — cat-world name, ineffable near-name, and the certificate. You never leave the ceremony page, and nothing is charged before this moment.",
+    description: `A single payment of ${UNLOCK_PRICE_USD} for this cat opens the remaining stages — cat-world name, ineffable near-name, and the certificate. You never leave the ceremony page, and nothing is charged before this moment.`,
     phase: "Unlocked",
   },
   {

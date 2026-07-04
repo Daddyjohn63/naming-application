@@ -1,7 +1,8 @@
 import Link from "next/link"
-import { CheckIcon } from "lucide-react"
 
 import { dataComponent } from "@/lib/data-component"
+import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
+import { FeatureList } from "@/modules/landing/ui/components/feature-list"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 import {
@@ -67,19 +68,7 @@ export function PricingSection() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ul className="flex flex-col gap-3">
-                {FREE_FEATURES.map((feature) => (
-                  <li key={feature} className="flex items-start gap-3">
-                    <CheckIcon
-                      aria-hidden
-                      className="mt-1 size-4 shrink-0 text-primary"
-                    />
-                    <span className="text-sm text-pretty text-muted-foreground">
-                      {feature}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <FeatureList features={FREE_FEATURES} itemClassName="text-sm" />
             </CardContent>
             <CardFooter className="mt-auto">
               <Button variant="outline" size="lg" className="w-full" asChild>
@@ -99,7 +88,7 @@ export function PricingSection() {
                 </CardTitle>
                 <div className="flex items-baseline gap-2">
                   <span className="text-4xl font-semibold tracking-tight">
-                    $3.99
+                    {UNLOCK_PRICE_USD}
                   </span>
                   <span className="text-sm text-muted-foreground">
                     one-time, per cat
@@ -111,19 +100,10 @@ export function PricingSection() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ul className="flex flex-col gap-3">
-                  {UNLOCK_FEATURES.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3">
-                      <CheckIcon
-                        aria-hidden
-                        className="mt-1 size-4 shrink-0 text-primary"
-                      />
-                      <span className="text-sm text-pretty text-muted-foreground">
-                        {feature}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                <FeatureList
+                  features={UNLOCK_FEATURES}
+                  itemClassName="text-sm"
+                />
               </CardContent>
               <CardFooter className="mt-auto">
                 <Button size="lg" className="w-full" asChild>
