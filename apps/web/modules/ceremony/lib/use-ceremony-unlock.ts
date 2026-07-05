@@ -6,18 +6,12 @@ import { useMutation } from "convex/react"
 import { api } from "@workspace/backend/_generated/api"
 import type { Doc } from "@workspace/backend/_generated/dataModel"
 import { isCeremonyUnlocked } from "@/modules/ceremony/lib/ceremony-layout"
+import { isStubUnlockUiEnabled } from "@/modules/ceremony/lib/stub-unlock-config"
 import {
   FAMILY_UNLOCK_CHECKOUT_STEPS,
 } from "@workspace/shared/constants/naming-curation"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
 import { toast } from "@workspace/ui/components/sonner"
-
-function isStubUnlockUiEnabled(): boolean {
-  return (
-    process.env.NEXT_PUBLIC_ENABLE_STUB_UNLOCK === "true" ||
-    process.env.NODE_ENV === "development"
-  )
-}
 
 type CeremonyUnlockCat = Pick<
   Doc<"cats">,
@@ -50,24 +44,41 @@ export function useCeremonyUnlock(cat: CeremonyUnlockCat) {
   const showUnlockCheckout = isFamilyUnlockCheckoutStep && !unlocked
   const showStubUnlock = step === "awaiting_payment" && isStubUnlockUiEnabled()
   const showUnlockPrompt = showUnlockCheckout || showStubUnlock
+  const showAwaitingPaymentPlaceholder =
+    step === "awaiting_payment" && !showStubUnlock && !unlocked
+
+  const completeUnlockFlow = React.useCallback(async () => {
+    if (step !== "awaiting_payment") {
+      await beginUnlock({ catId: cat._id })
+    }
+    if (isStubUnlockUiEnabled()) {
+      await completeStubUnlock({ catId: cat._id })
+      return "stub" as const
+    }
+    return "checkout" as const
+  }, [beginUnlock, cat._id, completeStubUnlock, step])
 
   const onBeginUnlock = React.useCallback(async () => {
     setUnlocking(true)
     try {
-      await beginUnlock({ catId: cat._id })
-      toast.success("Ready to complete your unlock.")
+      const result = await completeUnlockFlow()
+      toast.success(
+        result === "stub"
+          ? "Unlocked — generating cat-world names…"
+          : "Ready to complete your unlock.",
+      )
     } catch (error) {
       toast.error(getConvexErrorMessage(error))
     } finally {
       setUnlocking(false)
     }
-  }, [beginUnlock, cat._id])
+  }, [completeUnlockFlow])
 
   const onStubUnlock = React.useCallback(async () => {
     setPaying(true)
     try {
       await completeStubUnlock({ catId: cat._id })
-      toast.success("Unlocked — your cat-world names await!")
+      toast.success("Unlocked — generating cat-world names…")
     } catch (error) {
       toast.error(getConvexErrorMessage(error))
     } finally {
@@ -83,6 +94,7 @@ export function useCeremonyUnlock(cat: CeremonyUnlockCat) {
     showUnlockCheckout,
     showStubUnlock,
     showUnlockPrompt,
+    showAwaitingPaymentPlaceholder,
     unlocking,
     paying,
     onBeginUnlock,

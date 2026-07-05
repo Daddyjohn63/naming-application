@@ -38,6 +38,7 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
     unlockEnabled,
     showUnlockCheckout,
     showStubUnlock,
+    showAwaitingPaymentPlaceholder,
     unlocking,
     paying,
     onBeginUnlock,
@@ -90,7 +91,7 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
 
       <div className="flex flex-col gap-4 px-4 py-6">
         {showUnlockCheckout || showStubUnlock ? (
-          <div className="hidden flex-col gap-4 lg:flex">
+          <div className="flex flex-col gap-4">
             <p className="text-foreground text-sm font-semibold tracking-tight">
               $3.99 USD
             </p>
@@ -128,6 +129,15 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
               </>
             ) : null}
           </div>
+        ) : null}
+
+        {showAwaitingPaymentPlaceholder ? (
+          <p className="text-muted-foreground text-sm">
+            Checkout is disabled in this environment (
+            <code className="text-foreground">NEXT_PUBLIC_ENABLE_STUB_UNLOCK=false</code>
+            ). Your family name and shortlist are saved — return when payment is
+            available.
+          </p>
         ) : null}
 
         {unlocked && showContinueToCatWorld ? (

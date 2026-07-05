@@ -10,6 +10,8 @@ import { ConvexError, v } from "convex/values"
 import { CEREMONY_UNLOCK_AMOUNT_MINOR_USD } from "@workspace/shared/constants/naming-curation"
 import { STAGED_NAMING_ERROR_CODE } from "@workspace/shared/constants/staged-naming-errors"
 
+import { beginCatWorldGenerationIfNeeded } from "./lib/beginCatWorldGeneration"
+import { isStubUnlockAllowedOnDeployment } from "./lib/stubUnlock"
 import { mutation } from "./_generated/server"
 import { getCurrentUser } from "./users"
 
@@ -46,7 +48,7 @@ export const completeStubUnlock = mutation({
     if (cat.ceremonyPaymentId !== undefined) {
       throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.STEP_LOCKED })
     }
-    if (process.env.ENABLE_STUB_UNLOCK !== "true") {
+    if (!isStubUnlockAllowedOnDeployment()) {
       throw new ConvexError({
         code: STAGED_NAMING_ERROR_CODE.STUB_UNLOCK_DISABLED,
       })
@@ -66,9 +68,10 @@ export const completeStubUnlock = mutation({
 
     await ctx.db.patch(id, {
       ceremonyPaymentId: paymentId,
-      ceremonyStep: "naming_cat_world",
       updatedAt: now,
     })
+
+    await beginCatWorldGenerationIfNeeded(ctx, id)
 
     await ctx.db.insert("funnel_events", {
       userId: currentUser._id,

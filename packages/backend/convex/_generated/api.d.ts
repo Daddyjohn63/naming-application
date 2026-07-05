@@ -22,7 +22,9 @@ import type * as familyNamingActions from "../familyNamingActions.js";
 import type * as http from "../http.js";
 import type * as ineffableNaming from "../ineffableNaming.js";
 import type * as ineffableNamingActions from "../ineffableNamingActions.js";
+import type * as lib_beginCatWorldGeneration from "../lib/beginCatWorldGeneration.js";
 import type * as lib_namingStage from "../lib/namingStage.js";
+import type * as lib_stubUnlock from "../lib/stubUnlock.js";
 import type * as users from "../users.js";
 
 import type {
@@ -46,7 +48,9 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   ineffableNaming: typeof ineffableNaming;
   ineffableNamingActions: typeof ineffableNamingActions;
+  "lib/beginCatWorldGeneration": typeof lib_beginCatWorldGeneration;
   "lib/namingStage": typeof lib_namingStage;
+  "lib/stubUnlock": typeof lib_stubUnlock;
   users: typeof users;
 }>;
 

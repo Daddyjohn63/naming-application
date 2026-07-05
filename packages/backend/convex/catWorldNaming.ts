@@ -41,6 +41,7 @@ import {
   shortlistForStage,
   type ShortlistEntry,
 } from "./lib/namingStage"
+import { beginCatWorldGenerationIfNeeded } from "./lib/beginCatWorldGeneration"
 import { getCurrentUser } from "./users"
 import type { Doc, Id } from "./_generated/dataModel"
 
@@ -240,19 +241,7 @@ export const startCatWorldNaming = mutation({
       throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NO_EVERYDAY_NAME })
     }
 
-    const existingBatch = await latestGenerationForStage(ctx, id, STAGE)
-    if (existingBatch !== null) {
-      return null
-    }
-
-    const now = Date.now()
-    await ctx.db.patch(id, {
-      ceremonyStep: "awaiting_cat_world_names",
-      catWorldNameGenerationError: undefined,
-      updatedAt: now,
-    })
-
-    await scheduleCatWorldGeneration(ctx, id, 0)
+    await beginCatWorldGenerationIfNeeded(ctx, id)
     return null
   },
 })
