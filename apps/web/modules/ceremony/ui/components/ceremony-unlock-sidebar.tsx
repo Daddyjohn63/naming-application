@@ -26,11 +26,8 @@ type CeremonyUnlockSidebarProps = {
  * KB-007 stub unlock on `awaiting_payment`; KB-009/010 continue CTAs after unlock.
  */
 export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
-  const {
-    continuingToCatWorld,
-    continueToCatWorld,
-    showContinueToCatWorld,
-  } = useCeremonyStageContinue(cat)
+  const { continuingToCatWorld, continueToCatWorld, showContinueToCatWorld } =
+    useCeremonyStageContinue(cat)
 
   const {
     unlocked,
@@ -56,9 +53,11 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
         ? "Generating cat-world names"
         : step === "naming_cat_world" && cat.selectedCatWorldName === undefined
           ? "Continue your ceremony"
-          : step === "naming_cat_world" && cat.selectedCatWorldName !== undefined
+          : step === "naming_cat_world" &&
+              cat.selectedCatWorldName !== undefined
             ? "Almost there"
-            : step === "naming_ineffable" && cat.selectedIneffableName === undefined
+            : step === "naming_ineffable" &&
+                cat.selectedIneffableName === undefined
               ? "Almost there"
               : unlocked
                 ? "Your ceremony"
@@ -71,19 +70,24 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
         ? "We're crafting distinctive cat-world names — this usually takes a moment."
         : step === "naming_cat_world" && cat.selectedCatWorldName === undefined
           ? "Choose a cat-world name next. You can still switch your family name favourite from the shortlist above."
-          : step === "naming_cat_world" && cat.selectedCatWorldName !== undefined
+          : step === "naming_cat_world" &&
+              cat.selectedCatWorldName !== undefined
             ? "Continue in the main column when you're ready for your ineffable near-name."
-            : step === "naming_ineffable" && cat.selectedIneffableName === undefined
+            : step === "naming_ineffable" &&
+                cat.selectedIneffableName === undefined
               ? "One more stage — playful approximations of the secret name."
               : unlocked
-                ? "Switch stages in the main column to review or change your picks before the certificate."
+                ? "Review or change your picks before moving to generate your certificate."
                 : "Your family name is free. Unlock once per cat to reveal cat-world and ineffable names, then receive your certificate."
 
   return (
-    <Card {...dataComponent("CeremonyUnlockSidebar")} className="ceremony-sidebar-panel border-primary/20">
+    <Card
+      {...dataComponent("CeremonyUnlockSidebar")}
+      className="ceremony-sidebar-panel border-primary/20"
+    >
       <CardHeader className="border-b">
         <div className="flex items-center gap-2">
-          <Lock className="text-primary size-4 shrink-0" aria-hidden />
+          <Lock className="size-4 shrink-0 text-primary" aria-hidden />
           <CardTitle className="text-base">{title}</CardTitle>
         </div>
         <CardDescription>{description}</CardDescription>
@@ -92,13 +96,13 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
       <div className="flex flex-col gap-4 px-4 py-6">
         {showUnlockCheckout || showStubUnlock ? (
           <div className="flex flex-col gap-4">
-            <p className="text-foreground text-sm font-semibold tracking-tight">
+            <p className="text-sm font-semibold tracking-tight text-foreground">
               $3.99 USD
             </p>
 
             {showUnlockCheckout ? (
               <>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-sm text-muted-foreground">
                   {unlockEnabled
                     ? "Ready when you are — your shortlist and favourite stay saved if checkout is interrupted."
                     : "Save at least one name to your shortlist and pick a favourite to unlock."}
@@ -115,9 +119,9 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
 
             {showStubUnlock ? (
               <>
-                <p className="text-muted-foreground text-sm">
-                  Stub unlock for development — no charge. Your names remain visible
-                  while you complete payment.
+                <p className="text-sm text-muted-foreground">
+                  Stub unlock for development — no charge. Your names remain
+                  visible while you complete payment.
                 </p>
                 <Button
                   type="button"
@@ -132,9 +136,11 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
         ) : null}
 
         {showAwaitingPaymentPlaceholder ? (
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             Checkout is disabled in this environment (
-            <code className="text-foreground">NEXT_PUBLIC_ENABLE_STUB_UNLOCK=false</code>
+            <code className="text-foreground">
+              NEXT_PUBLIC_ENABLE_STUB_UNLOCK=false
+            </code>
             ). Your family name and shortlist are saved — return when payment is
             available.
           </p>
