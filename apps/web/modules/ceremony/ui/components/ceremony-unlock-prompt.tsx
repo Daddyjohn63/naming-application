@@ -34,14 +34,14 @@ export function CeremonyUnlockPrompt({
     showUnlockPrompt,
     showUnlockCheckout,
     showStubUnlock,
+    showAwaitingPaymentPlaceholder,
     unlockEnabled,
     unlocking,
     paying,
     onBeginUnlock,
-    onStubUnlock,
   } = useCeremonyUnlock(cat)
 
-  if (!showUnlockPrompt) {
+  if (!showUnlockPrompt && !showAwaitingPaymentPlaceholder) {
     return null
   }
 
@@ -124,12 +124,21 @@ export function CeremonyUnlockPrompt({
               type="button"
               size="lg"
               className="w-full sm:w-auto"
-              disabled={paying}
-              onClick={() => void onStubUnlock()}
+              disabled={paying || unlocking}
+              onClick={() => void onBeginUnlock()}
             >
-              {paying ? "Unlocking…" : "Unlock now ($3.99 — no charge)"}
+              {paying || unlocking
+                ? "Unlocking…"
+                : "Unlock now ($3.99 — no charge)"}
             </Button>
           </>
+        ) : null}
+
+        {showAwaitingPaymentPlaceholder ? (
+          <p className="text-muted-foreground text-sm">
+            Checkout is not configured in this environment. Your family name and
+            shortlist are saved — return when payment is available.
+          </p>
         ) : null}
       </div>
     </Card>

@@ -119,7 +119,6 @@ export function useCeremonyStageContinue(
   const showContinueToCatWorld =
     needsCatWorldGenerationStart(cat) &&
     catWorldStateLoaded &&
-    catWorldState !== null &&
     !hasCatWorldBatch
 
   const showContinueToIneffable =

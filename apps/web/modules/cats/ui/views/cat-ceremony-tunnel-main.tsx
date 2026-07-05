@@ -70,6 +70,9 @@ export function CatCeremonyTunnelMain({
     continueToIneffable,
     showContinueToIneffable,
     needsCatWorldConfirm,
+    continuingToCatWorld,
+    continueToCatWorld,
+    showContinueToCatWorld,
   } = useCeremonyStageContinue(cat)
 
   const [activeView, setActiveView] = React.useState<CeremonyNamingView>(() =>
@@ -126,6 +129,16 @@ export function CatCeremonyTunnelMain({
       <CeremonyThreeNamesView cat={cat} />
 
       <CeremonyUnlockPrompt cat={cat} />
+
+      {panels.showPaidNaming && showContinueToCatWorld ? (
+        <CeremonyStageContinuePrompt
+          title="Start your cat-world names"
+          description="We'll generate ten distinctive names for you to choose from."
+          buttonLabel="Generate cat-world names"
+          continuing={continuingToCatWorld}
+          onContinue={() => void continueToCatWorld()}
+        />
+      ) : null}
 
       {panels.showPaidNaming && showContinueToIneffable ? (
         <CeremonyStageContinuePrompt

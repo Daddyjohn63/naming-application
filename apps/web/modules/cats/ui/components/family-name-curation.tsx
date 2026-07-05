@@ -37,6 +37,7 @@ import { cn } from "@workspace/ui/lib/utils"
 
 import { FamilyNamePaywallTeaser } from "./family-name-paywall-teaser"
 import { scrollToCeremonyThreeNames } from "@/modules/ceremony/lib/scroll-to-ceremony-three-names"
+import { useCeremonyUnlock } from "@/modules/ceremony/lib/use-ceremony-unlock"
 import { dataComponent } from "@/lib/data-component"
 
 type FamilyNameCurationProps = {
@@ -64,14 +65,13 @@ export function FamilyNameCuration({
   const removeFromShortlist = useMutation(api.familyNaming.removeFromFamilyShortlist)
   const setFavourite = useMutation(api.familyNaming.setFamilyFavourite)
   const regenerateNames = useMutation(api.familyNaming.regenerateFamilyNames)
-  const beginUnlock = useMutation(api.familyNaming.beginUnlock)
+  const { unlocking, onBeginUnlock } = useCeremonyUnlock(cat)
   const [savingName, setSavingName] = React.useState<string | null>(null)
   const [removingName, setRemovingName] = React.useState<string | null>(null)
   const [settingFavourite, setSettingFavourite] = React.useState<string | null>(
     null,
   )
   const [regenerating, setRegenerating] = React.useState(false)
-  const [unlocking, setUnlocking] = React.useState(false)
   const [showRegenStyles, setShowRegenStyles] = React.useState(false)
   const [customName, setCustomName] = React.useState("")
   const [addingCustomName, setAddingCustomName] = React.useState(false)
@@ -235,18 +235,6 @@ export function FamilyNameCuration({
   const unlockEnabled =
     favouriteNormalized !== null && shortlist.length >= 1
   const showShortlistPanel = !tunnelMode && shortlist.length > 0
-
-  const onUnlock = async () => {
-    setUnlocking(true)
-    try {
-      await beginUnlock({ catId: cat._id })
-      toast.success("Ready to unlock the rest of your ceremony.")
-    } catch (error) {
-      toast.error(getConvexErrorMessage(error))
-    } finally {
-      setUnlocking(false)
-    }
-  }
 
   return (
     <div {...dataComponent("FamilyNameCuration")} className="flex flex-col gap-6">
@@ -541,7 +529,7 @@ export function FamilyNameCuration({
         <FamilyNamePaywallTeaser
           unlockEnabled={unlockEnabled}
           unlocking={unlocking}
-          onUnlock={() => void onUnlock()}
+          onUnlock={() => void onBeginUnlock()}
         />
       ) : null}
     </div>
