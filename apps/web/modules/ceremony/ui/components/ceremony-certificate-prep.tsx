@@ -1,8 +1,12 @@
 "use client"
 
 /**
- * KB-010 → KB-011 handoff — certificate generation CTA (PDF render arrives in KB-011).
+ * KB-011 — certificate tab card: hands off to `/cats/[catId]/certificate`
+ * where the everyday-name edit, preview, and PDF download live.
  */
+
+import Link from "next/link"
+import { Award } from "lucide-react"
 
 import type { Doc } from "@workspace/backend/_generated/dataModel"
 import { Button } from "@workspace/ui/components/button"
@@ -14,26 +18,19 @@ import {
 } from "@workspace/ui/components/card"
 
 import { dataComponent } from "@/lib/data-component"
+import { allThreeCeremonyNamesChosen } from "@/modules/ceremony/lib/ceremony-naming-view"
 
 type CeremonyCertificatePrepProps = {
   cat: Doc<"cats">
 }
 
-function allThreeNamesChosen(cat: Doc<"cats">): boolean {
-  return (
-    cat.selectedFamilyName !== undefined &&
-    cat.selectedFamilyRationale !== undefined &&
-    cat.selectedCatWorldName !== undefined &&
-    cat.selectedCatWorldRationale !== undefined &&
-    cat.selectedIneffableName !== undefined &&
-    cat.selectedIneffableRationale !== undefined
-  )
-}
-
 export function CeremonyCertificatePrep({ cat }: CeremonyCertificatePrepProps) {
-  if (!allThreeNamesChosen(cat)) {
+  if (!allThreeCeremonyNamesChosen(cat)) {
     return null
   }
+
+  const complete = cat.ceremonyStep === "ceremony_complete"
+  const href = `/cats/${encodeURIComponent(cat._id)}/certificate`
 
   return (
     <Card
@@ -41,19 +38,29 @@ export function CeremonyCertificatePrep({ cat }: CeremonyCertificatePrepProps) {
       className="ceremony-highlight-panel border-primary/30"
     >
       <CardHeader className="border-b">
-        <CardTitle className="text-base">Your three names are complete</CardTitle>
+        <CardTitle className="text-base">
+          {complete
+            ? "Your ceremony is complete"
+            : "Your three names are complete"}
+        </CardTitle>
         <CardDescription>
-          You can still switch between cat-world and ineffable above to change your
-          mind. When you&apos;re happy, generate your whimsical naming certificate.
+          {complete
+            ? "Your certificate has been generated. View it or download the PDF again any time."
+            : "You can still switch between cat-world and ineffable above to change your mind. When you're happy, create your whimsical naming certificate."}
         </CardDescription>
       </CardHeader>
       <div className="flex flex-col gap-3 px-4 py-6">
-        <p className="text-muted-foreground text-sm">
-          Certificate preview and PDF download arrive in the next milestone — your
-          selections are saved and ready.
-        </p>
-        <Button type="button" disabled aria-disabled>
-          Generate certificate — coming soon
+        {!complete ? (
+          <p className="text-muted-foreground text-sm">
+            On the certificate page you can adjust the everyday name one last
+            time before generating — generating makes your names final.
+          </p>
+        ) : null}
+        <Button asChild>
+          <Link href={href}>
+            <Award className="size-4" aria-hidden />
+            {complete ? "View certificate" : "Create certificate"}
+          </Link>
         </Button>
       </div>
     </Card>
