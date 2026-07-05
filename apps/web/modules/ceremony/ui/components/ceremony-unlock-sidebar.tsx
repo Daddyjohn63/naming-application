@@ -60,7 +60,7 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
                 cat.selectedIneffableName === undefined
               ? "Almost there"
               : unlocked
-                ? "Your ceremony"
+                ? "Your naming ceremony"
                 : "What's next"
 
   const description =
