@@ -19,7 +19,9 @@ export const completeStubUnlock = mutation({
   handler: async (ctx, { catId }) => {
     const currentUser = await getCurrentUser(ctx)
     if (currentUser === null) {
-      throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NOT_AUTHENTICATED })
+      throw new ConvexError({
+        code: STAGED_NAMING_ERROR_CODE.NOT_AUTHENTICATED,
+      })
     }
 
     const id = ctx.db.normalizeId("cats", catId)

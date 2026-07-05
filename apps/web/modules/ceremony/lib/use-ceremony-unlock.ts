@@ -6,9 +6,7 @@ import { useMutation } from "convex/react"
 import { api } from "@workspace/backend/_generated/api"
 import type { Doc } from "@workspace/backend/_generated/dataModel"
 import { isCeremonyUnlocked } from "@/modules/ceremony/lib/ceremony-layout"
-import {
-  FAMILY_UNLOCK_CHECKOUT_STEPS,
-} from "@workspace/shared/constants/naming-curation"
+import { FAMILY_UNLOCK_CHECKOUT_STEPS } from "@workspace/shared/constants/naming-curation"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
 import { toast } from "@workspace/ui/components/sonner"
 

@@ -5,6 +5,7 @@ import { Lock } from "lucide-react"
 
 import type { Doc } from "@workspace/backend/_generated/dataModel"
 import { showCeremonyUnlockSidebar } from "@/modules/ceremony/lib/ceremony-layout"
+import { allThreeCeremonyNamesChosen } from "@/modules/ceremony/lib/ceremony-naming-view"
 import { useCeremonyStageContinue } from "@/modules/ceremony/lib/use-ceremony-stage-continue"
 import { useCeremonyUnlock } from "@/modules/ceremony/lib/use-ceremony-unlock"
 import { Button } from "@workspace/ui/components/button"
@@ -48,8 +49,12 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
     return null
   }
 
-  const title =
-    step === "awaiting_payment"
+  const ceremonyComplete = cat.ceremonyStep === "ceremony_complete"
+  const readyForCertificate = allThreeCeremonyNamesChosen(cat)
+
+  const title = ceremonyComplete
+    ? "Ceremony complete"
+    : step === "awaiting_payment"
       ? "Complete your unlock"
       : step === "awaiting_cat_world_names"
         ? "Generating cat-world names"
@@ -63,8 +68,9 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
                 ? "Your ceremony"
                 : "What's next"
 
-  const description =
-    step === "awaiting_payment"
+  const description = ceremonyComplete
+    ? "Your certificate is ready — view or download it any time."
+    : step === "awaiting_payment"
       ? "Your family name and shortlist stay saved if checkout is interrupted."
       : step === "awaiting_cat_world_names"
         ? "We're crafting distinctive cat-world names — this usually takes a moment."
@@ -138,6 +144,14 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
             onClick={() => void continueToCatWorld()}
           >
             {continuingToCatWorld ? "Starting…" : "Continue to cat-world names"}
+          </Button>
+        ) : null}
+
+        {readyForCertificate ? (
+          <Button asChild>
+            <Link href={`/cats/${encodeURIComponent(cat._id)}/certificate`}>
+              {ceremonyComplete ? "View certificate" : "Create certificate"}
+            </Link>
           </Button>
         ) : null}
 
