@@ -8,7 +8,6 @@
 
 export const NAME_BATCH_SIZE = 10
 export const MAX_SHORTLIST_TOTAL = 6
-export const MAX_SHORTLIST_PER_BATCH = 3
 export const MAX_NAME_REGENERATIONS = 1
 
 /** Normalize a name for duplicate detection (case-insensitive, collapsed whitespace). */

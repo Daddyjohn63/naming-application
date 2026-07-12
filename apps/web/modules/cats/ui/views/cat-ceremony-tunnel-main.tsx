@@ -25,7 +25,11 @@ import {
 import { CeremonyStageContinuePrompt } from "@/modules/ceremony/ui/components/ceremony-stage-continue-prompt"
 import { CeremonyThreeNamesView } from "@/modules/ceremony/ui/components/ceremony-three-names-view"
 import { CeremonyUnlockPrompt } from "@/modules/ceremony/ui/components/ceremony-unlock-prompt"
-import { defaultCeremonyNamingView } from "@/modules/ceremony/lib/ceremony-naming-view"
+import {
+  allThreeCeremonyNamesChosen,
+  defaultCeremonyNamingView,
+} from "@/modules/ceremony/lib/ceremony-naming-view"
+import { scrollToCeremonyCertificatePrep } from "@/modules/ceremony/lib/scroll-to-ceremony-certificate-prep"
 import { useCeremonyStageContinue } from "@/modules/ceremony/lib/use-ceremony-stage-continue"
 import { FamilyNameCuration } from "@/modules/cats/ui/components/family-name-curation"
 import { FamilyNamePipelineStatus } from "@/modules/cats/ui/components/family-name-pipeline-status"
@@ -78,12 +82,33 @@ export function CatCeremonyTunnelMain({
   const [activeView, setActiveView] = React.useState<CeremonyNamingView>(() =>
     defaultCeremonyNamingView(cat),
   )
+  const wasReadyForCertificateRef = React.useRef(
+    allThreeCeremonyNamesChosen(cat),
+  )
 
   // Re-sync tab when step advances (e.g. naming_cat_world → naming_ineffable).
   // Do not depend on selectedCatWorldName — that caused premature tab switch before Continue.
   React.useEffect(() => {
     setActiveView(defaultCeremonyNamingView(cat))
   }, [cat.ceremonyStep, cat.selectedIneffableName])
+
+  // When the third name is chosen, open Certificate and bring the main CTA into view.
+  React.useEffect(() => {
+    const ready = allThreeCeremonyNamesChosen(cat)
+    if (ready && !wasReadyForCertificateRef.current) {
+      wasReadyForCertificateRef.current = true
+      setActiveView("certificate")
+      scrollToCeremonyCertificatePrep()
+      return
+    }
+    if (!ready) {
+      wasReadyForCertificateRef.current = false
+    }
+  }, [
+    cat.selectedFamilyName,
+    cat.selectedCatWorldName,
+    cat.selectedIneffableName,
+  ])
 
   const onContinueToIneffable = async () => {
     await continueToIneffable()
@@ -98,8 +123,8 @@ export function CatCeremonyTunnelMain({
           selectedName: catWorldState.selectedCatWorldName,
           selectedRationale: catWorldState.selectedCatWorldRationale,
           regenerationsUsed: catWorldState.catWorldNameRegenerationsUsed,
+          generatedBatches: catWorldState.generatedBatches,
           currentBatch: catWorldState.currentBatch,
-          savedFromCurrentBatchCount: catWorldState.savedFromCurrentBatchCount,
         }
 
   const ineffableNamingState =
@@ -110,8 +135,8 @@ export function CatCeremonyTunnelMain({
           selectedName: ineffableState.selectedIneffableName,
           selectedRationale: ineffableState.selectedIneffableRationale,
           regenerationsUsed: ineffableState.ineffableNameRegenerationsUsed,
+          generatedBatches: ineffableState.generatedBatches,
           currentBatch: ineffableState.currentBatch,
-          savedFromCurrentBatchCount: ineffableState.savedFromCurrentBatchCount,
         }
 
   return (
@@ -180,14 +205,14 @@ export function CatCeremonyTunnelMain({
                 />
               ) : null}
               {!panels.showCatWorldNamePipeline &&
-              catWorldNamingState?.currentBatch !== null &&
-              catWorldNamingState?.currentBatch !== undefined ? (
+              catWorldNamingState?.generatedBatches !== null &&
+              catWorldNamingState?.generatedBatches !== undefined ? (
                 <StageNameCuration
                   cat={cat}
                   stage="cat_world"
                   state={catWorldNamingState}
                   title="Cat-world name suggestions"
-                  description="Save up to three names from this batch"
+                  description="Save up to six names to your shortlist"
                 />
               ) : null}
             </>
@@ -204,14 +229,14 @@ export function CatCeremonyTunnelMain({
                 />
               ) : null}
               {!panels.showIneffableNamePipeline &&
-              ineffableNamingState?.currentBatch !== null &&
-              ineffableNamingState?.currentBatch !== undefined ? (
+              ineffableNamingState?.generatedBatches !== null &&
+              ineffableNamingState?.generatedBatches !== undefined ? (
                 <StageNameCuration
                   cat={cat}
                   stage="ineffable"
                   state={ineffableNamingState}
                   title="Ineffable near-name suggestions"
-                  description="Save up to three approximations from this batch"
+                  description="Save up to six approximations to your shortlist"
                   framingCopy="These are playful guesses at your cat's secret name — the one no human can truly know. Pick the near-name that feels closest to the mystery."
                   onConfirmContinue={
                     cat.ceremonyStep === "naming_ineffable"

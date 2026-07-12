@@ -3,7 +3,6 @@ import { z } from "zod"
 import {
   FAMILY_NAME_BATCH_SIZE,
   FAMILY_NAME_STYLE_IDS,
-  MAX_FAMILY_SHORTLIST_PER_BATCH,
   MAX_FAMILY_SHORTLIST_TOTAL,
 } from "../constants/family-naming"
 
@@ -59,6 +58,5 @@ export const regenerateFamilyNamesSchema = z.object({
 
 export {
   FAMILY_NAME_BATCH_SIZE,
-  MAX_FAMILY_SHORTLIST_PER_BATCH,
   MAX_FAMILY_SHORTLIST_TOTAL,
 }

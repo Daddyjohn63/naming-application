@@ -16,7 +16,6 @@ export const STAGED_NAMING_ERROR_CODE = {
   GENERATION_IN_PROGRESS: "generation_in_progress",
   BATCH_NOT_READY: "batch_not_ready",
   SHORTLIST_FULL: "shortlist_full",
-  BATCH_SAVE_LIMIT: "batch_save_limit",
   DUPLICATE_NAME: "duplicate_name",
   NAME_NOT_IN_BATCH: "name_not_in_batch",
   NAME_NOT_IN_SHORTLIST: "name_not_in_shortlist",
@@ -49,12 +48,10 @@ const MESSAGES: Record<StagedNamingErrorCode, string> = {
     "Name suggestions aren't ready yet. Try again shortly.",
   [STAGED_NAMING_ERROR_CODE.SHORTLIST_FULL]:
     "Your shortlist is full (6 names maximum). Remove one to save another.",
-  [STAGED_NAMING_ERROR_CODE.BATCH_SAVE_LIMIT]:
-    "You can save up to 3 names from this batch.",
   [STAGED_NAMING_ERROR_CODE.DUPLICATE_NAME]:
     "That name is already on your shortlist.",
   [STAGED_NAMING_ERROR_CODE.NAME_NOT_IN_BATCH]:
-    "That name isn't in the current suggestions.",
+    "That name isn't in your suggestions.",
   [STAGED_NAMING_ERROR_CODE.NAME_NOT_IN_SHORTLIST]:
     "Pick a favourite from your saved shortlist.",
   [STAGED_NAMING_ERROR_CODE.REGEN_EXHAUSTED]:

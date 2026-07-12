@@ -25,7 +25,7 @@ const FAQ_ITEMS = [
   {
     question: "What if I don't like the names the AI suggests?",
     answer:
-      "Each naming stage gives you 10 suggestions with a short rationale for each. You can shortlist up to six, regenerate once for 10 completely fresh names, and for the family name you can even add one of your own. Your shortlist is never lost when you regenerate.",
+      "Each naming stage gives you 10 suggestions with a short rationale for each. You can shortlist up to six names from those suggestions, regenerate once for 10 completely fresh names (and keep choosing across both batches), and for the family name you can even add one of your own.",
   },
   {
     question: "Can I edit the AI's summary of my cat?",
