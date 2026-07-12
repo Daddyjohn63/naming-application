@@ -19,6 +19,7 @@ import {
 
 import { dataComponent } from "@/lib/data-component"
 import { allThreeCeremonyNamesChosen } from "@/modules/ceremony/lib/ceremony-naming-view"
+import { CEREMONY_CERTIFICATE_PREP_SECTION_ID } from "@/modules/ceremony/lib/scroll-to-ceremony-certificate-prep"
 
 type CeremonyCertificatePrepProps = {
   cat: Doc<"cats">
@@ -35,7 +36,8 @@ export function CeremonyCertificatePrep({ cat }: CeremonyCertificatePrepProps) {
   return (
     <Card
       {...dataComponent("CeremonyCertificatePrep")}
-      className="ceremony-highlight-panel border-primary/30"
+      id={CEREMONY_CERTIFICATE_PREP_SECTION_ID}
+      className="ceremony-highlight-panel scroll-mt-24 border-primary/30"
     >
       <CardHeader className="border-b">
         <CardTitle className="text-base">

@@ -142,7 +142,15 @@ export function CeremonyThreeNamesView({
     setSettingStage("ineffable")
     try {
       await setIneffableFavourite({ catId: cat._id, name })
-      scrollToCeremonyThreeNames()
+      // Completing the third name opens Certificate in the main column;
+      // changing an existing ineffable pick can stay on the three-name cards.
+      if (
+        cat.selectedFamilyName === undefined ||
+        cat.selectedCatWorldName === undefined ||
+        cat.selectedIneffableName !== undefined
+      ) {
+        scrollToCeremonyThreeNames()
+      }
     } catch (error) {
       toast.error(getConvexErrorMessage(error))
     } finally {

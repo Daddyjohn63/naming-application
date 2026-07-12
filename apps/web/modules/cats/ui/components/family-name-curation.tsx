@@ -37,7 +37,10 @@ import { toast } from "@workspace/ui/components/sonner"
 import { cn } from "@workspace/ui/lib/utils"
 
 import { FamilyNamePaywallTeaser } from "./family-name-paywall-teaser"
+import { NameSuggestionBatches } from "./name-suggestion-batches"
 import { scrollToCeremonyThreeNames } from "@/modules/ceremony/lib/scroll-to-ceremony-three-names"
+import { nameSuggestionsSectionId } from "@/modules/ceremony/lib/scroll-to-name-suggestions"
+import { useScrollToNameSuggestionsOnReady } from "@/modules/ceremony/lib/use-scroll-to-name-suggestions-on-ready"
 import { useCeremonyUnlock } from "@/modules/ceremony/lib/use-ceremony-unlock"
 import { dataComponent } from "@/lib/data-component"
 
@@ -95,6 +98,9 @@ export function FamilyNameCuration({
       )
     }
   }, [showRegenStyles, state?.familyNameStyles])
+
+  const batchCount = state?.generatedBatches?.length ?? 0
+  useScrollToNameSuggestionsOnReady("family", batchCount)
 
   if (state === undefined) {
     return (
@@ -238,9 +244,148 @@ export function FamilyNameCuration({
     customShortlistEntry !== undefined &&
     favouriteNormalized === normalizeFamilyName(customShortlistEntry.name)
 
+  const renderSuggestionEntry = (
+    entry: { name: string; rationale: string },
+    batch: { generationIndex: number },
+  ) => {
+    const normalized = normalizeFamilyName(entry.name)
+    const onShortlist = shortlistNormalized.has(normalized)
+    const isFavourite = favouriteNormalized === normalized
+    const canSave = !onShortlist && shortlistRemaining > 0 && !busySaving
+
+    return (
+      <li
+        key={`${batch.generationIndex}-${entry.name}`}
+        className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-start sm:justify-between"
+      >
+        <div className="flex min-w-0 flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-base font-semibold tracking-tight">
+              {entry.name}
+            </span>
+            {onShortlist ? <ShortlistSavedBadge /> : null}
+            {isFavourite ? <ShortlistFavouriteBadge /> : null}
+          </div>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {entry.rationale}
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          {onShortlist ? (
+            <>
+              <Button
+                type="button"
+                size="sm"
+                variant={isFavourite ? "default" : "outline"}
+                className={
+                  isFavourite ? undefined : setFavouriteButtonClassName
+                }
+                disabled={settingFavourite !== null || removingName !== null}
+                onClick={() => void onSetFavourite(entry.name)}
+              >
+                {settingFavourite === entry.name
+                  ? "Setting…"
+                  : isFavourite
+                    ? "Favourite"
+                    : "Set favourite"}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                disabled={removingName !== null || settingFavourite !== null}
+                onClick={() => void onRemoveName(entry.name)}
+              >
+                {removingName === entry.name ? "Removing…" : "Remove"}
+              </Button>
+            </>
+          ) : (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={!canSave || savingName !== null}
+              onClick={() => void onSaveName(entry.name)}
+            >
+              {savingName === entry.name ? "Saving…" : "Save to shortlist"}
+            </Button>
+          )}
+        </div>
+      </li>
+    )
+  }
+
   return (
     <div {...dataComponent("FamilyNameCuration")} className="flex flex-col gap-6">
-      <Card className="ceremony-panel">
+      {showShortlistPanel ? (
+        <Card className="ceremony-panel">
+          <CardHeader className="border-b">
+            <CardTitle className="text-base">Your shortlist</CardTitle>
+            <CardDescription>
+              {shortlist.length} of {MAX_FAMILY_SHORTLIST_TOTAL} saved · pick one
+              favourite before unlocking.
+            </CardDescription>
+          </CardHeader>
+          <ul className="flex flex-col divide-y">
+            {shortlist.map((entry) => {
+              const isFavourite =
+                favouriteNormalized === normalizeFamilyName(entry.name)
+              return (
+                <li
+                  key={entry.name}
+                  className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <span className="font-medium">{entry.name}</span>
+                    {isCustomFamilyShortlistEntry(entry) ? (
+                      <Badge variant="outline" className="ml-2 rounded-full">
+                        Your idea
+                      </Badge>
+                    ) : null}
+                    {isFavourite ? (
+                      <ShortlistFavouriteBadge className="ml-2" />
+                    ) : null}
+                  </div>
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={isFavourite ? "default" : "outline"}
+                      className={
+                        isFavourite ? undefined : setFavouriteButtonClassName
+                      }
+                      disabled={settingFavourite !== null}
+                      onClick={() => void onSetFavourite(entry.name)}
+                    >
+                      {settingFavourite === entry.name
+                        ? "Setting…"
+                        : isFavourite
+                          ? "Favourite"
+                          : "Set favourite"}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      disabled={
+                        removingName !== null || settingFavourite !== null
+                      }
+                      onClick={() => void onRemoveName(entry.name)}
+                    >
+                      {removingName === entry.name ? "Removing…" : "Remove"}
+                    </Button>
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        </Card>
+      ) : null}
+
+      <Card
+        id={nameSuggestionsSectionId("family")}
+        className="ceremony-panel scroll-mt-24"
+      >
         <CardHeader className="border-b">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
@@ -250,7 +395,7 @@ export function FamilyNameCuration({
                 ({shortlistRemaining}{" "}
                 {shortlistRemaining === 1 ? "slot" : "slots"} left)
                 {generatedBatches.length > 1
-                  ? " — pick freely across both batches."
+                  ? " — open a generation to browse names."
                   : ". Regenerate once for 10 more options if you like."}
               </CardDescription>
             </div>
@@ -262,7 +407,7 @@ export function FamilyNameCuration({
                 disabled={regenerating || busySaving}
                 onClick={() => setShowRegenStyles((open) => !open)}
               >
-                {showRegenStyles ? "Hide styles" : "Regenerate batch"}
+                {showRegenStyles ? "Hide styles" : "Generate 10 more names"}
               </Button>
             ) : (
               <Badge variant="secondary" className="rounded-full">
@@ -321,95 +466,10 @@ export function FamilyNameCuration({
           </div>
         ) : null}
 
-        <ul className="flex flex-col divide-y">
-          {generatedBatches.map((batch) => (
-            <React.Fragment key={batch.generationIndex}>
-              {generatedBatches.length > 1 ? (
-                <li className="border-b bg-muted/10 px-4 py-2">
-                  <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                    {batch.generationIndex === 0
-                      ? "First batch"
-                      : "Regenerated batch"}
-                  </p>
-                </li>
-              ) : null}
-              {batch.names.map((entry) => {
-                const normalized = normalizeFamilyName(entry.name)
-                const onShortlist = shortlistNormalized.has(normalized)
-                const isFavourite = favouriteNormalized === normalized
-                const canSave =
-                  !onShortlist && shortlistRemaining > 0 && !busySaving
-
-                return (
-                  <li
-                    key={`${batch.generationIndex}-${entry.name}`}
-                    className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-start sm:justify-between"
-                  >
-                    <div className="flex min-w-0 flex-col gap-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-base font-semibold tracking-tight">
-                          {entry.name}
-                        </span>
-                        {onShortlist ? <ShortlistSavedBadge /> : null}
-                        {isFavourite ? <ShortlistFavouriteBadge /> : null}
-                      </div>
-                      <p className="text-sm leading-relaxed text-muted-foreground">
-                        {entry.rationale}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 flex-wrap gap-2">
-                      {onShortlist ? (
-                        <>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant={isFavourite ? "default" : "outline"}
-                            className={
-                              isFavourite ? undefined : setFavouriteButtonClassName
-                            }
-                            disabled={
-                              settingFavourite !== null || removingName !== null
-                            }
-                            onClick={() => void onSetFavourite(entry.name)}
-                          >
-                            {settingFavourite === entry.name
-                              ? "Setting…"
-                              : isFavourite
-                                ? "Favourite"
-                                : "Set favourite"}
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            disabled={
-                              removingName !== null || settingFavourite !== null
-                            }
-                            onClick={() => void onRemoveName(entry.name)}
-                          >
-                            {removingName === entry.name ? "Removing…" : "Remove"}
-                          </Button>
-                        </>
-                      ) : (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          disabled={!canSave || savingName !== null}
-                          onClick={() => void onSaveName(entry.name)}
-                        >
-                          {savingName === entry.name
-                            ? "Saving…"
-                            : "Save to shortlist"}
-                        </Button>
-                      )}
-                    </div>
-                  </li>
-                )
-              })}
-            </React.Fragment>
-          ))}
-        </ul>
+        <NameSuggestionBatches
+          batches={generatedBatches}
+          renderEntry={renderSuggestionEntry}
+        />
 
         {canAddCustomName ? (
           <div className="border-t bg-muted/10 px-4 py-4">
@@ -498,71 +558,6 @@ export function FamilyNameCuration({
           </div>
         ) : null}
       </Card>
-
-      {showShortlistPanel ? (
-        <Card className="ceremony-panel">
-          <CardHeader className="border-b">
-            <CardTitle className="text-base">Your shortlist</CardTitle>
-            <CardDescription>
-              {shortlist.length} of {MAX_FAMILY_SHORTLIST_TOTAL} saved · pick one
-              favourite before unlocking.
-            </CardDescription>
-          </CardHeader>
-          <ul className="flex flex-col divide-y">
-            {shortlist.map((entry) => {
-              const isFavourite =
-                favouriteNormalized === normalizeFamilyName(entry.name)
-              return (
-                <li
-                  key={entry.name}
-                  className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <span className="font-medium">{entry.name}</span>
-                    {isCustomFamilyShortlistEntry(entry) ? (
-                      <Badge variant="outline" className="ml-2 rounded-full">
-                        Your idea
-                      </Badge>
-                    ) : null}
-                    {isFavourite ? (
-                      <ShortlistFavouriteBadge className="ml-2" />
-                    ) : null}
-                  </div>
-                  <div className="flex shrink-0 flex-wrap gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={isFavourite ? "default" : "outline"}
-                      className={
-                        isFavourite ? undefined : setFavouriteButtonClassName
-                      }
-                      disabled={settingFavourite !== null}
-                      onClick={() => void onSetFavourite(entry.name)}
-                    >
-                      {settingFavourite === entry.name
-                        ? "Setting…"
-                        : isFavourite
-                          ? "Favourite"
-                          : "Set favourite"}
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      disabled={
-                        removingName !== null || settingFavourite !== null
-                      }
-                      onClick={() => void onRemoveName(entry.name)}
-                    >
-                      {removingName === entry.name ? "Removing…" : "Remove"}
-                    </Button>
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
-        </Card>
-      ) : null}
 
       {!tunnelMode ? (
         <FamilyNamePaywallTeaser

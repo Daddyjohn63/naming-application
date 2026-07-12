@@ -25,7 +25,11 @@ import {
 import { CeremonyStageContinuePrompt } from "@/modules/ceremony/ui/components/ceremony-stage-continue-prompt"
 import { CeremonyThreeNamesView } from "@/modules/ceremony/ui/components/ceremony-three-names-view"
 import { CeremonyUnlockPrompt } from "@/modules/ceremony/ui/components/ceremony-unlock-prompt"
-import { defaultCeremonyNamingView } from "@/modules/ceremony/lib/ceremony-naming-view"
+import {
+  allThreeCeremonyNamesChosen,
+  defaultCeremonyNamingView,
+} from "@/modules/ceremony/lib/ceremony-naming-view"
+import { scrollToCeremonyCertificatePrep } from "@/modules/ceremony/lib/scroll-to-ceremony-certificate-prep"
 import { useCeremonyStageContinue } from "@/modules/ceremony/lib/use-ceremony-stage-continue"
 import { FamilyNameCuration } from "@/modules/cats/ui/components/family-name-curation"
 import { FamilyNamePipelineStatus } from "@/modules/cats/ui/components/family-name-pipeline-status"
@@ -78,12 +82,33 @@ export function CatCeremonyTunnelMain({
   const [activeView, setActiveView] = React.useState<CeremonyNamingView>(() =>
     defaultCeremonyNamingView(cat),
   )
+  const wasReadyForCertificateRef = React.useRef(
+    allThreeCeremonyNamesChosen(cat),
+  )
 
   // Re-sync tab when step advances (e.g. naming_cat_world → naming_ineffable).
   // Do not depend on selectedCatWorldName — that caused premature tab switch before Continue.
   React.useEffect(() => {
     setActiveView(defaultCeremonyNamingView(cat))
   }, [cat.ceremonyStep, cat.selectedIneffableName])
+
+  // When the third name is chosen, open Certificate and bring the main CTA into view.
+  React.useEffect(() => {
+    const ready = allThreeCeremonyNamesChosen(cat)
+    if (ready && !wasReadyForCertificateRef.current) {
+      wasReadyForCertificateRef.current = true
+      setActiveView("certificate")
+      scrollToCeremonyCertificatePrep()
+      return
+    }
+    if (!ready) {
+      wasReadyForCertificateRef.current = false
+    }
+  }, [
+    cat.selectedFamilyName,
+    cat.selectedCatWorldName,
+    cat.selectedIneffableName,
+  ])
 
   const onContinueToIneffable = async () => {
     await continueToIneffable()
