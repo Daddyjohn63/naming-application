@@ -5,18 +5,13 @@
 
 export type NameSuggestionsStage = "family" | "cat_world" | "ineffable"
 
-const MAX_SCROLL_ATTEMPTS = 12
+const DEFAULT_MAX_SCROLL_ATTEMPTS = 12
 
-export function nameSuggestionsSectionId(
-  stage: NameSuggestionsStage,
-): string {
-  return `name-suggestions-${stage}`
-}
-
-/** Smooth-scroll to the suggestions card for the given naming stage. */
-export function scrollToNameSuggestions(stage: NameSuggestionsStage) {
-  const sectionId = nameSuggestionsSectionId(stage)
-
+/** Retry until the element exists, then smooth-scroll it into view. */
+export function scrollElementIntoView(
+  sectionId: string,
+  maxAttempts: number = DEFAULT_MAX_SCROLL_ATTEMPTS,
+) {
   const tryScroll = (attemptsLeft: number) => {
     const section = document.getElementById(sectionId)
     if (section !== null) {
@@ -28,5 +23,16 @@ export function scrollToNameSuggestions(stage: NameSuggestionsStage) {
     }
   }
 
-  requestAnimationFrame(() => tryScroll(MAX_SCROLL_ATTEMPTS))
+  requestAnimationFrame(() => tryScroll(maxAttempts))
+}
+
+export function nameSuggestionsSectionId(
+  stage: NameSuggestionsStage,
+): string {
+  return `name-suggestions-${stage}`
+}
+
+/** Smooth-scroll to the suggestions card for the given naming stage. */
+export function scrollToNameSuggestions(stage: NameSuggestionsStage) {
+  scrollElementIntoView(nameSuggestionsSectionId(stage))
 }

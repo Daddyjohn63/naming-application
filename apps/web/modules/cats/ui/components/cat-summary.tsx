@@ -47,6 +47,10 @@ export function CatSummary({ catId }: { catId: Id<"cats"> }) {
   })
   const [expanded, setExpanded] = React.useState(false)
 
+  React.useEffect(() => {
+    setExpanded(false)
+  }, [catId])
+
   if (latestSummary === undefined) {
     return <Skeleton className="h-24 w-full rounded-md" />
   }
@@ -69,7 +73,7 @@ export function CatSummary({ catId }: { catId: Id<"cats"> }) {
       className="ceremony-sidebar-panel mt-2 border-primary/20"
     >
       <CardHeader className="border-b">
-        <CardTitle>Your cats personality summary</CardTitle>
+        <CardTitle>Your cat&apos;s personality summary</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <p className="text-sm leading-relaxed">{displayText}</p>
@@ -79,6 +83,7 @@ export function CatSummary({ catId }: { catId: Id<"cats"> }) {
             variant="link"
             size="sm"
             className="h-auto self-start px-0"
+            aria-expanded={expanded}
             onClick={() => setExpanded((open) => !open)}
           >
             {expanded ? "Show less" : "Read full profile"}

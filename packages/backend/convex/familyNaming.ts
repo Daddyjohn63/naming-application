@@ -169,6 +169,61 @@ async function scheduleFamilyGeneration(
 /** Owner-facing state for the family curation UI. */
 export const getFamilyNamingStateForOwner = query({
   args: { catId: v.string() },
+  returns: v.union(
+    v.null(),
+    v.object({
+      catId: v.id("cats"),
+      ceremonyStep: v.string(),
+      familyNameStyles: v.array(
+        v.union(
+          v.literal("elegant"),
+          v.literal("silly"),
+          v.literal("classic"),
+          v.literal("nature_inspired"),
+          v.literal("non_human_names"),
+          v.literal("mix_it_up"),
+        ),
+      ),
+      shortlist: v.array(
+        v.object({
+          name: v.string(),
+          rationale: v.string(),
+          source: v.optional(v.union(v.literal("ai"), v.literal("custom"))),
+        }),
+      ),
+      selectedFamilyName: v.optional(v.string()),
+      selectedFamilyRationale: v.optional(v.string()),
+      familyNameRegenerationsUsed: v.number(),
+      familyNameGenerationError: v.optional(v.string()),
+      currentBatch: v.union(
+        v.null(),
+        v.object({
+          generationIndex: v.number(),
+          names: v.array(
+            v.object({
+              name: v.string(),
+              rationale: v.string(),
+            }),
+          ),
+        }),
+      ),
+      generatedBatches: v.union(
+        v.null(),
+        v.array(
+          v.object({
+            generationIndex: v.number(),
+            names: v.array(
+              v.object({
+                name: v.string(),
+                rationale: v.string(),
+              }),
+            ),
+          }),
+        ),
+      ),
+      customShortlistCount: v.number(),
+    }),
+  ),
   handler: async (ctx, { catId }) => {
     const currentUser = await getCurrentUser(ctx)
     if (currentUser === null) {

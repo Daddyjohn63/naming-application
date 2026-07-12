@@ -61,17 +61,17 @@ export function CeremonyCertificateDocument({
       className={cn(
         "relative overflow-hidden rounded-2xl border border-[#e7dcc4] bg-[#fdf9f0] px-6 py-8 text-[#4a3b2c] shadow-sm sm:px-10",
         fixed ? "w-[800px] shrink-0" : "w-full",
-        className,
+        className
       )}
     >
       {/* Corner accents */}
       <PawPrint
         aria-hidden
-        className="absolute left-5 top-6 size-6 -rotate-12 text-[#e3d5b8]"
+        className="absolute top-6 left-5 size-6 -rotate-12 text-[#e3d5b8]"
       />
       <PawPrint
         aria-hidden
-        className="absolute right-5 top-6 size-6 rotate-12 text-[#e3d5b8]"
+        className="absolute top-6 right-5 size-6 rotate-12 text-[#e3d5b8]"
       />
 
       {/* Header */}
@@ -112,7 +112,7 @@ export function CeremonyCertificateDocument({
         )}
 
         <div className="text-center">
-          <p className="wrap-break-word font-serif text-3xl font-semibold text-[#9a6b32]">
+          <p className="font-serif text-3xl font-semibold wrap-break-word text-[#9a6b32]">
             {data.everydayName}
           </p>
           <div aria-hidden className="mx-auto mt-2 h-px w-24 bg-[#dcc9a3]" />
@@ -124,23 +124,20 @@ export function CeremonyCertificateDocument({
         <div className="flex items-center justify-center gap-2">
           <Feather aria-hidden className="size-5 text-[#c9a86a]" />
           <h2 className="font-serif text-xl font-semibold text-[#463628]">
-            The Cat Profile
+            Your Cat&apos;s Profile
           </h2>
         </div>
         <div className="mt-4 flex flex-col gap-3">
           {paragraphs.length > 0 ? (
             paragraphs.map((paragraph, index) => (
-              <p
-                key={index}
-                className="text-sm leading-relaxed text-[#5d4c38]"
-              >
+              <p key={index} className="text-sm leading-relaxed text-[#5d4c38]">
                 {paragraph}
               </p>
             ))
           ) : (
-            <p className="text-center text-sm italic leading-relaxed text-[#8a7658]">
-              A cat of quiet mystery — their profile speaks through their
-              three names below.
+            <p className="text-center text-sm leading-relaxed text-[#8a7658] italic">
+              A cat of quiet mystery — their profile speaks through their three
+              names below.
             </p>
           )}
         </div>
@@ -158,7 +155,7 @@ export function CeremonyCertificateDocument({
         <div
           className={cn(
             "mt-3 grid gap-3",
-            fixed ? "grid-cols-3" : "sm:grid-cols-3",
+            fixed ? "grid-cols-3" : "sm:grid-cols-3"
           )}
         >
           <div className="flex items-start gap-3 rounded-lg border border-[#ecdfc2] bg-[#f9efdb] px-4 py-6">
@@ -168,7 +165,7 @@ export function CeremonyCertificateDocument({
             />
             <div className="min-w-0">
               <p className="text-xs font-medium text-[#7a643f]">Family Name:</p>
-              <p className="wrap-break-word font-serif text-sm font-semibold text-[#463628]">
+              <p className="font-serif text-sm font-semibold wrap-break-word text-[#463628]">
                 &ldquo;{data.everydayName}&rdquo;
               </p>
             </div>
@@ -182,7 +179,7 @@ export function CeremonyCertificateDocument({
               <p className="text-xs font-medium text-[#5f7245]">
                 Cat-world Name:
               </p>
-              <p className="wrap-break-word font-serif text-sm font-semibold text-[#3c4a2c]">
+              <p className="font-serif text-sm font-semibold wrap-break-word text-[#3c4a2c]">
                 &ldquo;{data.catWorldName}&rdquo;
               </p>
             </div>
@@ -190,12 +187,13 @@ export function CeremonyCertificateDocument({
           <div className="flex items-start gap-3 rounded-lg border border-[#ddd4ea] bg-[#efeaf6] px-4 py-6">
             <Sparkles
               aria-hidden
-              className="mt-0.5 size-5 shrink-0 text-[#8a6fb3]" />
+              className="mt-0.5 size-5 shrink-0 text-[#8a6fb3]"
+            />
             <div className="min-w-0">
               <p className="text-xs font-medium text-[#6f5c8f]">
                 Ineffable Near-Name:
               </p>
-              <p className="wrap-break-word font-serif text-sm font-semibold text-[#453460]">
+              <p className="font-serif text-sm font-semibold wrap-break-word text-[#453460]">
                 &ldquo;{data.ineffableName}&rdquo;
               </p>
             </div>

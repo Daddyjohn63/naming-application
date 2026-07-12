@@ -230,12 +230,6 @@ export async function addToStageShortlist(
   rawName: string,
 ): Promise<void> {
   assertCanCurateStage(cat, stage)
-  if (cat.ceremonyStep !== curationStepForStage(stage)) {
-    const batch = await latestGenerationForStage(ctx, cat._id, stage)
-    if (batch === null) {
-      throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.STEP_LOCKED })
-    }
-  }
 
   const parsed = addShortlistEntrySchema.safeParse({ name: rawName })
   if (!parsed.success) {

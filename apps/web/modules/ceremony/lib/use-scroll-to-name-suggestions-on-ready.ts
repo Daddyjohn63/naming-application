@@ -12,25 +12,29 @@ import {
   type NameSuggestionsStage,
 } from "@/modules/ceremony/lib/scroll-to-name-suggestions"
 
+const INITIAL_COUNT = Number.NaN
+
 export function useScrollToNameSuggestionsOnReady(
   stage: NameSuggestionsStage,
   batchCount: number,
 ) {
-  const previousCountRef = React.useRef<number | null>(null)
+  const previousCountRef = React.useRef(INITIAL_COUNT)
 
   React.useEffect(() => {
-    if (batchCount < 1) {
-      previousCountRef.current = batchCount
-      return
-    }
-
     const previousCount = previousCountRef.current
     previousCountRef.current = batchCount
 
-    const batchesJustReady =
-      previousCount === null || previousCount < 1
-    const newGenerationArrived =
-      previousCount !== null && batchCount > previousCount
+    // Skip scroll on first effect run (existing batches already in view).
+    if (Number.isNaN(previousCount)) {
+      return
+    }
+
+    if (batchCount < 1) {
+      return
+    }
+
+    const batchesJustReady = previousCount < 1
+    const newGenerationArrived = batchCount > previousCount
 
     if (batchesJustReady || newGenerationArrived) {
       scrollToNameSuggestions(stage)

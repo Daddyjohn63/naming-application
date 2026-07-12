@@ -22,6 +22,87 @@ type CeremonyUnlockSidebarProps = {
   cat: Doc<"cats">
 }
 
+type UnlockSidebarCopyInput = {
+  ceremonyComplete: boolean
+  readyForCertificate: boolean
+  step: Doc<"cats">["ceremonyStep"]
+  selectedCatWorldName: string | undefined
+  selectedIneffableName: string | undefined
+  unlocked: boolean
+}
+
+/** Ordered precedence for unlock-sidebar title/description copy. */
+function unlockSidebarCopy({
+  ceremonyComplete,
+  readyForCertificate,
+  step,
+  selectedCatWorldName,
+  selectedIneffableName,
+  unlocked,
+}: UnlockSidebarCopyInput): { title: string; description: string } {
+  if (ceremonyComplete) {
+    return {
+      title: "Ceremony complete",
+      description:
+        "Open the Certificate tab in the main column to view or download your certificate.",
+    }
+  }
+  if (readyForCertificate) {
+    return {
+      title: "Ready for your certificate",
+      description:
+        "Your three names are complete — open the Certificate tab in the main column to create your certificate, or save and come back later.",
+    }
+  }
+  if (step === "awaiting_payment") {
+    return {
+      title: "Complete your unlock",
+      description:
+        "Your family name and shortlist stay saved if checkout is interrupted.",
+    }
+  }
+  if (step === "awaiting_cat_world_names") {
+    return {
+      title: "Generating cat-world names",
+      description:
+        "We're crafting distinctive cat-world names — this usually takes a moment.",
+    }
+  }
+  if (step === "naming_cat_world" && selectedCatWorldName === undefined) {
+    return {
+      title: "Continue your ceremony",
+      description:
+        "Choose a cat-world name next. You can still switch your family name favourite from the shortlist above.",
+    }
+  }
+  if (step === "naming_cat_world" && selectedCatWorldName !== undefined) {
+    return {
+      title: "Almost there",
+      description:
+        "Continue in the main column when you're ready for your ineffable near-name.",
+    }
+  }
+  if (step === "naming_ineffable" && selectedIneffableName === undefined) {
+    return {
+      title: "Almost there",
+      description:
+        "One more stage — playful approximations of the secret name.",
+    }
+  }
+  if (unlocked) {
+    return {
+      title: "Your naming ceremony",
+      description:
+        "Review or change your picks before moving to generate your certificate.",
+    }
+  }
+  return {
+    title: "What's next",
+    description:
+      "Your family name is free. Unlock once per cat to reveal cat-world and ineffable names, then receive your certificate.",
+  }
+}
+
 /**
  * KB-006A — persistent unlock sidebar: teasers, pricing, Unlock now, Save & exit.
  * KB-007 stub unlock on `awaiting_payment`; KB-009/010 continue CTAs after unlock.
@@ -51,47 +132,14 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
   const ceremonyComplete = cat.ceremonyStep === "ceremony_complete"
   const readyForCertificate = allThreeCeremonyNamesChosen(cat)
 
-  const title = ceremonyComplete
-    ? "Ceremony complete"
-    : readyForCertificate
-      ? "Ready for your certificate"
-      : step === "awaiting_payment"
-        ? "Complete your unlock"
-        : step === "awaiting_cat_world_names"
-          ? "Generating cat-world names"
-          : step === "naming_cat_world" &&
-              cat.selectedCatWorldName === undefined
-            ? "Continue your ceremony"
-            : step === "naming_cat_world" &&
-                cat.selectedCatWorldName !== undefined
-              ? "Almost there"
-              : step === "naming_ineffable" &&
-                  cat.selectedIneffableName === undefined
-                ? "Almost there"
-                : unlocked
-                  ? "Your naming ceremony"
-                  : "What's next"
-
-  const description = ceremonyComplete
-    ? "Open the Certificate tab in the main column to view or download your certificate."
-    : readyForCertificate
-      ? "Your three names are complete — Create your certificate or save and come back later."
-      : step === "awaiting_payment"
-        ? "Your family name and shortlist stay saved if checkout is interrupted."
-        : step === "awaiting_cat_world_names"
-          ? "We're crafting distinctive cat-world names — this usually takes a moment."
-          : step === "naming_cat_world" &&
-              cat.selectedCatWorldName === undefined
-            ? "Choose a cat-world name next. You can still switch your family name favourite from the shortlist above."
-            : step === "naming_cat_world" &&
-                cat.selectedCatWorldName !== undefined
-              ? "Continue in the main column when you're ready for your ineffable near-name."
-              : step === "naming_ineffable" &&
-                  cat.selectedIneffableName === undefined
-                ? "One more stage — playful approximations of the secret name."
-                : unlocked
-                  ? "Review or change your picks before moving to generate your certificate."
-                  : "Your family name is free. Unlock once per cat to reveal cat-world and ineffable names, then receive your certificate."
+  const { title, description } = unlockSidebarCopy({
+    ceremonyComplete,
+    readyForCertificate,
+    step,
+    selectedCatWorldName: cat.selectedCatWorldName,
+    selectedIneffableName: cat.selectedIneffableName,
+    unlocked,
+  })
 
   return (
     <Card
