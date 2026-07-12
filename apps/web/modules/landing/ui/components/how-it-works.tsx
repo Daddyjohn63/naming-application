@@ -58,8 +58,9 @@ const CEREMONY_STEPS: readonly CeremonyStep[] = [
 export function HowItWorks() {
   return (
     <section
+      id="how-it-works"
       {...dataComponent("HowItWorks")}
-      className="w-full border-b border-border/40"
+      className="w-full scroll-mt-16 border-b border-border/40"
     >
       <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[2fr_3fr] lg:gap-16">
