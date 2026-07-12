@@ -28,12 +28,13 @@ import {
 import {
   acceptedSummaryText,
   addToStageShortlist,
+  allGenerationsForCat,
   allThreeNamesChosen,
   assertRegenAvailable,
   awaitingStepForStage,
-  countSavedFromBatch,
   curationStepForStage,
   excludedNamesForStage,
+  generatedBatchesFromGenerations,
   latestGenerationForStage,
   regenUsedForStage,
   removeFromStageShortlist,
@@ -124,7 +125,20 @@ export const getCatWorldNamingStateForOwner = query({
           ),
         }),
       ),
-      savedFromCurrentBatchCount: v.number(),
+      generatedBatches: v.union(
+        v.null(),
+        v.array(
+          v.object({
+            generationIndex: v.number(),
+            names: v.array(
+              v.object({
+                name: v.string(),
+                rationale: v.string(),
+              }),
+            ),
+          }),
+        ),
+      ),
     }),
   ),
   handler: async (ctx, { catId }) => {
@@ -141,8 +155,9 @@ export const getCatWorldNamingStateForOwner = query({
       return null
     }
 
-    const currentBatch = await latestGenerationForStage(ctx, id, STAGE)
+    const generations = await allGenerationsForCat(ctx, id, STAGE)
     const shortlist = shortlistForStage(cat, STAGE)
+    const currentBatch = generations.at(-1) ?? null
 
     return {
       catId: id,
@@ -152,6 +167,7 @@ export const getCatWorldNamingStateForOwner = query({
       selectedCatWorldRationale: cat.selectedCatWorldRationale,
       catWorldNameRegenerationsUsed: regenUsedForStage(cat, STAGE),
       catWorldNameGenerationError: cat.catWorldNameGenerationError,
+      generatedBatches: generatedBatchesFromGenerations(generations),
       currentBatch:
         currentBatch === null
           ? null
@@ -159,13 +175,6 @@ export const getCatWorldNamingStateForOwner = query({
               generationIndex: currentBatch.generationIndex,
               names: currentBatch.names,
             },
-      savedFromCurrentBatchCount:
-        currentBatch === null
-          ? 0
-          : countSavedFromBatch(
-              shortlist,
-              currentBatch.names.map((n) => n.name),
-            ),
     }
   },
 })

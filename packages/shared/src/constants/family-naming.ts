@@ -38,7 +38,6 @@ export const FAMILY_NAME_STYLE_LABELS: Record<FamilyNameStyleId, string> = {
 
 export const FAMILY_NAME_BATCH_SIZE = 10
 export const MAX_FAMILY_SHORTLIST_TOTAL = 6
-export const MAX_FAMILY_SHORTLIST_PER_BATCH = 3
 export const MAX_FAMILY_NAME_REGENERATIONS = 1
 /** User-provided family names allowed per ceremony (not from AI batches). */
 export const MAX_CUSTOM_FAMILY_NAMES = 1

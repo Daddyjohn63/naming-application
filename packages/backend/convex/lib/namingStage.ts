@@ -16,7 +16,6 @@ import { ConvexError } from "convex/values"
 
 import {
   MAX_NAME_REGENERATIONS,
-  MAX_SHORTLIST_PER_BATCH,
   MAX_SHORTLIST_TOTAL,
   normalizeNameForDedupe,
 } from "@workspace/shared/constants/naming-curation"
@@ -87,6 +86,44 @@ export function awaitingStepForStage(stage: NamingStage): Doc<"cats">["ceremonyS
   return stage === "cat_world" ? "awaiting_cat_world_names" : "awaiting_ineffable_names"
 }
 
+export type NameGenerationStage = NamingStage | "family"
+
+type GenerationRow = {
+  generationIndex: number
+  names: Array<{ name: string; rationale: string }>
+}
+
+export async function allGenerationsForCat(
+  ctx: QueryCtx | MutationCtx,
+  catId: Id<"cats">,
+  stage: NameGenerationStage,
+): Promise<GenerationRow[]> {
+  const generations = await ctx.db
+    .query("cat_name_generations")
+    .withIndex("by_catId_stage_generationIndex", (q) =>
+      q.eq("catId", catId).eq("stage", stage),
+    )
+    .collect()
+  return generations.sort((a, b) => a.generationIndex - b.generationIndex)
+}
+
+export function findNameInGenerations(
+  generations: readonly GenerationRow[],
+  rawName: string,
+  normalize: (name: string) => string,
+): { generation: GenerationRow; entry: { name: string; rationale: string } } | null {
+  const normalized = normalize(rawName)
+  for (const generation of generations) {
+    const entry = generation.names.find(
+      (candidate) => normalize(candidate.name) === normalized,
+    )
+    if (entry !== undefined) {
+      return { generation, entry }
+    }
+  }
+  return null
+}
+
 export async function latestGenerationForStage(
   ctx: QueryCtx | MutationCtx,
   catId: Id<"cats">,
@@ -125,14 +162,19 @@ export async function excludedNamesForStage(
   return [...excluded]
 }
 
-export function countSavedFromBatch(
-  shortlist: ShortlistEntry[],
-  batchNames: readonly string[],
-): number {
-  const batchNormalized = new Set(batchNames.map(normalizeNameForDedupe))
-  return shortlist.filter((entry) =>
-    batchNormalized.has(normalizeNameForDedupe(entry.name)),
-  ).length
+export function generatedBatchesFromGenerations(
+  generations: readonly GenerationRow[],
+): Array<{
+  generationIndex: number
+  names: Array<{ name: string; rationale: string }>
+}> | null {
+  if (generations.length === 0) {
+    return null
+  }
+  return generations.map((batch) => ({
+    generationIndex: batch.generationIndex,
+    names: batch.names,
+  }))
 }
 
 export async function acceptedSummaryText(
@@ -200,19 +242,21 @@ export async function addToStageShortlist(
     throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NAME_NOT_IN_BATCH })
   }
 
-  const batch = await latestGenerationForStage(ctx, cat._id, stage)
-  if (batch === null) {
+  const generations = await allGenerationsForCat(ctx, cat._id, stage)
+  if (generations.length === 0) {
     throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.BATCH_NOT_READY })
   }
 
-  const batchEntry = batch.names.find(
-    (entry) =>
-      normalizeNameForDedupe(entry.name) ===
-      normalizeNameForDedupe(parsed.data.name),
+  const match = findNameInGenerations(
+    generations,
+    parsed.data.name,
+    normalizeNameForDedupe,
   )
-  if (batchEntry === undefined) {
+  if (match === null) {
     throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NAME_NOT_IN_BATCH })
   }
+
+  const { entry: batchEntry } = match
 
   const shortlist = shortlistForStage(cat, stage)
   if (shortlist.length >= MAX_SHORTLIST_TOTAL) {
@@ -222,14 +266,6 @@ export async function addToStageShortlist(
   const normalized = normalizeNameForDedupe(batchEntry.name)
   if (shortlist.some((entry) => normalizeNameForDedupe(entry.name) === normalized)) {
     throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.DUPLICATE_NAME })
-  }
-
-  const savedFromBatch = countSavedFromBatch(
-    shortlist,
-    batch.names.map((n) => n.name),
-  )
-  if (savedFromBatch >= MAX_SHORTLIST_PER_BATCH) {
-    throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.BATCH_SAVE_LIMIT })
   }
 
   const field =

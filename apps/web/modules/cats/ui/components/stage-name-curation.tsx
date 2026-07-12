@@ -16,11 +16,11 @@ import { api } from "@workspace/backend/_generated/api"
 import type { Doc } from "@workspace/backend/_generated/dataModel"
 import {
   MAX_NAME_REGENERATIONS,
-  MAX_SHORTLIST_PER_BATCH,
   MAX_SHORTLIST_TOTAL,
   normalizeNameForDedupe,
 } from "@workspace/shared/constants/naming-curation"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
+import { ShortlistFavouriteBadge, setFavouriteButtonClassName } from "@/modules/ceremony/ui/components/shortlist-favourite-badge"
 import { ShortlistSavedBadge } from "@/modules/ceremony/ui/components/shortlist-saved-badge"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
@@ -38,16 +38,21 @@ import { scrollToCeremonyThreeNames } from "@/modules/ceremony/lib/scroll-to-cer
 import type { NamingStageKind } from "@/modules/cats/ui/components/stage-name-pipeline-status"
 import { dataComponent } from "@/lib/data-component"
 
+type GeneratedBatch = {
+  generationIndex: number
+  names: Array<{ name: string; rationale: string }>
+}
+
 type StageNamingState = {
   shortlist: Array<{ name: string; rationale: string }>
   selectedName?: string
   selectedRationale?: string
   regenerationsUsed: number
+  generatedBatches: GeneratedBatch[] | null
   currentBatch: {
     generationIndex: number
     names: Array<{ name: string; rationale: string }>
   } | null
-  savedFromCurrentBatchCount: number
 }
 
 type StageNameCurationProps = {
@@ -111,7 +116,11 @@ export function StageNameCuration({
     )
   }
 
-  if (state === null || state.currentBatch === null) {
+  if (
+    state === null ||
+    state.generatedBatches === null ||
+    state.generatedBatches.length === 0
+  ) {
     return (
       <Card {...dataComponent("StageNameCuration")} className="ceremony-panel">
         <CardHeader className="border-b">
@@ -126,11 +135,9 @@ export function StageNameCuration({
   }
 
   const shortlist = state.shortlist
-  const batchNames = state.currentBatch.names
+  const generatedBatches = state.generatedBatches
   const regenUsed = state.regenerationsUsed
   const regenExhausted = regenUsed >= MAX_NAME_REGENERATIONS
-  const savedFromBatch = state.savedFromCurrentBatchCount
-  const batchSaveRemaining = MAX_SHORTLIST_PER_BATCH - savedFromBatch
   const shortlistRemaining = MAX_SHORTLIST_TOTAL - shortlist.length
 
   const shortlistNormalized = new Set(
@@ -242,11 +249,11 @@ export function StageNameCuration({
             <div className="flex flex-col gap-1">
               <CardTitle className="text-base">{title}</CardTitle>
               <CardDescription>
-                {description} ({batchSaveRemaining} remaining here ·{" "}
-                {shortlistRemaining} slots left overall).
-                {state.currentBatch.generationIndex === 1
-                  ? " These are from your regeneration."
-                  : null}
+                {description} ({shortlistRemaining}{" "}
+                {shortlistRemaining === 1 ? "slot" : "slots"} left)
+                {generatedBatches.length > 1
+                  ? " — pick freely across both batches."
+                  : ". Regenerate once for 10 more options if you like."}
               </CardDescription>
             </div>
             {!regenExhausted ? (
@@ -268,80 +275,93 @@ export function StageNameCuration({
         </CardHeader>
 
         <ul className="flex flex-col divide-y">
-          {batchNames.map((entry) => {
-            const normalized = normalizeNameForDedupe(entry.name)
-            const onShortlist = shortlistNormalized.has(normalized)
-            const isFavourite = favouriteNormalized === normalized
-            const canSave =
-              !onShortlist &&
-              batchSaveRemaining > 0 &&
-              shortlistRemaining > 0 &&
-              !busySaving
-
-            return (
-              <li
-                key={`${state.currentBatch!.generationIndex}-${entry.name}`}
-                className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-start sm:justify-between"
-              >
-                <div className="flex min-w-0 flex-col gap-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-base font-semibold tracking-tight">
-                      {entry.name}
-                    </span>
-                    {onShortlist ? <ShortlistSavedBadge /> : null}
-                    {isFavourite ? (
-                      <Badge className="bg-primary rounded-full">Favourite</Badge>
-                    ) : null}
-                  </div>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {entry.rationale}
+          {generatedBatches.map((batch) => (
+            <React.Fragment key={batch.generationIndex}>
+              {generatedBatches.length > 1 ? (
+                <li className="border-b bg-muted/10 px-4 py-2">
+                  <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    {batch.generationIndex === 0
+                      ? "First batch"
+                      : "Regenerated batch"}
                   </p>
-                </div>
-                <div className="flex shrink-0 flex-wrap gap-2">
-                  {onShortlist ? (
-                    <>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={isFavourite ? "default" : "outline"}
-                        disabled={
-                          settingFavourite !== null || removingName !== null
-                        }
-                        onClick={() => void onSetFavourite(entry.name)}
-                      >
-                        {settingFavourite === entry.name
-                          ? "Setting…"
-                          : isFavourite
-                            ? "Favourite"
-                            : "Set favourite"}
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        disabled={
-                          removingName !== null || settingFavourite !== null
-                        }
-                        onClick={() => void onRemoveName(entry.name)}
-                      >
-                        {removingName === entry.name ? "Removing…" : "Remove"}
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      disabled={!canSave || savingName !== null}
-                      onClick={() => void onSaveName(entry.name)}
-                    >
-                      {savingName === entry.name ? "Saving…" : "Save to shortlist"}
-                    </Button>
-                  )}
-                </div>
-              </li>
-            )
-          })}
+                </li>
+              ) : null}
+              {batch.names.map((entry) => {
+                const normalized = normalizeNameForDedupe(entry.name)
+                const onShortlist = shortlistNormalized.has(normalized)
+                const isFavourite = favouriteNormalized === normalized
+                const canSave =
+                  !onShortlist && shortlistRemaining > 0 && !busySaving
+
+                return (
+                  <li
+                    key={`${batch.generationIndex}-${entry.name}`}
+                    className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-start sm:justify-between"
+                  >
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-base font-semibold tracking-tight">
+                          {entry.name}
+                        </span>
+                        {onShortlist ? <ShortlistSavedBadge /> : null}
+                        {isFavourite ? <ShortlistFavouriteBadge /> : null}
+                      </div>
+                      <p className="text-sm leading-relaxed text-muted-foreground">
+                        {entry.rationale}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 flex-wrap gap-2">
+                      {onShortlist ? (
+                        <>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={isFavourite ? "default" : "outline"}
+                            className={
+                              isFavourite ? undefined : setFavouriteButtonClassName
+                            }
+                            disabled={
+                              settingFavourite !== null || removingName !== null
+                            }
+                            onClick={() => void onSetFavourite(entry.name)}
+                          >
+                            {settingFavourite === entry.name
+                              ? "Setting…"
+                              : isFavourite
+                                ? "Favourite"
+                                : "Set favourite"}
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            disabled={
+                              removingName !== null || settingFavourite !== null
+                            }
+                            onClick={() => void onRemoveName(entry.name)}
+                          >
+                            {removingName === entry.name ? "Removing…" : "Remove"}
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={!canSave || savingName !== null}
+                          onClick={() => void onSaveName(entry.name)}
+                        >
+                          {savingName === entry.name
+                            ? "Saving…"
+                            : "Save to shortlist"}
+                        </Button>
+                      )}
+                    </div>
+                  </li>
+                )
+              })}
+            </React.Fragment>
+          ))}
         </ul>
       </Card>
 
@@ -366,13 +386,16 @@ export function StageNameCuration({
                   <div>
                     <span className="font-medium">{entry.name}</span>
                     {isFavourite ? (
-                      <Badge className="bg-primary ml-2 rounded-full">Favourite</Badge>
+                      <ShortlistFavouriteBadge className="ml-2" />
                     ) : null}
                   </div>
                   <Button
                     type="button"
                     size="sm"
                     variant={isFavourite ? "default" : "outline"}
+                    className={
+                      isFavourite ? undefined : setFavouriteButtonClassName
+                    }
                     disabled={settingFavourite !== null}
                     onClick={() => void onSetFavourite(entry.name)}
                   >

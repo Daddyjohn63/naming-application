@@ -26,7 +26,7 @@ const CEREMONY_STEPS: readonly CeremonyStep[] = [
   {
     title: "Curate family names",
     description:
-      "Choose one or more styles — Elegant, Silly, Classic, Nature-inspired, Non-human, or Mix-it-up. The AI suggests 10 names, each with a reason. Shortlist up to six, regenerate once for 10 fresh ideas, add one of your own, and crown a favourite family name.",
+      "Choose one or more styles — Elegant, Silly, Classic, Nature-inspired, Non-human, or Mix-it-up. The AI suggests 10 names, each with a reason. Shortlist up to six, regenerate once for 10 fresh ideas you can mix with the first batch, add one of your own, and crown a favourite family name.",
     phase: "Free",
   },
   {

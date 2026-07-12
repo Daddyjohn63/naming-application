@@ -9,7 +9,6 @@ import {
   FAMILY_NAME_STYLE_IDS,
   MAX_CUSTOM_FAMILY_NAMES,
   MAX_FAMILY_NAME_REGENERATIONS,
-  MAX_FAMILY_SHORTLIST_PER_BATCH,
   MAX_FAMILY_SHORTLIST_TOTAL,
   normalizeFamilyName,
   resolveMixItUpStyles,
@@ -35,6 +34,11 @@ import {
   type QueryCtx,
 } from "./_generated/server"
 import { getCurrentUser } from "./users"
+import {
+  allGenerationsForCat,
+  findNameInGenerations,
+  generatedBatchesFromGenerations,
+} from "./lib/namingStage"
 import type { Doc, Id } from "./_generated/dataModel"
 
 type ShortlistEntry = {
@@ -126,16 +130,6 @@ async function excludedNamesForGeneration(
   return [...excluded]
 }
 
-function countSavedFromBatch(
-  shortlist: ShortlistEntry[],
-  batchNames: readonly string[],
-): number {
-  const batchNormalized = new Set(batchNames.map(normalizeFamilyName))
-  return shortlist.filter((entry) =>
-    batchNormalized.has(normalizeFamilyName(entry.name)),
-  ).length
-}
-
 function countCustomShortlistEntries(shortlist: ShortlistEntry[]): number {
   return shortlist.filter((entry) => entry.source === "custom").length
 }
@@ -189,8 +183,9 @@ export const getFamilyNamingStateForOwner = query({
       return null
     }
 
-    const currentBatch = await latestFamilyGeneration(ctx, id)
+    const generations = await allGenerationsForCat(ctx, id, "family")
     const shortlist = shortlistOf(cat)
+    const latestBatch = generations.at(-1) ?? null
 
     return {
       catId: id,
@@ -201,20 +196,14 @@ export const getFamilyNamingStateForOwner = query({
       selectedFamilyRationale: cat.selectedFamilyRationale,
       familyNameRegenerationsUsed: regenUsed(cat),
       familyNameGenerationError: cat.familyNameGenerationError,
+      generatedBatches: generatedBatchesFromGenerations(generations),
       currentBatch:
-        currentBatch === null
+        latestBatch === null
           ? null
           : {
-              generationIndex: currentBatch.generationIndex,
-              names: currentBatch.names,
+              generationIndex: latestBatch.generationIndex,
+              names: latestBatch.names,
             },
-      savedFromCurrentBatchCount:
-        currentBatch === null
-          ? 0
-          : countSavedFromBatch(
-              shortlist,
-              currentBatch.names.map((n) => n.name),
-            ),
       customShortlistCount: countCustomShortlistEntries(shortlist),
     }
   },
@@ -287,7 +276,7 @@ export const submitFamilyNameStyles = mutation({
   },
 })
 
-/** Save a name from the current batch to the shortlist (max 3 per batch, 6 total). */
+/** Save a name from any generated batch to the shortlist (max 6 total). */
 export const addToFamilyShortlist = mutation({
   args: { catId: v.string(), name: v.string() },
   handler: async (ctx, args) => {
@@ -309,18 +298,21 @@ export const addToFamilyShortlist = mutation({
       throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.NAME_NOT_IN_BATCH })
     }
 
-    const batch = await latestFamilyGeneration(ctx, id)
-    if (batch === null) {
+    const generations = await allGenerationsForCat(ctx, id, "family")
+    if (generations.length === 0) {
       throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.BATCH_NOT_READY })
     }
 
-    const batchEntry = batch.names.find(
-      (entry) =>
-        normalizeFamilyName(entry.name) === normalizeFamilyName(parsed.data.name),
+    const match = findNameInGenerations(
+      generations,
+      parsed.data.name,
+      normalizeFamilyName,
     )
-    if (batchEntry === undefined) {
+    if (match === null) {
       throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.NAME_NOT_IN_BATCH })
     }
+
+    const { entry: batchEntry } = match
 
     const shortlist = shortlistOf(cat)
     if (shortlist.length >= MAX_FAMILY_SHORTLIST_TOTAL) {
@@ -330,14 +322,6 @@ export const addToFamilyShortlist = mutation({
     const normalized = normalizeFamilyName(batchEntry.name)
     if (shortlist.some((entry) => normalizeFamilyName(entry.name) === normalized)) {
       throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.DUPLICATE_NAME })
-    }
-
-    const savedFromBatch = countSavedFromBatch(
-      shortlist,
-      batch.names.map((n) => n.name),
-    )
-    if (savedFromBatch >= MAX_FAMILY_SHORTLIST_PER_BATCH) {
-      throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.BATCH_SAVE_LIMIT })
     }
 
     const now = Date.now()
