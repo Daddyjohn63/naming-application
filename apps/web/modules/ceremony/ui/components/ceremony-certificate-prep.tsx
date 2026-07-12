@@ -51,9 +51,9 @@ export function CeremonyCertificatePrep({ cat }: CeremonyCertificatePrepProps) {
       </CardHeader>
       <div className="flex flex-col gap-3 px-4 py-6">
         {!complete ? (
-          <p className="text-muted-foreground text-sm">
-            On the certificate page you can adjust the everyday name one last
-            time before generating — generating makes your names final.
+          <p className="text-sm text-muted-foreground">
+            On the certificate page you can adjust the family name one last time
+            before generating — generating makes your names final.
           </p>
         ) : null}
         <Button asChild>

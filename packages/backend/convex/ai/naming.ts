@@ -59,7 +59,7 @@ Here is a summary of the poem,
 
 T. S. Eliot's "The Naming of Cats" is a playful poem built around the idea that cats are mysterious, dignified creatures who need three different names.
 
-The first name is the ordinary, everyday name humans use — something simple and practical, like the sort of name you might call across the room.
+The first name is the ordinary, family name humans use — something simple and practical, like the sort of name you might call across the room.
 
 The second name is more unusual and personal. It gives the cat a sense of character, style, and individuality. This is the name that makes a cat feel grand, distinctive, and properly respected.
 
@@ -199,7 +199,7 @@ export async function generateCatSummaryWithAi(args: {
 }
 
 /** §2 system prompt: everyday family names grounded in the cat summary. */
-const FAMILY_NAMES_SYSTEM_PROMPT = `You are Naming Buddy's family-name generator for the "everyday name" a cat's humans use daily (T. S. Eliot's first name).
+const FAMILY_NAMES_SYSTEM_PROMPT = `You are Naming Buddy's family-name generator for the "family name" a cat's humans use daily (T. S. Eliot's first name).
 
 Rules:
 - Return exactly 10 name options.
@@ -220,13 +220,17 @@ const FAMILY_STYLE_PROMPT_NUANCES: Record<
   classic: "Timeless human names; could appear on a birth certificate.",
   nature_inspired: "Flora, fauna, seasons, landscapes — subtle not cartoon.",
   non_human_names:
-    "Names that feel otherworldly or non-human yet still speakable as everyday nicknames.",
+    "Names that feel otherworldly or non-human yet still speakable as everyday family nicknames.",
 }
 
-function buildFamilyStylePromptLine(styleIds: readonly FamilyNameStyleId[]): string {
+function buildFamilyStylePromptLine(
+  styleIds: readonly FamilyNameStyleId[]
+): string {
   const labels = familyStyleLabelsForPrompt(styleIds)
   const nuances = styleIds
-    .filter((id): id is Exclude<FamilyNameStyleId, "mix_it_up"> => id !== "mix_it_up")
+    .filter(
+      (id): id is Exclude<FamilyNameStyleId, "mix_it_up"> => id !== "mix_it_up"
+    )
     .map((id) => `${FAMILY_STYLE_PROMPT_NUANCES[id]}`)
   return `Family name style: ${labels.join(" + ")}\n${nuances.join("\n")}`
 }
@@ -238,9 +242,7 @@ function buildFamilyNamesUserText(args: {
   generationIndex: number
 }): string {
   const excluded =
-    args.excludedNames.length > 0
-      ? args.excludedNames.join(", ")
-      : "(none)"
+    args.excludedNames.length > 0 ? args.excludedNames.join(", ") : "(none)"
 
   return `Cat personality summary:
 ${args.summaryText}
@@ -293,7 +295,7 @@ Rules:
 - Return exactly ${NAME_BATCH_SIZE} near-name options.
 - Tone: whimsical, poetic, slightly absurd, mysterious — like a human guessing at something cats keep private.
 - Names can be neologisms, compound phrases, or almost-words that feel "close" to a secret identity without claiming to be the real thing.
-- Ground choices in the cat summary, everyday name, and cat-world name already chosen.
+- Ground choices in the cat summary, family name, and cat-world name already chosen.
 - Each option needs a short poetic rationale (max ~25 words).
 - No duplicate names within the batch.
 - Avoid names already in the excluded list.
@@ -306,9 +308,7 @@ function buildCatWorldNamesUserText(args: {
   generationIndex: number
 }): string {
   const excluded =
-    args.excludedNames.length > 0
-      ? args.excludedNames.join(", ")
-      : "(none)"
+    args.excludedNames.length > 0 ? args.excludedNames.join(", ") : "(none)"
 
   return `Cat personality summary:
 ${args.summaryText}
@@ -330,9 +330,7 @@ function buildIneffableNamesUserText(args: {
   generationIndex: number
 }): string {
   const excluded =
-    args.excludedNames.length > 0
-      ? args.excludedNames.join(", ")
-      : "(none)"
+    args.excludedNames.length > 0 ? args.excludedNames.join(", ") : "(none)"
 
   return `Cat personality summary:
 ${args.summaryText}

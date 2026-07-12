@@ -5,7 +5,7 @@
  *
  * Guards: redirects back to the ceremony when the three names aren't chosen
  * yet (KB-012 illegal-skip recovery). Pre-completion the user can free-text
- * edit the everyday name; generating downloads the PDF, stores it, and marks
+ * edit the family name; generating downloads the PDF, stores it, and marks
  * the ceremony complete (final — name editing locks).
  */
 
@@ -51,7 +51,7 @@ export function CatCertificateView() {
 
   const cat = useQuery(
     api.cats.getCatByIdForOwner,
-    catIdParam !== undefined ? { catId: catIdParam } : "skip",
+    catIdParam !== undefined ? { catId: catIdParam } : "skip"
   )
 
   if (catIdParam === undefined || cat === undefined) {
@@ -101,7 +101,7 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
     photoSrc,
     dateLabel: `Named on ${format(
       completedAt !== undefined ? new Date(completedAt) : new Date(),
-      "d MMMM yyyy",
+      "d MMMM yyyy"
     )}`,
   }
 
@@ -129,23 +129,21 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
         <h1 className="text-2xl font-semibold tracking-tight">
           {complete ? "Your naming certificate" : "Prepare your certificate"}
         </h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {complete
             ? "Your ceremony is complete. Download your certificate again any time."
-            : "Review your cat's completed profile below. You can still adjust the everyday name before generating."}
+            : "Review your cat's completed profile below. You can still adjust the family name before generating."}
         </p>
       </div>
 
-      {!complete ? (
-        <EverydayNameEditCard cat={cat} disabled={working} />
-      ) : null}
+      {!complete ? <EverydayNameEditCard cat={cat} disabled={working} /> : null}
 
       <CeremonyCertificateDocument data={certificateData} />
 
       <Card className="ceremony-highlight-panel border-primary/30">
         <div className="flex flex-col gap-3 px-4 py-5">
           {!complete ? (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               Generating your certificate completes the ceremony — your three
               names become final and can no longer be changed.
             </p>
@@ -168,7 +166,7 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
       {/* Off-screen fixed-width instance captured for the PDF (consistent on all viewports). */}
       <div
         aria-hidden
-        className="pointer-events-none fixed left-[-2000px] top-0"
+        className="pointer-events-none fixed top-0 left-[-2000px]"
       >
         <CeremonyCertificateDocument
           ref={captureRef}
@@ -207,7 +205,7 @@ function EverydayNameEditCard({
     setSaving(true)
     try {
       await updateEverydayName({ catId: cat._id, name: trimmed })
-      toast.success("Everyday name updated.")
+      toast.success("Family name updated.")
     } catch (error) {
       toast.error(getConvexErrorMessage(error))
     } finally {
@@ -216,14 +214,11 @@ function EverydayNameEditCard({
   }
 
   return (
-    <Card
-      {...dataComponent("EverydayNameEditCard")}
-      className="ceremony-panel"
-    >
+    <Card {...dataComponent("EverydayNameEditCard")} className="ceremony-panel">
       <CardHeader className="border-b">
         <div className="flex items-center gap-2">
-          <PencilLine className="text-primary size-4 shrink-0" aria-hidden />
-          <CardTitle className="text-base">Everyday name</CardTitle>
+          <PencilLine className="size-4 shrink-0 text-primary" aria-hidden />
+          <CardTitle className="text-base">Family name</CardTitle>
         </div>
         <CardDescription>
           The first ceremony name — the one your family will use every day. You
@@ -286,7 +281,7 @@ function CatCertificateNotFound() {
       className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center gap-4 px-4 py-16 text-center"
     >
       <h1 className="text-xl font-semibold">Ceremony not found</h1>
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         This ceremony doesn&apos;t exist or you don&apos;t have access to it.
       </p>
       <Button variant="outline" asChild className="border-primary/30">

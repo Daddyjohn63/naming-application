@@ -16,7 +16,7 @@ const THREE_NAMES = [
     label: "The first name",
     title: "Family name",
     description:
-      "The sensible, everyday name you call down the hallway — an Oliver, a Poppy, a Max. The one your cat answers to. Occasionally.",
+      "The sensible, family name you call down the hallway — an Oliver, a Poppy, a Max. The one your cat answers to. Occasionally.",
     Mark: FamilyMark,
     accentClassName: "text-amber-600 dark:text-amber-400",
     haloClassName: "bg-amber-500/10",
@@ -57,8 +57,7 @@ export function ThreeNamesSection() {
             <span aria-hidden className="h-px w-8 bg-border" />
           </p>
           <h2 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-            One cat.{" "}
-            <span className="font-serif italic">Three names.</span>
+            One cat. <span className="font-serif italic">Three names.</span>
           </h2>
           <p className="text-lg leading-relaxed text-pretty text-muted-foreground sm:text-xl">
             Naming a cat is serious business — and one name was never going to

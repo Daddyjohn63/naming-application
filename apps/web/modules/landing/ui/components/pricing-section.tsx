@@ -19,7 +19,7 @@ const FREE_FEATURES = [
   "AI photo check and personality summary — edit until it's right",
   "Family name styles: Elegant, Silly, Classic, Nature-inspired, and more",
   "10 AI family names with rationales, plus one free regeneration",
-  "Shortlist up to six names and crown a favourite everyday name",
+  "Shortlist up to six names and crown a favourite family name",
   "Pause any time — progress is saved at every step",
 ] as const
 
@@ -48,7 +48,7 @@ export function PricingSection() {
           </h2>
           <p className="mt-6 text-lg text-pretty text-muted-foreground">
             No subscription, no bundle, no surprises. Everything up to your
-            cat&apos;s everyday name is free — unlock the rest of the ceremony
+            cat&apos;s family name is free — unlock the rest of the ceremony
             only if you fall in love with it.
           </p>
         </div>
@@ -115,9 +115,9 @@ export function PricingSection() {
         </div>
 
         <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-pretty text-muted-foreground">
-          You&apos;re only charged when you choose to unlock — never at
-          sign-up, and never automatically. Each cat&apos;s ceremony is its own
-          unlock, so a household of three cats is three ceremonies (and three
+          You&apos;re only charged when you choose to unlock — never at sign-up,
+          and never automatically. Each cat&apos;s ceremony is its own unlock,
+          so a household of three cats is three ceremonies (and three
           certificates).
         </p>
       </div>

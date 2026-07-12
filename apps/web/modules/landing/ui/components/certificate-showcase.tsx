@@ -6,7 +6,7 @@ import { FeatureList } from "@/modules/landing/ui/components/feature-list"
 const CERTIFICATE_FEATURES = [
   "Their photo in an illustrated storybook frame",
   "The AI personality summary, written from your words and their photo",
-  "All three names — everyday, cat-world, and ineffable — with their meanings",
+  "All three names — family, cat-world, and ineffable — with their meanings",
   "The date of the ceremony, sealed for posterity",
   "A PDF download to print, share, or frame",
   "Reopen it from your dashboard whenever you miss it",
@@ -21,7 +21,7 @@ export function CertificateShowcase() {
     >
       <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-6 py-24 sm:py-32 md:grid-cols-2 md:gap-16 lg:px-8">
         <div className="order-2 flex items-center justify-center md:order-1">
-          <div className="relative aspect-4/5 w-full max-w-sm overflow-hidden rounded-2xl border-4 border-white bg-white shadow-2xl -rotate-2 transition-transform hover:rotate-0 duration-300">
+          <div className="relative aspect-4/5 w-full max-w-sm -rotate-2 overflow-hidden rounded-2xl border-4 border-white bg-white shadow-2xl transition-transform duration-300 hover:rotate-0">
             <Image
               src="/images/certifcate.png"
               alt="Example naming certificate showing a cat's photo, personality summary, and three names"

@@ -21,6 +21,7 @@ import {
   normalizeNameForDedupe,
 } from "@workspace/shared/constants/naming-curation"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
+import { ShortlistSavedBadge } from "@/modules/ceremony/ui/components/shortlist-saved-badge"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 import {
@@ -287,11 +288,7 @@ export function StageNameCuration({
                     <span className="text-base font-semibold tracking-tight">
                       {entry.name}
                     </span>
-                    {onShortlist ? (
-                      <Badge variant="secondary" className="rounded-full">
-                        Saved
-                      </Badge>
-                    ) : null}
+                    {onShortlist ? <ShortlistSavedBadge /> : null}
                     {isFavourite ? (
                       <Badge className="bg-primary rounded-full">Favourite</Badge>
                     ) : null}
