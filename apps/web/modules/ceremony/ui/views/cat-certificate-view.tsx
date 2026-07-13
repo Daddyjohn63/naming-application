@@ -97,6 +97,9 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
     everydayName,
     catWorldName: cat.selectedCatWorldName ?? "",
     ineffableName: cat.selectedIneffableName ?? "",
+    everydayNameRationale: cat.selectedFamilyRationale,
+    catWorldNameRationale: cat.selectedCatWorldRationale,
+    ineffableNameRationale: cat.selectedIneffableRationale,
     summaryText: latestSummary?.summaryText,
     photoSrc,
     dateLabel: `Named on ${format(

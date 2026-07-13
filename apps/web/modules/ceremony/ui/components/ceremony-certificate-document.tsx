@@ -19,6 +19,12 @@ export type CeremonyCertificateData = {
   everydayName: string
   catWorldName: string
   ineffableName: string
+  /** Short AI rationale for the family / everyday name. */
+  everydayNameRationale: string | undefined
+  /** Short AI rationale for the cat-world name. */
+  catWorldNameRationale: string | undefined
+  /** Short AI rationale for the ineffable near-name. */
+  ineffableNameRationale: string | undefined
   /** Accepted AI summary — "The Cat Profile" section. */
   summaryText: string | undefined
   /** Photo as data URL (capture-safe) or https URL; omitted when no photo. */
@@ -168,6 +174,12 @@ export function CeremonyCertificateDocument({
               <p className="font-serif text-sm font-semibold wrap-break-word text-[#463628]">
                 &ldquo;{data.everydayName}&rdquo;
               </p>
+              {data.everydayNameRationale !== undefined &&
+              data.everydayNameRationale.length > 0 ? (
+                <p className="mt-1.5 text-xs leading-relaxed wrap-break-word text-[#7a643f]">
+                  {data.everydayNameRationale}
+                </p>
+              ) : null}
             </div>
           </div>
           <div className="flex items-start gap-3 rounded-lg border border-[#dbe5cf] bg-[#eef3e3] px-4 py-6">
@@ -182,6 +194,12 @@ export function CeremonyCertificateDocument({
               <p className="font-serif text-sm font-semibold wrap-break-word text-[#3c4a2c]">
                 &ldquo;{data.catWorldName}&rdquo;
               </p>
+              {data.catWorldNameRationale !== undefined &&
+              data.catWorldNameRationale.length > 0 ? (
+                <p className="mt-1.5 text-xs leading-relaxed wrap-break-word text-[#5f7245]">
+                  {data.catWorldNameRationale}
+                </p>
+              ) : null}
             </div>
           </div>
           <div className="flex items-start gap-3 rounded-lg border border-[#ddd4ea] bg-[#efeaf6] px-4 py-6">
@@ -196,6 +214,12 @@ export function CeremonyCertificateDocument({
               <p className="font-serif text-sm font-semibold wrap-break-word text-[#453460]">
                 &ldquo;{data.ineffableName}&rdquo;
               </p>
+              {data.ineffableNameRationale !== undefined &&
+              data.ineffableNameRationale.length > 0 ? (
+                <p className="mt-1.5 text-xs leading-relaxed wrap-break-word text-[#6f5c8f]">
+                  {data.ineffableNameRationale}
+                </p>
+              ) : null}
             </div>
           </div>
         </div>
