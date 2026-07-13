@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google"
 
 import "@workspace/ui/globals.css"
+import { BackToTopButton } from "@/components/back-to-top-button"
 import { ConditionalRootHeader } from "@/components/conditional-root-header"
 import { PublicRouteShell } from "@/components/public-route-shell"
 import { Providers } from "@/components/providers"
@@ -41,6 +42,7 @@ export default function RootLayout({
               <ConditionalRootHeader />
 
               <div className="flex flex-1 flex-col">{children}</div>
+              <BackToTopButton />
             </PublicRouteShell>
           </Providers>
         </ClerkProvider>

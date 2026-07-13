@@ -23,12 +23,12 @@ const FAQ_ITEMS = [
       "Yes. In Eliot's telling, a cat's second name is theirs and theirs alone — so ours are too. When you confirm your favourite, it's claimed globally across every cat named with Naming Buddy, and no other cat can ever take it. If a name has already been claimed, you'll simply pick another from your shortlist.",
   },
   {
-    question: "What if I don't like the names the AI suggests?",
+    question: "What if I don't like the names the app suggests?",
     answer:
       "Each naming stage gives you 10 suggestions with a short rationale for each. You can shortlist up to six names from those suggestions, regenerate once for 10 completely fresh names (and keep choosing across both batches), and for the family name you can even add one of your own.",
   },
   {
-    question: "Can I edit the AI's summary of my cat?",
+    question: "Can I edit the personality summary of my cat?",
     answer:
       "Absolutely — the summary is yours to shape. Edit and save it as many times as you like until it sounds exactly like your cat. Once you submit it, it locks in as the creative truth behind every name that follows.",
   },

@@ -49,8 +49,8 @@ export function AboutInspiration() {
             </p>
             <p className="font-serif text-lg italic text-foreground/90 md:text-xl">
               Naming Buddy is our loving, modern answer to that idea: a
-              guided ritual, in our own words, with a little help from AI —
-              and with deep respect for the work that inspired it.
+              guided ritual, in our own words — and with deep respect for
+              the work that inspired it.
             </p>
           </div>
         </div>

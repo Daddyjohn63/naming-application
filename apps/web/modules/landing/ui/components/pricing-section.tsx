@@ -16,9 +16,9 @@ import {
 
 const FREE_FEATURES = [
   "Cat profile with required photo and personality description",
-  "AI photo check and personality summary — edit until it's right",
+  "Photo check and personality summary — edit until it's right",
   "Family name styles: Elegant, Silly, Classic, Nature-inspired, and more",
-  "10 AI family names with rationales, plus one free regeneration",
+  "10 family names with rationales, plus one free regeneration",
   "Shortlist up to six names and crown a favourite family name",
   "Pause any time — progress is saved at every step",
 ] as const
@@ -63,8 +63,8 @@ export function PricingSection() {
                 </span>
               </div>
               <CardDescription className="text-base">
-                Meet your cat&apos;s AI summary and find their everyday family
-                name — no card required.
+                Meet your cat&apos;s personality summary and find their everyday
+                family name — no card required.
               </CardDescription>
             </CardHeader>
             <CardContent>

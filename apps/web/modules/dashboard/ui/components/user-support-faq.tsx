@@ -41,7 +41,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "Can I add my own family name?",
-    answer: `Yes. During family-name curation you may add ${MAX_CUSTOM_FAMILY_NAMES === 1 ? "one custom name" : `${MAX_CUSTOM_FAMILY_NAMES} custom names`} to the shortlist alongside AI suggestions. Custom names aren’t available for the cat-world or ineffable stages.`,
+    answer: `Yes. During family-name curation you may add ${MAX_CUSTOM_FAMILY_NAMES === 1 ? "one custom name" : `${MAX_CUSTOM_FAMILY_NAMES} custom names`} to the shortlist alongside suggestions from the app. Custom names aren’t available for the cat-world or ineffable stages.`,
   },
   {
     question: "What does unlock cost, and when am I charged?",
@@ -53,13 +53,13 @@ const FAQ_ITEMS = [
       "Yes. When you confirm your favourite, it’s claimed globally across Naming Buddy so no other cat can take it. If a name was just claimed by someone else, simply pick another from your shortlist (or regenerate if you still can).",
   },
   {
-    question: "Can I edit the AI summary?",
+    question: "Can I edit the personality summary?",
     answer:
       "Absolutely. Edit and save until it sounds like your cat, then submit to lock it in. After submit, changing the profile regenerates a new summary and uses one of your profile submission attempts.",
   },
   {
     question: "How many times can I change the profile or regenerate names?",
-    answer: `You can successfully submit a cat’s profile up to ${MAX_CAT_PROFILE_SUBMIT_COUNT} times. Each ceremony also has up to ${MAX_PHOTO_VALIDATION_ATTEMPTS} automated photo checks. Each naming stage (family, cat-world, ineffable) allows ${MAX_FAMILY_NAME_REGENERATIONS === 1 ? "one" : MAX_FAMILY_NAME_REGENERATIONS} AI regeneration. If a ceremony’s budgets are exhausted, start a new cat ceremony from the dashboard for fresh limits, or contact support.`,
+    answer: `You can successfully submit a cat’s profile up to ${MAX_CAT_PROFILE_SUBMIT_COUNT} times. Each ceremony also has up to ${MAX_PHOTO_VALIDATION_ATTEMPTS} automated photo checks. Each naming stage (family, cat-world, ineffable) allows ${MAX_FAMILY_NAME_REGENERATIONS === 1 ? "one" : MAX_FAMILY_NAME_REGENERATIONS} regeneration. If a ceremony’s budgets are exhausted, start a new cat ceremony from the dashboard for fresh limits, or contact support.`,
   },
   {
     question: "What if I run out of photo checks?",

@@ -5,7 +5,7 @@ import { FeatureList } from "@/modules/landing/ui/components/feature-list"
 
 const CERTIFICATE_FEATURES = [
   "Their photo in an illustrated storybook frame",
-  "The AI personality summary, written from your words and their photo",
+  "The personality summary, written from your words and their photo",
   "All three names — family, cat-world, and ineffable — with their meanings",
   "The date of the ceremony, sealed for posterity",
   "A PDF download to print, share, or frame",

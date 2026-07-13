@@ -19,17 +19,18 @@ export function PoemTribute() {
             <span aria-hidden className="h-px w-8 bg-border" />
           </p>
           <p className="font-serif text-2xl leading-relaxed text-balance italic sm:text-3xl">
-            In 1939, T. S. Eliot published a poem insisting that naming a cat
-            is no small task — that every cat, in fact, needs three: a
-            sensible one for the household, a grander one that belongs to no
-            other cat alive, and a third so private that only the cat will
-            ever know it.
+            Our path started in a theatre — watching Andrew Lloyd Webber&apos;s{" "}
+            <cite className="not-italic font-medium">Cats</cite>
+            — and led us to T. S. Eliot&apos;s poem insisting that every cat
+            needs three names: a sensible one for the household, a grander one
+            that belongs to no other cat alive, and a third so private that
+            only the cat will ever know it.
           </p>
           <p className="max-w-xl text-base text-pretty text-muted-foreground">
-            He was right, of course. Naming Buddy is the ceremony he never got
-            around to building — a loving nod to{" "}
+            He was right, of course. Naming Buddy is the ceremony built from
+            that idea — a loving nod to{" "}
             <cite className="not-italic font-medium">The Naming of Cats</cite>,
-            in our own words and with a little help from AI.
+            in our own words, for people who already take their cats seriously.
           </p>
         </div>
       </div>

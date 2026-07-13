@@ -288,9 +288,8 @@ function DashboardCatsLoaded() {
             </EmptyTitle>
             <EmptyDescription>
               Start when you are ready — create a profile with a photo of your
-              cat and their story. Our feline-trained AI agent will then create a
-              summary of your cat&apos;s personality from which names can be
-              generated.
+              cat and their story. Naming Buddy will then write a summary of
+              your cat&apos;s personality from which names can be generated.
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>

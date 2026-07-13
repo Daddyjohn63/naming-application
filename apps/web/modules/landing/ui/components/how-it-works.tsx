@@ -18,15 +18,15 @@ const CEREMONY_STEPS: readonly CeremonyStep[] = [
     phase: "Free",
   },
   {
-    title: "Meet their AI summary",
+    title: "Meet their personality summary",
     description:
-      "The AI checks your photo really is a single cat, then studies it alongside your words to write a personality summary. Edit it until it sounds exactly like your cat, then submit — it becomes the creative truth behind every name.",
+      "Naming Buddy checks your photo really is a single cat, then studies it alongside your words to write a personality summary. Edit it until it sounds exactly like your cat, then submit — it becomes the creative truth behind every name.",
     phase: "Free",
   },
   {
     title: "Curate family names",
     description:
-      "Choose one or more styles — Elegant, Silly, Classic, Nature-inspired, Non-human, or Mix-it-up. The AI suggests 10 names, each with a reason. Shortlist up to six, regenerate once for 10 fresh ideas you can mix with the first batch, add one of your own, and crown a favourite family name.",
+      "Choose one or more styles — Elegant, Silly, Classic, Nature-inspired, Non-human, or Mix-it-up. The app suggests 10 names, each with a reason. Shortlist up to six, regenerate once for 10 fresh ideas you can mix with the first batch, add one of your own, and crown a favourite family name.",
     phase: "Free",
   },
   {
@@ -67,10 +67,11 @@ export function HowItWorks() {
           <div className="flex flex-col gap-6 lg:sticky lg:top-24 lg:self-start">
             <p className="text-base/7 font-semibold">How it works</p>
             <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-              A guided ceremony, one gentle step at a time
+              A guided ceremony, not a name generator
             </h2>
             <p className="text-lg text-pretty text-muted-foreground">
-              You bring the story; the ceremony does the rest. Your progress is
+              You bring the story; Naming Buddy walks you through the rest —
+              summary, shortlists, and a keepsake certificate. Your progress is
               saved at every step, so you can pause mid-ceremony and pick up
               exactly where you left off — for as many cats as you have.
             </p>

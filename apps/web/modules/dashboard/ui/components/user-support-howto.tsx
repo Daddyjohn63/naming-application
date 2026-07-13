@@ -26,7 +26,7 @@ const CEREMONY_FLOW_STEPS = [
   },
   {
     title: "Review the summary",
-    body: "Our AI writes a personality summary from your story and photo. Edit it until it sounds like your cat, then submit when you’re happy — that locked summary becomes the creative truth behind every name that follows.",
+    body: "Naming Buddy writes a personality summary from your story and photo. Edit it until it sounds like your cat, then submit when you’re happy — that locked summary becomes the creative truth behind every name that follows.",
   },
   {
     title: "Pick a family-name style",
@@ -57,7 +57,7 @@ const CEREMONY_FLOW_STEPS = [
 const NAME_TYPES = [
   {
     title: "Family name (everyday name)",
-    body: "The name you call your cat at home — warm, practical, and personal. This stage is free. You choose a style first, then curate AI suggestions, and you may add one custom name of your own to the shortlist.",
+    body: "The name you call your cat at home — warm, practical, and personal. This stage is free. You choose a style first, then curate name suggestions from the app, and you may add one custom name of your own to the shortlist.",
   },
   {
     title: "Cat-world name",
@@ -173,7 +173,7 @@ export function UserSupportHowto() {
             {
               step: "1",
               title: "Review a batch",
-              body: `${NAME_BATCH_SIZE} AI suggestions appear, each with a short rationale.`,
+              body: `${NAME_BATCH_SIZE} suggestions appear, each with a short rationale.`,
             },
             {
               step: "2",

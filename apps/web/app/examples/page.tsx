@@ -1,18 +1,13 @@
 import type { Metadata } from "next"
 
-import { PublicPageShell } from "@/modules/marketing/ui/components/public-page-shell"
+import { ExamplesView } from "@/modules/examples/ui/views/examples-view"
 
 export const metadata: Metadata = {
   title: "Examples — Naming Buddy",
   description:
-    "See how the Naming Buddy ceremony walks from family names to cat-world names and the quiet third name.",
+    "Browse sample Naming Buddy certificates — photo, personality profile, and all three names on a keepsake you can enlarge and step through.",
 }
 
 export default function ExamplesPage() {
-  return (
-    <PublicPageShell
-      title="Examples"
-      description="Sample ceremonies and name styles will live here soon. Start your own from the home page when you are ready."
-    />
-  )
+  return <ExamplesView />
 }

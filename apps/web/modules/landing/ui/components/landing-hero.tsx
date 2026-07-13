@@ -45,7 +45,7 @@ export function LandingHero() {
             </Button>
           </nav>
           <p className="text-sm text-muted-foreground">
-            Free to begin — profile, AI summary, and family names cost nothing.
+            Free to begin — profile, personality summary, and family names cost nothing.
             Unlock the full ceremony for a one-time {UNLOCK_PRICE_USD} per cat.
           </p>
         </div>

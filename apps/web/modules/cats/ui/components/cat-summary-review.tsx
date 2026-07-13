@@ -69,7 +69,7 @@ export function CatSummaryReview({
   const submitSummary = useMutation(api.catSummary.submitSummary)
   const [ShowConfirm, confirm] = useConfirm(
     "Go back to profile?",
-    `Going back to edit your profile may result in losing this AI generated summary. But remember you have ${MAX_CAT_PROFILE_SUBMIT_COUNT} attempts.`
+    `Going back to edit your profile may result in losing this generated summary. But remember you have ${MAX_CAT_PROFILE_SUBMIT_COUNT} attempts.`
   )
 
   /** Non-field errors from save/submit mutations (auth, step locked, etc.). */

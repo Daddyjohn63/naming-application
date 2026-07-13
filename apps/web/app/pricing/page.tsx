@@ -1,18 +1,13 @@
 import type { Metadata } from "next"
 
-import { PublicPageShell } from "@/modules/marketing/ui/components/public-page-shell"
+import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
+import { PricingView } from "@/modules/pricing/ui/views/pricing-view"
 
 export const metadata: Metadata = {
   title: "Pricing — Naming Buddy",
-  description:
-    "Explore Naming Buddy pricing for unlocking ceremony stages per cat.",
+  description: `Naming Buddy is free to start. Unlock the full naming ceremony — cat-world name, ineffable near-name, and certificate — for a one-time ${UNLOCK_PRICE_USD} per cat. No subscription.`,
 }
 
 export default function PricingPage() {
-  return (
-    <PublicPageShell
-      title="Pricing"
-      description="Early steps are free to explore. Unlocking paid stages stays per cat, whenever you are ready — detailed pricing will appear here soon."
-    />
-  )
+  return <PricingView />
 }
