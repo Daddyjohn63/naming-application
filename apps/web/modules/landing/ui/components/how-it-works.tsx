@@ -14,13 +14,13 @@ const CEREMONY_STEPS: readonly CeremonyStep[] = [
   {
     title: "Create your cat's profile",
     description:
-      "Write a short description of their personality — the greeting at the door, the most annoying habit, who they think they are. A photo and basics like age or breed are optional. Save and come back whenever you like.",
+      "Upload a clear photo of your cat and write a short description of their personality — the greeting at the door, the most annoying habit, who they think they are. Basics like age or breed are optional. Save and come back whenever you like.",
     phase: "Free",
   },
   {
     title: "Meet their AI summary",
     description:
-      "If you added a photo, the AI checks it really is a cat, then studies it alongside your words to write a personality summary. Edit it until it sounds exactly like your cat, then submit — it becomes the creative truth behind every name.",
+      "The AI checks your photo really is a single cat, then studies it alongside your words to write a personality summary. Edit it until it sounds exactly like your cat, then submit — it becomes the creative truth behind every name.",
     phase: "Free",
   },
   {

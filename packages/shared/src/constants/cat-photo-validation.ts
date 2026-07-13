@@ -7,7 +7,7 @@
 
 /**
  * Max AI vision checks per cat ceremony (each submit with a photo consumes one).
- * Caps token spend; owners can continue without a photo when exhausted.
+ * Caps token spend; when exhausted the owner must start a new ceremony or contact support.
  */
 export const MAX_PHOTO_VALIDATION_ATTEMPTS = 5
 
@@ -114,7 +114,7 @@ export function photoValidationAttemptsUsed(
   return cat.photoValidationAttemptsUsed ?? 0
 }
 
-/** Remaining AI photo checks before the owner must continue without a photo. */
+/** Remaining AI photo checks before submit is blocked for this ceremony. */
 export function photoValidationAttemptsRemaining(used: number): number {
   return Math.max(0, MAX_PHOTO_VALIDATION_ATTEMPTS - used)
 }

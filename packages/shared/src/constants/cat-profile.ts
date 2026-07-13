@@ -1,6 +1,6 @@
 /** Default story shown on KB-002 draft rows until the owner submits KB-003 profile. */
 export const DRAFT_CAT_DESCRIPTION_PLACEHOLDER =
-  "Tell your cat's story in the next steps — a photo is optional. You can replace this anytime before the summary is approved."
+  "Tell your cat's story in the next steps — a photo is required when you submit. You can replace this anytime before the summary is approved."
 
 /** Optional cat sex values for KB-003 profile and summary pronouns. */
 export const CAT_SEX_VALUES = ["male", "female"] as const

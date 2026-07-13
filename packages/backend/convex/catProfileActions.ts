@@ -172,16 +172,19 @@ export const submitCatProfile = action({
       breed: args.breed,
     })
 
-    const photoStorageId = args.photoStorageId as Id<"_storage"> | undefined
-    if (photoStorageId !== undefined) {
-      const photoError = await validateStoredCatPhoto(
-        ctx,
-        photoStorageId,
-        cat.photoStorageId,
-      )
-      if (photoError !== null) {
-        return profileActionFailure(photoError)
-      }
+    const photoStorageId =
+      (args.photoStorageId as Id<"_storage"> | undefined) ?? cat.photoStorageId
+    if (photoStorageId === undefined) {
+      return profileActionFailure(CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_REQUIRED)
+    }
+
+    const photoError = await validateStoredCatPhoto(
+      ctx,
+      photoStorageId,
+      cat.photoStorageId,
+    )
+    if (photoError !== null) {
+      return profileActionFailure(photoError)
     }
 
     await ctx.runMutation(internal.catProfile.applyCatProfileSubmit, {

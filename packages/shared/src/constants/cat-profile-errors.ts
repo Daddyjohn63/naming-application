@@ -49,7 +49,7 @@ const MESSAGES: Record<CatProfileSubmitErrorCode, string> = {
   [CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_UNREADABLE]:
     "We could not read that image. Try a different file.",
   [CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_VALIDATION_LIMIT_REACHED]:
-    "You've used all automated photo checks for this ceremony. Continue without a photo or save a draft.",
+    "You've used all automated photo checks for this ceremony. Start a new ceremony from your dashboard, or contact support for help.",
 }
 
 export function catProfileSubmitErrorMessage(

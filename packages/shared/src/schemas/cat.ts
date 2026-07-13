@@ -93,7 +93,7 @@ export type SubmitCatProfileFieldsInput = z.input<
 
 /**
  * KB-003 draft save — relaxed validation for "Save & exit" (no summary trigger).
- * Photo remains optional; description may be partial or empty.
+ * Photo is optional on draft; description may be partial or empty.
  */
 export const saveCatProfileDraftFieldsSchema = z.object({
   title: z

@@ -11,22 +11,16 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@workspace/ui/components/alert"
-import { Button } from "@workspace/ui/components/button"
-import { ceremonyCtaButtonClassName } from "@/modules/ceremony/lib/ceremony-styles"
 import { dataComponent } from "@/lib/data-component"
 
 type CatPhotoGuidanceProps = {
   cat: { photoValidationAttemptsUsed?: number }
   photoChecksExhausted: boolean
-  continuingWithoutPhoto?: boolean
-  onContinueWithoutPhoto?: () => void
 }
 
 export function CatPhotoGuidance({
   cat,
   photoChecksExhausted,
-  continuingWithoutPhoto = false,
-  onContinueWithoutPhoto,
 }: CatPhotoGuidanceProps) {
   const attemptsUsed = photoValidationAttemptsUsed(cat)
   const attemptsRemaining = photoValidationAttemptsRemaining(attemptsUsed)
@@ -61,23 +55,9 @@ export function CatPhotoGuidance({
               review, so uploading a different photo won&apos;t help.
             </p>
             <p>
-              Continue without a photo to generate your summary from your
-              written description, or save a draft and come back later.
+              Start a new ceremony from your dashboard, or contact support for
+              help. You can still save a draft of this profile.
             </p>
-            {onContinueWithoutPhoto !== undefined ? (
-              <div className="flex flex-wrap gap-2 pt-1">
-                <Button
-                  type="button"
-                  disabled={continuingWithoutPhoto}
-                  className={ceremonyCtaButtonClassName}
-                  onClick={onContinueWithoutPhoto}
-                >
-                  {continuingWithoutPhoto
-                    ? "Continuing…"
-                    : "Continue without photo"}
-                </Button>
-              </div>
-            ) : null}
           </AlertDescription>
         </Alert>
       ) : attemptsRemaining <= 2 ? (

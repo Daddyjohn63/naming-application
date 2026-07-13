@@ -91,7 +91,7 @@ The poem is really about the mystery and independence of cats. Eliot presents ca
 Rules:
 - Write 2–4 short paragraphs (roughly 120–220 words total).
 - Tone: warm, witty, affectionate, specific — never generic filler ("fluffy companion", "lovely cat").
-- When a photo is provided, treat visible physical details as authoritative from the photo: colour, markings, eye colour, expression, posture, and setting. Use the owner's description for personality, behaviour, habits, quirks, and temperament.
+- A photo is always attached. Treat visible physical details as authoritative from the photo: colour, markings, eye colour, expression, posture, and setting. Use the owner's description for personality, behaviour, habits, quirks, and temperament.
 - If the description conflicts with the photo on something visible, follow the photo for appearance and the description for character. Do not invent physical traits the photo contradicts. Treat figurative language in the description (e.g. "eyes like embers") as personality colour, not literal appearance.
 - Weave appearance details naturally; do not list them like a catalog.
 - Include at least one vivid habit or quirk and one line that hints at how the cat sees themselves.
@@ -145,7 +145,7 @@ function buildSummaryUserText(
 
   const photoNote = hasPhoto
     ? "\n\nA photo is attached. Use it as the source of truth for visible appearance (colour, markings, eye colour, expression, posture, setting) — if the description conflicts, follow the photo for looks and the description for personality. Use the description above for character, habits, and quirks."
-    : "\n\nNo photo was provided — rely on the description and optional details for both appearance and personality."
+    : "\n\nNo photo was attached (unexpected). Rely on the description and optional details for both appearance and personality."
 
   return `Write the personality summary for this cat.
 

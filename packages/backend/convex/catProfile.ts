@@ -2,7 +2,7 @@
  * KB-003 profile persistence + KB-004 pipeline entry.
  *
  * Internal mutations write cat profile fields. `applyCatProfileSubmit` also sets the
- * first summary substate and schedules photo validation or summary generation.
+ * first summary substate and schedules photo validation (photo required on submit).
  * Parse helpers validate Zod field rules before mutations run (from actions).
  * Internal mutations for profile submit/draft; field parsing helpers.
  */
@@ -40,7 +40,7 @@ export const applyCatProfileSubmit = internalMutation({
     sex: v.optional(v.union(v.literal("male"), v.literal("female"))),
     age: v.optional(v.string()),
     breed: v.optional(v.string()),
-    photoStorageId: v.optional(v.id("_storage")),
+    photoStorageId: v.id("_storage"),
   },
   handler: async (ctx, args) => {
     const cat = await ctx.db.get(args.catId)
@@ -72,8 +72,7 @@ export const applyCatProfileSubmit = internalMutation({
     }
 
     const photoAttemptsUsed = cat.photoValidationAttemptsUsed ?? 0
-    const hasPhoto = args.photoStorageId !== undefined
-    if (hasPhoto && photoAttemptsUsed >= MAX_PHOTO_VALIDATION_ATTEMPTS) {
+    if (photoAttemptsUsed >= MAX_PHOTO_VALIDATION_ATTEMPTS) {
       throw new ConvexError({
         code: CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_VALIDATION_LIMIT_REACHED,
       })
@@ -92,9 +91,6 @@ export const applyCatProfileSubmit = internalMutation({
       cat.ceremonyStep === "summary_review" ||
       cat.acceptedSummaryVersionId !== undefined
 
-    // Photo path runs vision validation first; no-photo skips straight to summary.
-    const nextStep = hasPhoto ? "awaiting_photo_validation" : "awaiting_summary"
-
     await ctx.db.patch(args.catId, {
       title: args.title,
       description: args.description,
@@ -103,13 +99,11 @@ export const applyCatProfileSubmit = internalMutation({
       age: args.age,
       breed: args.breed,
       photoStorageId: args.photoStorageId,
-      ceremonyStep: nextStep,
+      ceremonyStep: "awaiting_photo_validation",
       ...(isSummaryReviewResubmit
         ? { profileSubmitsUsed: submitsUsed + 1 }
         : {}),
-      ...(hasPhoto
-        ? { photoValidationAttemptsUsed: photoAttemptsUsed + 1 }
-        : {}),
+      photoValidationAttemptsUsed: photoAttemptsUsed + 1,
       photoValidation: undefined,
       photoQualityAcknowledged: undefined,
       summaryGenerationError: undefined,
@@ -133,21 +127,13 @@ export const applyCatProfileSubmit = internalMutation({
       }
     }
 
-    if (hasPhoto) {
-      await ctx.scheduler.runAfter(
-        0,
-        internal.catSummaryActions.validateCatPhoto,
-        {
-          catId: args.catId,
-        }
-      )
-    } else {
-      await ctx.scheduler.runAfter(
-        0,
-        internal.catSummaryActions.generateCatSummary,
-        { catId: args.catId }
-      )
-    }
+    await ctx.scheduler.runAfter(
+      0,
+      internal.catSummaryActions.validateCatPhoto,
+      {
+        catId: args.catId,
+      },
+    )
   },
 })
 

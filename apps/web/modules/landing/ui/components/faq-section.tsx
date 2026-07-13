@@ -11,7 +11,7 @@ const FAQ_ITEMS = [
   {
     question: "Do I need a photo of my cat?",
     answer:
-      "No — a written description of their personality is all that's required. A photo makes the ceremony richer: the AI studies what it sees in the image alongside your words, and the photo appears on the certificate. If you do upload one, we quickly check it really is a cat before the ceremony continues.",
+      "Yes — a clear photo of your cat is required to generate their personality summary and appears on the certificate. We quickly check it really is a single cat before the ceremony continues. You can still save a draft profile without a photo and come back to upload one later.",
   },
   {
     question: "What does it cost, and when am I charged?",
@@ -44,7 +44,7 @@ const FAQ_ITEMS = [
   {
     question: "What's on the certificate?",
     answer:
-      "Your cat's photo (when you've added one), their personality summary, all three names — family, cat-world, and ineffable — and the ceremony date. You can adjust the family name one last time before it's generated, then download it as a PDF and reopen it from your dashboard whenever you like.",
+      "Your cat's photo, their personality summary, all three names — family, cat-world, and ineffable — and the ceremony date. You can adjust the family name one last time before it's generated, then download it as a PDF and reopen it from your dashboard whenever you like.",
   },
   {
     question: "What is an “ineffable” name, anyway?",

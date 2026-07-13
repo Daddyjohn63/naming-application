@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useAction, useMutation } from "convex/react"
+import { useAction } from "convex/react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -95,7 +95,6 @@ export function CatProfileForm({
   const router = useRouter()
   const submitProfile = useAction(api.catProfileActions.submitCatProfile)
   const saveDraft = useAction(api.catProfileActions.saveCatProfileDraft)
-  const continueWithoutPhoto = useMutation(api.catSummary.continueWithoutPhoto)
   const {
     upload,
     pending: uploadPending,
@@ -114,8 +113,6 @@ export function CatProfileForm({
   const [formError, setFormError] = React.useState<string | null>(null)
   const [submitting, setSubmitting] = React.useState(false)
   const [savingDraft, setSavingDraft] = React.useState(false)
-  const [continuingWithoutPhoto, setContinuingWithoutPhoto] =
-    React.useState(false)
 
   const isSummaryReviewResubmit = cat.ceremonyStep === "summary_review"
   const submitsUsed = cat.profileSubmitsUsed ?? 0
@@ -131,7 +128,7 @@ export function CatProfileForm({
     photoFile !== null ||
     storedPhotoId !== undefined ||
     (cat.photoStorageId !== undefined && photoFile === null && previewUrl === null)
-  const photoSubmitBlocked = photoChecksExhausted && hasPhotoSelected
+  const photoSubmitBlocked = photoChecksExhausted
 
   const form = useForm<SubmitCatProfileFieldsInput>({
     resolver: zodResolver(submitCatProfileFieldsSchema),
@@ -195,11 +192,25 @@ export function CatProfileForm({
     setFormError(null)
     setServerFieldErrors({})
 
+    if (!hasPhotoSelected) {
+      setServerFieldErrors({
+        photo: "Please upload a photo of your cat.",
+      })
+      return
+    }
+
     let photoStorageId = storedPhotoId
     try {
       if (photoFile !== null) {
         photoStorageId = await upload(photoFile)
         setStoredPhotoId(photoStorageId)
+      }
+
+      if (photoStorageId === undefined) {
+        setServerFieldErrors({
+          photo: "Please upload a photo of your cat.",
+        })
+        return
       }
 
       setSubmitting(true)
@@ -211,7 +222,7 @@ export function CatProfileForm({
         sex: normalizeCatSex(values.sex),
         age: values.age,
         breed: values.breed,
-        ...(photoStorageId !== undefined ? { photoStorageId } : {}),
+        photoStorageId,
       })
       if (isCatProfileActionFailure(result)) {
         applyCatProfileActionError(result, {
@@ -314,39 +325,15 @@ export function CatProfileForm({
   const photoError =
     serverFieldErrors.photo ?? uploadHookError ?? undefined
 
-  const onContinueWithoutPhoto = async () => {
-    setFormError(null)
-    setServerFieldErrors({})
-    try {
-      setContinuingWithoutPhoto(true)
-      await continueWithoutPhoto({ catId: cat._id })
-      toast.success("Generating your summary without a photo.")
-    } catch (error) {
-      const data = getConvexErrorData(error)
-      if (data?.fieldErrors !== undefined) {
-        setServerFieldErrors(
-          data.fieldErrors as Partial<Record<FieldName, string>>,
-        )
-      }
-      const message = getConvexErrorMessage(error)
-      if (data?.fieldErrors === undefined) {
-        setFormError(message)
-      }
-    } finally {
-      setContinuingWithoutPhoto(false)
-    }
-  }
-
-  const busy =
-    submitting || uploadPending || savingDraft || continuingWithoutPhoto
+  const busy = submitting || uploadPending || savingDraft
 
   return (
     <Card {...dataComponent("CatProfileForm")} className="ceremony-panel">
       <CardHeader className="border-b">
         <CardTitle className="text-base">Cat profile</CardTitle>
         <CardDescription>
-          Tell us about your cat. A photo is optional but helps us write a richer
-          summary when you provide one. You can update your profile here until
+          Tell us about your cat. A photo is required to generate their summary
+          and appears on the certificate. You can update your profile here until
           the summary is submitted.
           {isSummaryReviewResubmit &&
           submitsRemaining < MAX_CAT_PROFILE_SUBMIT_COUNT ? (
@@ -376,18 +363,12 @@ export function CatProfileForm({
               Cat photo
             </FieldLabel>
             <FieldDescription>
-              Optional · {catPhotoConstraintsLabel()}
+              Required · {catPhotoConstraintsLabel()}
             </FieldDescription>
             <div className="mt-3">
               <CatPhotoGuidance
                 cat={cat}
                 photoChecksExhausted={photoChecksExhausted}
-                continuingWithoutPhoto={continuingWithoutPhoto}
-                onContinueWithoutPhoto={
-                  photoChecksExhausted
-                    ? () => void onContinueWithoutPhoto()
-                    : undefined
-                }
               />
             </div>
             <CatPhotoUploader
@@ -578,31 +559,38 @@ export function CatProfileForm({
           </p>
         ) : null}
 
-        <div className="flex flex-wrap gap-3">
-          <Button
-            type="submit"
-            disabled={
-              busy ||
-              (isSummaryReviewResubmit && submitsRemaining === 0) ||
-              photoSubmitBlocked
-            }
-            className={ceremonyCtaButtonClassName}
-          >
-            {submitting
-              ? "Submitting…"
-              : photoSubmitBlocked
-                ? "Continue without photo"
-                : "Submit profile and generate summary"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={busy}
-            className={ceremonyOutlineButtonClassName}
-            onClick={() => void onSaveAndExit()}
-          >
-            {savingDraft ? "Saving…" : "Save & exit to dashboard"}
-          </Button>
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-3">
+            <Button
+              type="submit"
+              disabled={
+                busy ||
+                (isSummaryReviewResubmit && submitsRemaining === 0) ||
+                photoSubmitBlocked
+              }
+              className={ceremonyCtaButtonClassName}
+            >
+              {submitting
+                ? "Submitting…"
+                : photoSubmitBlocked
+                  ? "Photo checks used — start a new ceremony"
+                  : "Submit profile and generate summary"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy}
+              className={ceremonyOutlineButtonClassName}
+              onClick={() => void onSaveAndExit()}
+            >
+              {savingDraft ? "Saving…" : "Save & exit to dashboard"}
+            </Button>
+          </div>
+          {photoError !== undefined ? (
+            <p className="text-destructive text-sm" role="alert">
+              {photoError}
+            </p>
+          ) : null}
         </div>
       </form>
     </Card>
