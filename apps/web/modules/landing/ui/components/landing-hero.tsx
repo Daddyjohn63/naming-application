@@ -28,11 +28,10 @@ export function LandingHero() {
             Every cat has three names. Discover all of them.
           </h1>
           <p className="max-w-xl text-base leading-relaxed text-pretty text-muted-foreground md:text-lg">
-            Tell us about your cat — add a photo if you like — and our guided
-            naming ceremony finds their everyday family name, a one-of-a-kind
-            cat-world name, and a playful guess at the secret name only they
-            know. It all ends with a keepsake certificate to download and
-            treasure.
+            Tell us about your cat and upload a photo, and our guided naming
+            ceremony finds their everyday family name, a one-of-a-kind cat-world
+            name, and a playful guess at the secret name only they know. It all
+            ends with a keepsake certificate to download and treasure.
           </p>
           <nav
             aria-label="Start naming ceremony"

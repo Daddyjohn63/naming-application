@@ -106,9 +106,9 @@ export default defineSchema({
     /** Free-text age label, e.g. "3 years" (optional). */
     age: v.optional(v.string()),
     breed: v.optional(v.string()),
-    /** Uploaded cat photo reference (Convex file storage). */
+    /** Uploaded cat photo reference (Convex file storage). Required to submit the profile for summary generation; optional while drafting. */
     photoStorageId: v.optional(v.id("_storage")),
-    /** Latest §2.3a vision validation payload when a photo was submitted. */
+    /** Latest §2.3a vision validation payload after photo submit. */
     photoValidation: v.optional(
       v.object({
         isCat: v.boolean(),

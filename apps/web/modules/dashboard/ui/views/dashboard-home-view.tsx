@@ -287,8 +287,8 @@ function DashboardCatsLoaded() {
               You haven&apos;t started a naming ceremony yet for your cat
             </EmptyTitle>
             <EmptyDescription>
-              Start when you are ready — you can upload an image of your cat and
-              create a profile. Our feline-trained AI agent will then create a
+              Start when you are ready — create a profile with a photo of your
+              cat and their story. Our feline-trained AI agent will then create a
               summary of your cat&apos;s personality from which names can be
               generated.
             </EmptyDescription>

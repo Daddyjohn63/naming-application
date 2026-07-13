@@ -1,6 +1,7 @@
 import { dataComponent } from "@/lib/data-component"
 import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
 import { MAX_CAT_PROFILE_SUBMIT_COUNT } from "@workspace/shared/constants/cat-profile"
+import { MAX_PHOTO_VALIDATION_ATTEMPTS } from "@workspace/shared/constants/cat-photo-validation"
 import {
   MAX_CUSTOM_FAMILY_NAMES,
   MAX_FAMILY_NAME_REGENERATIONS,
@@ -27,7 +28,7 @@ const FAQ_ITEMS = [
   {
     question: "Do I need a photo of my cat?",
     answer:
-      "No — a written story is enough. A photo makes the summary richer and appears on the certificate. If you upload one, we quickly check it really is a single cat before the ceremony continues.",
+      "Yes — a clear photo is required to generate the personality summary and appears on the certificate. We quickly check it really is a single cat before the ceremony continues. You can still save a draft without a photo and upload one when you’re ready to submit.",
   },
   {
     question: "What are the three names for?",
@@ -58,7 +59,11 @@ const FAQ_ITEMS = [
   },
   {
     question: "How many times can I change the profile or regenerate names?",
-    answer: `You can successfully submit a cat’s profile up to ${MAX_CAT_PROFILE_SUBMIT_COUNT} times. Each naming stage (family, cat-world, ineffable) allows ${MAX_FAMILY_NAME_REGENERATIONS === 1 ? "one" : MAX_FAMILY_NAME_REGENERATIONS} AI regeneration. If a ceremony’s budgets are exhausted, start a new cat ceremony from the dashboard for fresh limits.`,
+    answer: `You can successfully submit a cat’s profile up to ${MAX_CAT_PROFILE_SUBMIT_COUNT} times. Each ceremony also has up to ${MAX_PHOTO_VALIDATION_ATTEMPTS} automated photo checks. Each naming stage (family, cat-world, ineffable) allows ${MAX_FAMILY_NAME_REGENERATIONS === 1 ? "one" : MAX_FAMILY_NAME_REGENERATIONS} AI regeneration. If a ceremony’s budgets are exhausted, start a new cat ceremony from the dashboard for fresh limits, or contact support.`,
+  },
+  {
+    question: "What if I run out of photo checks?",
+    answer: `Each ceremony allows up to ${MAX_PHOTO_VALIDATION_ATTEMPTS} automated photo checks. If you’ve used them all, this ceremony can’t continue with another photo — start a new ceremony from the dashboard, or contact support. You can still save a draft of the profile.`,
   },
   {
     question: "Can I name more than one cat?",
@@ -72,7 +77,7 @@ const FAQ_ITEMS = [
   {
     question: "What’s on the certificate?",
     answer:
-      "Your cat’s photo (when you’ve added one), personality summary, all three names, and the ceremony date. You can adjust the family name one last time before generating, then download a PDF and reopen it from the ceremony whenever you like.",
+      "Your cat’s photo, personality summary, all three names, and the ceremony date. You can adjust the family name one last time before generating, then download a PDF and reopen it from the ceremony whenever you like.",
   },
   {
     question: "I deleted a ceremony by mistake — can I recover it?",

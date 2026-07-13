@@ -22,11 +22,11 @@ const CEREMONY_FLOW_STEPS = [
   },
   {
     title: "Build a profile",
-    body: "Give the ceremony a title and tell your cat’s story. A photo is optional but makes the summary and certificate richer. If you upload one, we check it really is a single cat before continuing.",
+    body: "Give the ceremony a title, tell your cat’s story, and upload a clear photo — required to generate the summary and for the certificate. We check it really is a single cat before continuing. You can still save a draft and come back later.",
   },
   {
     title: "Review the summary",
-    body: "Our AI writes a personality summary from your story (and photo, if you added one). Edit it until it sounds like your cat, then submit when you’re happy — that locked summary becomes the creative truth behind every name that follows.",
+    body: "Our AI writes a personality summary from your story and photo. Edit it until it sounds like your cat, then submit when you’re happy — that locked summary becomes the creative truth behind every name that follows.",
   },
   {
     title: "Pick a family-name style",
@@ -265,7 +265,8 @@ export function UserSupportHowto() {
                 </th>
                 <td className="px-4 py-3 text-muted-foreground">
                   Up to {MAX_PHOTO_VALIDATION_ATTEMPTS} automated photo checks
-                  per ceremony — you can always continue without a photo
+                  per ceremony — if they run out, start a new ceremony or
+                  contact support
                 </td>
               </tr>
               <tr>

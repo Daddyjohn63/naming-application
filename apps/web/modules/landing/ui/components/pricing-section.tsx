@@ -15,7 +15,7 @@ import {
 } from "@workspace/ui/components/card"
 
 const FREE_FEATURES = [
-  "Cat profile with photo and personality description",
+  "Cat profile with required photo and personality description",
   "AI photo check and personality summary — edit until it's right",
   "Family name styles: Elegant, Silly, Classic, Nature-inspired, and more",
   "10 AI family names with rationales, plus one free regeneration",

@@ -46,22 +46,19 @@ export const validateCatPhoto = internalAction({
     if (cat === null || cat.ceremonyStep !== "awaiting_photo_validation") {
       return
     }
-    // Edge case: step expects photo but row has none — treat as pass.
+    // Edge case: step expects a photo but the row has none — send back to profile.
     if (cat.photoStorageId === undefined) {
       await ctx.runMutation(internal.catSummary.applyPhotoValidationResult, {
         catId,
         validation: {
-          isCat: true,
+          isCat: false,
           isSingleCat: true,
-          catLikelihoodScore: 10,
-          qualityScore: 10,
-          userMessage: "",
-          blockReason: "",
+          catLikelihoodScore: 0,
+          qualityScore: 0,
+          userMessage: "Please upload a photo of your cat.",
+          blockReason: "photo_required",
         },
-        outcome: "pass",
-      })
-      await ctx.scheduler.runAfter(0, internal.catSummaryActions.generateCatSummary, {
-        catId,
+        outcome: "block",
       })
       return
     }

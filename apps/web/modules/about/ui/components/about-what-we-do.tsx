@@ -50,7 +50,7 @@ export function AboutWhatWeDo() {
           </h2>
           <p className="text-lg leading-relaxed text-pretty text-muted-foreground">
             You tell us about your cat — a short story of their personality,
-            and a photo if you like. We write a summary you can edit until it
+            and a photo. We write a summary you can edit until it
             sounds like them, then walk you through discovering all three
             names, ending with a keepsake certificate you can download and
             treasure.
