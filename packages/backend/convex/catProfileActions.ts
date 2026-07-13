@@ -178,13 +178,16 @@ export const submitCatProfile = action({
       return profileActionFailure(CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_REQUIRED)
     }
 
-    const photoError = await validateStoredCatPhoto(
-      ctx,
-      photoStorageId,
-      cat.photoStorageId,
-    )
-    if (photoError !== null) {
-      return profileActionFailure(photoError)
+    // Already-stored photo passed buffer checks when uploaded; only re-check new files.
+    if (photoStorageId !== cat.photoStorageId) {
+      const photoError = await validateStoredCatPhoto(
+        ctx,
+        photoStorageId,
+        cat.photoStorageId,
+      )
+      if (photoError !== null) {
+        return profileActionFailure(photoError)
+      }
     }
 
     await ctx.runMutation(internal.catProfile.applyCatProfileSubmit, {

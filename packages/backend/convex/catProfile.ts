@@ -71,8 +71,18 @@ export const applyCatProfileSubmit = internalMutation({
       })
     }
 
+    const previousPhotoId = cat.photoStorageId
+    const photoChanged = previousPhotoId !== args.photoStorageId
+    // Summary-review resubmit with the same photo already passed vision — skip a
+    // fresh AI check (and do not burn another attempt). Draft submits always
+    // validate, including after a draft-save with the same storage id or a block.
+    const skipPhotoRevalidation = !photoChanged && isSummaryReviewResubmit
+
     const photoAttemptsUsed = cat.photoValidationAttemptsUsed ?? 0
-    if (photoAttemptsUsed >= MAX_PHOTO_VALIDATION_ATTEMPTS) {
+    if (
+      !skipPhotoRevalidation &&
+      photoAttemptsUsed >= MAX_PHOTO_VALIDATION_ATTEMPTS
+    ) {
       throw new ConvexError({
         code: CAT_PROFILE_SUBMIT_ERROR_CODE.PHOTO_VALIDATION_LIMIT_REACHED,
       })
@@ -84,7 +94,6 @@ export const applyCatProfileSubmit = internalMutation({
       })
     }
 
-    const previousPhotoId = cat.photoStorageId
     const now = Date.now()
     // Whether user already had an accepted/edited summary — re-submit clears it.
     const hadSummaryProgress =
@@ -99,13 +108,21 @@ export const applyCatProfileSubmit = internalMutation({
       age: args.age,
       breed: args.breed,
       photoStorageId: args.photoStorageId,
-      ceremonyStep: "awaiting_photo_validation",
+      ceremonyStep: skipPhotoRevalidation
+        ? "awaiting_summary"
+        : "awaiting_photo_validation",
       ...(isSummaryReviewResubmit
         ? { profileSubmitsUsed: submitsUsed + 1 }
         : {}),
-      photoValidationAttemptsUsed: photoAttemptsUsed + 1,
-      photoValidation: undefined,
-      photoQualityAcknowledged: undefined,
+      ...(!skipPhotoRevalidation
+        ? { photoValidationAttemptsUsed: photoAttemptsUsed + 1 }
+        : {}),
+      ...(skipPhotoRevalidation
+        ? {}
+        : {
+            photoValidation: undefined,
+            photoQualityAcknowledged: undefined,
+          }),
       summaryGenerationError: undefined,
       updatedAt: now,
       ...(hadSummaryProgress
@@ -127,13 +144,21 @@ export const applyCatProfileSubmit = internalMutation({
       }
     }
 
-    await ctx.scheduler.runAfter(
-      0,
-      internal.catSummaryActions.validateCatPhoto,
-      {
-        catId: args.catId,
-      },
-    )
+    if (skipPhotoRevalidation) {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.catSummaryActions.generateCatSummary,
+        { catId: args.catId },
+      )
+    } else {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.catSummaryActions.validateCatPhoto,
+        {
+          catId: args.catId,
+        },
+      )
+    }
   },
 })
 
