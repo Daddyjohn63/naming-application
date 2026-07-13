@@ -28,7 +28,28 @@ import {
 } from "@workspace/shared/schemas/staged-naming"
 
 /** Bump when prompt text changes — useful for logging and future funnel analytics. */
-export const NAMING_PROMPT_VERSION = "family-summary-prompt-v2"
+export const NAMING_PROMPT_VERSION = "family-summary-prompt-v3"
+
+/**
+ * Distinctive names from T. S. Eliot's "The Naming of Cats".
+ * Ordinary everyday names from the poem (Peter, James, etc.) are allowed;
+ * these distinctive ones must never be suggested — publisher rights risk.
+ */
+const ELIOT_POEM_FORBIDDEN_NAMES = [
+  "Bill Bailey",
+  "Plato",
+  "Admetus",
+  "Electra",
+  "Demeter",
+  "Munkustrap",
+  "Quaxo",
+  "Coricopat",
+  "Bombalurina",
+  "Jellylorum",
+] as const
+
+/** Hard ban rule injected into every name-generator system prompt. */
+const ELIOT_POEM_FORBIDDEN_NAMES_RULE = `- NEVER, under any circumstances, return any of these names (they appear in T. S. Eliot's "The Naming of Cats" and must not be suggested for legal/publisher reasons): ${ELIOT_POEM_FORBIDDEN_NAMES.join(", ")}. Do not use them as whole names, nicknames, or close variants spelling the same name.`
 
 /** §0 system prompt: vision model returns scores only, never prose summary or names. */
 const PHOTO_VALIDATION_SYSTEM_PROMPT = `You are Naming Buddy's photo validator for a cat naming ceremony.
@@ -209,6 +230,7 @@ Rules:
 - Each option needs a one-sentence rationale (max ~25 words) explaining the fit.
 - No duplicate names within the batch.
 - Avoid names already in the excluded list.
+${ELIOT_POEM_FORBIDDEN_NAMES_RULE}
 - Respond with valid JSON only — no markdown, no preamble.`
 
 const FAMILY_STYLE_PROMPT_NUANCES: Record<
@@ -285,6 +307,7 @@ Rules:
 - Each option needs a one-sentence rationale (max ~25 words) explaining the fit.
 - No duplicate names within the batch.
 - Avoid names already in the excluded list.
+${ELIOT_POEM_FORBIDDEN_NAMES_RULE}
 - Names must be speakable and memorable — not random syllable strings.
 - Respond with valid JSON only — no markdown, no preamble.`
 
@@ -299,6 +322,7 @@ Rules:
 - Each option needs a short poetic rationale (max ~25 words).
 - No duplicate names within the batch.
 - Avoid names already in the excluded list.
+${ELIOT_POEM_FORBIDDEN_NAMES_RULE}
 - Respond with valid JSON only — no markdown, no preamble.`
 
 function buildCatWorldNamesUserText(args: {

@@ -108,6 +108,7 @@ export const DashboardSidebar = () => {
               asChild
               isActive={isNavItemActive(pathname, "/")}
               tooltip="Home"
+              className="[&_svg]:size-8"
             >
               <Link href="/" onClick={closeMobileSidebar}>
                 <Logo className="size-8 shrink-0" />

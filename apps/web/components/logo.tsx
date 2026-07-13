@@ -16,7 +16,7 @@ export function Logo({ className, ...props }: LogoProps) {
       viewBox="0 0 2000 2000"
       fill="currentColor"
       aria-hidden
-      className={cn("size-12 shrink-0", className)}
+      className={cn("size-[78px] shrink-0", className)}
       {...props}
     >
       <LogoMarkPaths />
