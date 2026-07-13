@@ -85,7 +85,9 @@ export function DashboardHeader() {
                 )}
                 {c.isLast && (
                   <BreadcrumbItem>
-                    <BreadcrumbPage className="truncate">{c.label}</BreadcrumbPage>
+                    <BreadcrumbPage className="truncate">
+                      {c.label}
+                    </BreadcrumbPage>
                   </BreadcrumbItem>
                 )}
               </React.Fragment>

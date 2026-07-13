@@ -35,11 +35,6 @@ const userSupportItems = [
 
     url: "/dashboard/user-support",
   },
-  {
-    title: "Settings",
-    icon: SettingsIcon,
-    url: "/dashboard/settings",
-  },
 ]
 
 const dashboardSidebarMenuClassName = "gap-1.5"
