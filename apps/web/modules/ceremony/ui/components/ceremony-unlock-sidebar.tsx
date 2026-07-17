@@ -51,7 +51,7 @@ function unlockSidebarCopy({
     return {
       title: "Ready for your certificate",
       description:
-        "Your three names are complete — create your certificate in the main column, or change a favourite from the shortlists above. Shortlists stay locked.",
+        "Your three names are complete — create your certificate in the main column, or change a favourite from the shortlists under the name cards. Shortlists stay locked.",
     }
   }
   if (step === "awaiting_payment") {

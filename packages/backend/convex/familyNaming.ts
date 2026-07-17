@@ -235,7 +235,7 @@ export const getFamilyNamingStateForOwner = query({
     return {
       catId: id,
       ceremonyStep: cat.ceremonyStep,
-      familyNameStyles: cat.familyNameStyles ?? [],
+      familyNameStyles: assertFamilyNameStyleIds(cat.familyNameStyles ?? []),
       shortlist,
       selectedFamilyName: cat.selectedFamilyName,
       selectedFamilyRationale: cat.selectedFamilyRationale,

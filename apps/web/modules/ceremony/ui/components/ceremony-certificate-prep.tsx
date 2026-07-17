@@ -48,7 +48,7 @@ export function CeremonyCertificatePrep({ cat }: CeremonyCertificatePrepProps) {
         <CardDescription>
           {complete
             ? "Your certificate has been generated. View it or download the PDF again any time."
-            : "You can still change a favourite from the shortlists above the three name cards. When you're happy, create your whimsical naming certificate."}
+            : "You can still change a favourite from the shortlists under the name cards. When you're happy, create your whimsical naming certificate."}
         </CardDescription>
       </CardHeader>
       <div className="flex flex-col gap-3 px-4 py-6">
