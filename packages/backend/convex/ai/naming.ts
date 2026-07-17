@@ -233,11 +233,8 @@ Rules:
 ${ELIOT_POEM_FORBIDDEN_NAMES_RULE}
 - Respond with valid JSON only — no markdown, no preamble.`
 
-const FAMILY_STYLE_PROMPT_NUANCES: Record<
-  Exclude<FamilyNameStyleId, "mix_it_up">,
-  string
-> = {
-  elegant: "Ref refined, graceful, slightly literary; avoid cutesy spellings.",
+const FAMILY_STYLE_PROMPT_NUANCES: Record<FamilyNameStyleId, string> = {
+  elegant: "Refined, graceful, slightly literary; avoid cutesy spellings.",
   silly: "Warm humour, gentle absurdity; still usable day-to-day.",
   classic: "Timeless human names; could appear on a birth certificate.",
   nature_inspired: "Flora, fauna, seasons, landscapes — subtle not cartoon.",
@@ -249,11 +246,7 @@ function buildFamilyStylePromptLine(
   styleIds: readonly FamilyNameStyleId[]
 ): string {
   const labels = familyStyleLabelsForPrompt(styleIds)
-  const nuances = styleIds
-    .filter(
-      (id): id is Exclude<FamilyNameStyleId, "mix_it_up"> => id !== "mix_it_up"
-    )
-    .map((id) => `${FAMILY_STYLE_PROMPT_NUANCES[id]}`)
+  const nuances = styleIds.map((id) => FAMILY_STYLE_PROMPT_NUANCES[id])
   return `Family name style: ${labels.join(" + ")}\n${nuances.join("\n")}`
 }
 

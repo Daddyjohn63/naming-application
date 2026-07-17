@@ -11,7 +11,6 @@ import {
   MAX_FAMILY_NAME_REGENERATIONS,
   MAX_FAMILY_SHORTLIST_TOTAL,
   normalizeFamilyName,
-  resolveMixItUpStyles,
   type FamilyNameStyleId,
   type FamilyShortlistSource,
 } from "@workspace/shared/constants/family-naming"
@@ -70,17 +69,9 @@ function regenUsed(cat: Doc<"cats">): number {
   return cat.familyNameRegenerationsUsed ?? 0
 }
 
-/** Resolve mix-it-up to concrete styles; other ids pass through unchanged. */
+/** Dedupe style ids while preserving first-seen order. */
 function resolveStyleSelection(styleIds: readonly FamilyNameStyleId[]): FamilyNameStyleId[] {
-  const resolved: FamilyNameStyleId[] = []
-  for (const id of styleIds) {
-    if (id === "mix_it_up") {
-      resolved.push(...resolveMixItUpStyles())
-    } else {
-      resolved.push(id)
-    }
-  }
-  return [...new Set(resolved)]
+  return [...new Set(styleIds)]
 }
 
 async function acceptedSummaryText(
@@ -181,7 +172,6 @@ export const getFamilyNamingStateForOwner = query({
           v.literal("classic"),
           v.literal("nature_inspired"),
           v.literal("non_human_names"),
-          v.literal("mix_it_up"),
         ),
       ),
       shortlist: v.array(
