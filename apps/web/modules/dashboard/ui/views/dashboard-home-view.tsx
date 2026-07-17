@@ -1,5 +1,15 @@
 "use client"
 
+/**
+ * Signed-in dashboard home — the owner’s list of naming ceremonies.
+ *
+ * Waits for Convex/Clerk auth to hydrate (skeleton grid), then loads the
+ * owner’s cats via `listMyCatsForDashboard`. Empty state offers “Add your
+ * first cat”; otherwise shows a header CTA (“Add a cat”) plus a card grid.
+ * Each card links to `/cats/[catId]` to resume, and supports delete with
+ * confirmation. Draft creation goes through `useCreateDraftCeremony`.
+ */
+
 import Link from "next/link"
 import * as React from "react"
 

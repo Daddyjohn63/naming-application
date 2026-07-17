@@ -51,12 +51,12 @@ export function CeremonyUnlockPrompt({
       id={CEREMONY_UNLOCK_SECTION_ID}
       className={cn(
         "ceremony-highlight-panel scroll-mt-24 border-primary/35 shadow-sm lg:hidden",
-        className,
+        className
       )}
     >
       <CardHeader className="gap-3 border-b pb-4">
         <div className="flex items-center gap-2">
-          <Lock className="text-primary size-4 shrink-0" aria-hidden />
+          <Lock className="size-4 shrink-0 text-primary" aria-hidden />
           <CardTitle className="text-base">
             {showStubUnlock
               ? "Complete your unlock"
@@ -72,7 +72,7 @@ export function CeremonyUnlockPrompt({
           ) : cat.selectedFamilyName !== undefined ? (
             <>
               You chose{" "}
-              <span className="text-foreground font-semibold">
+              <span className="font-semibold text-foreground">
                 {cat.selectedFamilyName}
               </span>
               {" — "}
@@ -81,8 +81,8 @@ export function CeremonyUnlockPrompt({
             </>
           ) : (
             <>
-              Your family name is free. Unlock once per cat to reveal
-              cat-world and ineffable names, then receive your certificate.
+              Your family name is free. Unlock once per cat to reveal cat-world
+              and ineffable names, then receive your certificate.
             </>
           )}
         </CardDescription>
@@ -90,14 +90,14 @@ export function CeremonyUnlockPrompt({
 
       <div className="flex flex-col gap-4 px-4 py-4">
         {showUnlockCheckout || showStubUnlock ? (
-          <p className="text-foreground text-sm font-semibold tracking-tight">
-            $3.99 USD
+          <p className="text-sm font-semibold tracking-tight text-foreground">
+            No charge
           </p>
         ) : null}
 
         {showUnlockCheckout ? (
           <>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {unlockEnabled
                 ? "Ready when you are — your shortlist and favourite stay saved if checkout is interrupted."
                 : "Save at least one name to your shortlist and pick a favourite to unlock."}
@@ -116,7 +116,7 @@ export function CeremonyUnlockPrompt({
 
         {showStubUnlock ? (
           <>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               Stub unlock for development — no charge. Your names remain visible
               while you complete payment.
             </p>
@@ -135,7 +135,7 @@ export function CeremonyUnlockPrompt({
         ) : null}
 
         {showAwaitingPaymentPlaceholder ? (
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             Checkout is not configured in this environment. Your family name and
             shortlist are saved — return when payment is available.
           </p>

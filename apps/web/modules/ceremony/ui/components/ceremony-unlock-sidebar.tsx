@@ -158,7 +158,7 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
         {showUnlockCheckout || showStubUnlock ? (
           <div className="flex flex-col gap-4">
             <p className="text-sm font-semibold tracking-tight text-foreground">
-              $3.99 USD
+              No charge
             </p>
 
             {showUnlockCheckout ? (
@@ -189,7 +189,7 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
                   disabled={paying}
                   onClick={() => void onStubUnlock()}
                 >
-                  {paying ? "Unlocking…" : "Unlock now ($3.99 — no charge)"}
+                  {paying ? "Unlocking…" : "Unlock now (no charge)"}
                 </Button>
               </>
             ) : null}
