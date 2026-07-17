@@ -2,29 +2,16 @@
  * KB-005 / KB-006 — family name style options, shortlist caps, and dedupe rules.
  */
 
-/** Selectable family name styles (KB-005). Mix-it-up picks a random subset of the others. */
+/** Selectable family name styles (KB-005). */
 export const FAMILY_NAME_STYLE_IDS = [
   "elegant",
   "silly",
   "classic",
   "nature_inspired",
   "non_human_names",
-  "mix_it_up",
 ] as const
 
 export type FamilyNameStyleId = (typeof FAMILY_NAME_STYLE_IDS)[number]
-
-/** Styles that can be randomly chosen when the user picks Mix-it-up. */
-export const FAMILY_NAME_STYLE_POOL_FOR_MIX: readonly Exclude<
-  FamilyNameStyleId,
-  "mix_it_up"
->[] = [
-  "elegant",
-  "silly",
-  "classic",
-  "nature_inspired",
-  "non_human_names",
-]
 
 /** User-facing labels for style chips. */
 export const FAMILY_NAME_STYLE_LABELS: Record<FamilyNameStyleId, string> = {
@@ -33,7 +20,6 @@ export const FAMILY_NAME_STYLE_LABELS: Record<FamilyNameStyleId, string> = {
   classic: "Classic",
   nature_inspired: "Nature-inspired",
   non_human_names: "Non-human names",
-  mix_it_up: "Mix-it-up",
 }
 
 export const FAMILY_NAME_BATCH_SIZE = 10
@@ -77,25 +63,7 @@ export function normalizeFamilyName(name: string): string {
   return name.trim().toLowerCase().replace(/\s+/g, " ")
 }
 
-/** Pick 1–3 random styles when the user selects Mix-it-up (deterministic per call). */
-export function resolveMixItUpStyles(
-  random: () => number = Math.random,
-): Exclude<FamilyNameStyleId, "mix_it_up">[] {
-  const pool = [...FAMILY_NAME_STYLE_POOL_FOR_MIX]
-  const r = Math.min(random(), 0.999999999999)
-  const count = 1 + Math.floor(r * 3)
-  const picked: Exclude<FamilyNameStyleId, "mix_it_up">[] = []
-  while (picked.length < count && pool.length > 0) {
-    const index = Math.floor(random() * pool.length)
-    const [style] = pool.splice(index, 1)
-    if (style !== undefined) {
-      picked.push(style)
-    }
-  }
-  return picked
-}
-
-/** Expand stored style ids to prompt-facing labels (resolves mix-it-up at persist time). */
+/** Expand stored style ids to prompt-facing labels. */
 export function familyStyleLabelsForPrompt(
   styleIds: readonly FamilyNameStyleId[],
 ): string[] {

@@ -347,7 +347,11 @@ export const regenerateIneffableNames = mutation({
     }
     const cat = await getOwnedCatOrThrow(ctx, id, currentUser._id)
     assertUnlocked(cat)
-    if (cat.ceremonyStep !== curationStepForStage(STAGE)) {
+    // Regen rebuilds the suggestion pool — locked once a favourite is chosen.
+    if (
+      cat.ceremonyStep !== curationStepForStage(STAGE) ||
+      cat.selectedIneffableName !== undefined
+    ) {
       throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.STEP_LOCKED })
     }
     assertRegenAvailable(cat, STAGE)

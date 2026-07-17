@@ -8,7 +8,7 @@
  *
  * Key concepts:
  * - `curationStepForStage` / `awaitingStepForStage` — the two substeps per stage
- * - `canEditStageCuration` — allows revisiting cat-world while on ineffable (pre-certificate)
+ * - `canEditStageCuration` — shortlist add/remove while curating; locks once ineffable favourite is set
  * - Regen counter increments only in `apply*GenerationSuccess` when generationIndex === 1
  */
 
@@ -189,15 +189,21 @@ export async function acceptedSummaryText(
 }
 
 /**
- * Whether the owner may edit shortlist/favourite for this stage right now.
- * Cat-world stays editable on `naming_ineffable` so users can change their mind
- * before KB-011 certificate generation (change-of-mind UX).
+ * Whether the owner may add/remove shortlist entries for this stage.
+ * Favourite switching among an existing shortlist is handled separately via
+ * `setStageFavouriteFromShortlist` / `set*Favourite` mutations.
+ *
+ * Once an ineffable favourite is chosen, shortlists lock until certificate —
+ * users may still change favourites from shortlist chips, not rebuild lists.
  */
 export function canEditStageCuration(
   cat: Doc<"cats">,
   stage: NamingStage,
 ): boolean {
   if (cat.ceremonyStep === "ceremony_complete") {
+    return false
+  }
+  if (cat.selectedIneffableName !== undefined) {
     return false
   }
   const curationStep = curationStepForStage(stage)

@@ -415,10 +415,12 @@ export const regenerateCatWorldNames = mutation({
     }
     const cat = await getOwnedCatOrThrow(ctx, id, currentUser._id)
     assertUnlocked(cat)
+    // Regen rebuilds the suggestion pool — locked once ineffable favourite is set.
     const canRegen =
-      cat.ceremonyStep === curationStepForStage(STAGE) ||
-      cat.ceremonyStep === "naming_ineffable" ||
-      cat.ceremonyStep === "awaiting_ineffable_names"
+      cat.selectedIneffableName === undefined &&
+      (cat.ceremonyStep === curationStepForStage(STAGE) ||
+        cat.ceremonyStep === "naming_ineffable" ||
+        cat.ceremonyStep === "awaiting_ineffable_names")
     if (!canRegen) {
       throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.STEP_LOCKED })
     }

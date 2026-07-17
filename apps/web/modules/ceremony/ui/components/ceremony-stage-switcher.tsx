@@ -1,7 +1,9 @@
 "use client"
 
 /**
- * KB-009 / KB-010 — switch between cat-world and ineffable curation before certificate.
+ * KB-009 / KB-010 — switch between cat-world and ineffable curation before all
+ * three names are chosen. Once the ineffable favourite is set, curation tabs
+ * lock; shortlist favourite changes stay on the three-name cards.
  */
 
 import type { Doc } from "@workspace/backend/_generated/dataModel"
@@ -9,6 +11,7 @@ import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 
 import { dataComponent } from "@/lib/data-component"
+import { allThreeCeremonyNamesChosen } from "@/modules/ceremony/lib/ceremony-naming-view"
 
 export type CeremonyNamingView = "cat_world" | "ineffable" | "certificate"
 
@@ -17,14 +20,6 @@ type CeremonyStageSwitcherProps = {
   activeView: CeremonyNamingView
   onChange: (view: CeremonyNamingView) => void
   className?: string
-}
-
-function allThreeNamesChosen(cat: Doc<"cats">): boolean {
-  return (
-    cat.selectedFamilyName !== undefined &&
-    cat.selectedCatWorldName !== undefined &&
-    cat.selectedIneffableName !== undefined
-  )
 }
 
 export function CeremonyStageSwitcher({
@@ -43,20 +38,24 @@ export function CeremonyStageSwitcher({
     cat.ceremonyStep === "naming_ineffable" ||
     cat.ceremonyStep === "awaiting_ineffable_names"
 
-  const showCertificate = allThreeNamesChosen(cat)
+  const readyForCertificate = allThreeCeremonyNamesChosen(cat)
 
   const tabs: Array<{ id: CeremonyNamingView; label: string; disabled?: boolean }> =
     [
-      { id: "cat_world", label: "Cat-world names" },
+      {
+        id: "cat_world",
+        label: "Cat-world names",
+        disabled: readyForCertificate,
+      },
       {
         id: "ineffable",
         label: "Ineffable names",
-        disabled: !showIneffable,
+        disabled: !showIneffable || readyForCertificate,
       },
       {
         id: "certificate",
         label: "Certificate",
-        disabled: !showCertificate,
+        disabled: !readyForCertificate,
       },
     ]
 

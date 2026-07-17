@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useMutation, useQuery } from "convex/react"
+import { ChevronDown } from "lucide-react"
 
 import { api } from "@workspace/backend/_generated/api"
 import type { Doc } from "@workspace/backend/_generated/dataModel"
@@ -36,6 +37,12 @@ type CeremonyThreeNamesViewProps = {
   className?: string
 }
 
+type ShortlistChip = {
+  name: string
+  label: string
+  isFavourite: boolean
+}
+
 function slotState(
   name: string | undefined,
   rationale: string | undefined,
@@ -46,6 +53,104 @@ function slotState(
     return lockedAfterUnlock && unlocked ? "locked" : "filled"
   }
   return "placeholder"
+}
+
+/**
+ * Shortlist under a name card. On mobile: collapsed dropdown. On sm+: always open.
+ */
+function CeremonyShortlistUnderCard({
+  title,
+  hint,
+  children,
+}: {
+  title: string
+  hint?: string
+  children: React.ReactNode
+}) {
+  const [open, setOpen] = React.useState(false)
+
+  return (
+    <div className="flex flex-col gap-2">
+      <button
+        type="button"
+        className={cn(
+          "flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-left text-sm font-medium",
+          "bg-muted/10 transition-colors hover:bg-muted/20",
+          "focus-visible:ring-ring outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+          "sm:hidden",
+        )}
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span>{title}</span>
+        <ChevronDown
+          aria-hidden
+          className={cn(
+            "text-muted-foreground size-4 shrink-0 transition-transform duration-200",
+            open && "rotate-180",
+          )}
+        />
+      </button>
+      <p className="hidden text-sm font-medium sm:block">{title}</p>
+      <div
+        className={cn(
+          "flex-col gap-2",
+          open ? "flex" : "hidden sm:flex",
+        )}
+      >
+        {children}
+        {hint !== undefined ? (
+          <p className="text-muted-foreground text-xs">{hint}</p>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+function ShortlistChipList({
+  chips,
+  canChangeFavourite,
+  settingFavourite,
+  busy,
+  onSelect,
+}: {
+  chips: ShortlistChip[]
+  canChangeFavourite: boolean
+  settingFavourite: string | null
+  busy: boolean
+  onSelect: (name: string) => void
+}) {
+  return (
+    <ul className="flex flex-wrap gap-2">
+      {chips.map((chip) => (
+        <li key={chip.name}>
+          {canChangeFavourite && !chip.isFavourite ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={busy}
+              className="rounded-full"
+              onClick={() => onSelect(chip.name)}
+            >
+              {settingFavourite === chip.name ? "Setting…" : chip.label}
+            </Button>
+          ) : (
+            <span
+              className={cn(
+                "inline-flex rounded-full border px-3 py-1 text-sm font-medium",
+                chip.isFavourite
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-secondary text-secondary-foreground",
+              )}
+            >
+              {chip.label}
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  )
 }
 
 /**
@@ -179,6 +284,39 @@ export function CeremonyThreeNamesView({
     scrollToCeremonyUnlockOnMobile()
   }
 
+  const familyChips: ShortlistChip[] = shortlist.map((entry) => {
+    const isCustom = isCustomFamilyShortlistEntry(entry)
+    return {
+      name: entry.name,
+      label: isCustom ? `${entry.name} (your idea)` : entry.name,
+      isFavourite: favouriteNormalized === normalizeFamilyName(entry.name),
+    }
+  })
+
+  const catWorldChips: ShortlistChip[] = (
+    catWorldNamingState?.shortlist ?? []
+  ).map((entry) => ({
+    name: entry.name,
+    label: entry.name,
+    isFavourite:
+      cat.selectedCatWorldName !== undefined &&
+      normalizeNameForDedupe(cat.selectedCatWorldName) ===
+        normalizeNameForDedupe(entry.name),
+  }))
+
+  const ineffableChips: ShortlistChip[] = (
+    ineffableNamingState?.shortlist ?? []
+  ).map((entry) => ({
+    name: entry.name,
+    label: entry.name,
+    isFavourite:
+      cat.selectedIneffableName !== undefined &&
+      normalizeNameForDedupe(cat.selectedIneffableName) ===
+        normalizeNameForDedupe(entry.name),
+  }))
+
+  const busy = settingFavourite !== null
+
   return (
     <section
       {...dataComponent("CeremonyThreeNamesView")}
@@ -196,202 +334,118 @@ export function CeremonyThreeNamesView({
       </header>
 
       <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
-        <CeremonyNameSlot
-          label="Family name"
-          name={cat.selectedFamilyName}
-          rationale={cat.selectedFamilyRationale}
-          state={everydayState}
-          badge={everydayState === "filled" ? "★ Your choice" : undefined}
-          className="min-w-0"
-        />
+        <div className="flex min-w-0 flex-col gap-3">
+          <CeremonyNameSlot
+            label="Family name"
+            name={cat.selectedFamilyName}
+            rationale={cat.selectedFamilyRationale}
+            state={everydayState}
+            badge={everydayState === "filled" ? "★ Your choice" : undefined}
+            className="min-w-0"
+          />
+          {familyChips.length > 0 ? (
+            <CeremonyShortlistUnderCard
+              title="Family name shortlist"
+              hint={
+                canChangeFavourite && shortlist.length > 1
+                  ? "Tap a shortlist name to change your family name favourite."
+                  : undefined
+              }
+            >
+              <ShortlistChipList
+                chips={familyChips}
+                canChangeFavourite={canChangeFavourite}
+                settingFavourite={
+                  settingStage === "family" ? settingFavourite : null
+                }
+                busy={busy}
+                onSelect={(name) => void onSetFavourite(name)}
+              />
+            </CeremonyShortlistUnderCard>
+          ) : null}
+        </div>
 
-        <CeremonyNameSlot
-          label="Cat-world name"
-          name={cat.selectedCatWorldName}
-          rationale={cat.selectedCatWorldRationale}
-          state={catWorldSlotState}
-          badge={catWorldSlotState === "filled" ? "★ Your choice" : undefined}
-          className="min-w-0"
-          placeholderHint={
-            unlocked && catWorldSlotState === "placeholder"
-              ? "Choose in the cat-world stage"
-              : "Unlock to discover"
-          }
-          onPlaceholderHintClick={
-            !unlocked && catWorldSlotState === "placeholder"
-              ? scrollLockedNameToUnlock
-              : undefined
-          }
-        />
+        <div className="flex min-w-0 flex-col gap-3">
+          <CeremonyNameSlot
+            label="Cat-world name"
+            name={cat.selectedCatWorldName}
+            rationale={cat.selectedCatWorldRationale}
+            state={catWorldSlotState}
+            badge={catWorldSlotState === "filled" ? "★ Your choice" : undefined}
+            className="min-w-0"
+            placeholderHint={
+              unlocked && catWorldSlotState === "placeholder"
+                ? "Choose in the cat-world stage"
+                : "Unlock to discover"
+            }
+            onPlaceholderHintClick={
+              !unlocked && catWorldSlotState === "placeholder"
+                ? scrollLockedNameToUnlock
+                : undefined
+            }
+          />
+          {catWorldChips.length > 0 ? (
+            <CeremonyShortlistUnderCard
+              title="Cat-world shortlist"
+              hint={
+                canChangeCatWorldFavourite
+                  ? "Tap a shortlist name to change your cat-world favourite."
+                  : undefined
+              }
+            >
+              <ShortlistChipList
+                chips={catWorldChips}
+                canChangeFavourite={canChangeCatWorldFavourite}
+                settingFavourite={
+                  settingStage === "cat_world" ? settingFavourite : null
+                }
+                busy={busy}
+                onSelect={(name) => void onSetCatWorldFavourite(name)}
+              />
+            </CeremonyShortlistUnderCard>
+          ) : null}
+        </div>
 
-        <CeremonyNameSlot
-          label="Ineffable near-name"
-          name={cat.selectedIneffableName}
-          rationale={cat.selectedIneffableRationale}
-          state={ineffableSlotState}
-          badge={ineffableSlotState === "filled" ? "★ Your choice" : undefined}
-          className="min-w-0"
-          placeholderHint={
-            unlocked && ineffableSlotState === "placeholder"
-              ? "Choose in the ineffable stage"
-              : "Unlock to discover"
-          }
-          onPlaceholderHintClick={
-            !unlocked && ineffableSlotState === "placeholder"
-              ? scrollLockedNameToUnlock
-              : undefined
-          }
-        />
-
-        {shortlist.length > 0 ? (
-          <div className="flex flex-col gap-2 sm:col-start-1">
-            <p className="text-sm font-medium">Family name shortlist</p>
-            <ul className="flex flex-wrap gap-2">
-              {shortlist.map((entry) => {
-                const isFavourite =
-                  favouriteNormalized === normalizeFamilyName(entry.name)
-                const isCustom = isCustomFamilyShortlistEntry(entry)
-                const label = isCustom ? `${entry.name} (your idea)` : entry.name
-
-                return (
-                  <li key={entry.name}>
-                    {canChangeFavourite && !isFavourite ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={settingFavourite !== null}
-                        className="rounded-full"
-                        onClick={() => void onSetFavourite(entry.name)}
-                      >
-                        {settingFavourite === entry.name &&
-                        settingStage === "family"
-                          ? "Setting…"
-                          : label}
-                      </Button>
-                    ) : (
-                      <span
-                        className={cn(
-                          "inline-flex rounded-full border px-3 py-1 text-sm font-medium",
-                          isFavourite
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-secondary text-secondary-foreground",
-                        )}
-                      >
-                        {label}
-                      </span>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-            {canChangeFavourite && shortlist.length > 1 ? (
-              <p className="text-muted-foreground text-xs">
-                Tap a shortlist name to change your family name favourite.
-              </p>
-            ) : null}
-          </div>
-        ) : null}
-
-        {(catWorldNamingState?.shortlist.length ?? 0) > 0 ? (
-          <div className="flex flex-col gap-2 sm:col-start-2">
-            <p className="text-sm font-medium">Cat-world shortlist</p>
-            <ul className="flex flex-wrap gap-2">
-              {(catWorldNamingState?.shortlist ?? []).map((entry) => {
-                const isFavourite =
-                  cat.selectedCatWorldName !== undefined &&
-                  normalizeNameForDedupe(cat.selectedCatWorldName) ===
-                    normalizeNameForDedupe(entry.name)
-
-                return (
-                  <li key={entry.name}>
-                    {canChangeCatWorldFavourite && !isFavourite ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={settingFavourite !== null}
-                        className="rounded-full"
-                        onClick={() => void onSetCatWorldFavourite(entry.name)}
-                      >
-                        {settingFavourite === entry.name &&
-                        settingStage === "cat_world"
-                          ? "Setting…"
-                          : entry.name}
-                      </Button>
-                    ) : (
-                      <span
-                        className={cn(
-                          "inline-flex rounded-full border px-3 py-1 text-sm font-medium",
-                          isFavourite
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-secondary text-secondary-foreground",
-                        )}
-                      >
-                        {entry.name}
-                      </span>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-            {canChangeCatWorldFavourite ? (
-              <p className="text-muted-foreground text-xs">
-                Tap a shortlist name to change your cat-world favourite.
-              </p>
-            ) : null}
-          </div>
-        ) : null}
-
-        {(ineffableNamingState?.shortlist.length ?? 0) > 0 ? (
-          <div className="flex flex-col gap-2 sm:col-start-3">
-            <p className="text-sm font-medium">Ineffable shortlist</p>
-            <ul className="flex flex-wrap gap-2">
-              {(ineffableNamingState?.shortlist ?? []).map((entry) => {
-                const isFavourite =
-                  cat.selectedIneffableName !== undefined &&
-                  normalizeNameForDedupe(cat.selectedIneffableName) ===
-                    normalizeNameForDedupe(entry.name)
-
-                return (
-                  <li key={entry.name}>
-                    {canChangeIneffableFavourite && !isFavourite ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={settingFavourite !== null}
-                        className="rounded-full"
-                        onClick={() => void onSetIneffableFavourite(entry.name)}
-                      >
-                        {settingFavourite === entry.name &&
-                        settingStage === "ineffable"
-                          ? "Setting…"
-                          : entry.name}
-                      </Button>
-                    ) : (
-                      <span
-                        className={cn(
-                          "inline-flex rounded-full border px-3 py-1 text-sm font-medium",
-                          isFavourite
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-secondary text-secondary-foreground",
-                        )}
-                      >
-                        {entry.name}
-                      </span>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-            {canChangeIneffableFavourite ? (
-              <p className="text-muted-foreground text-xs">
-                Tap a shortlist name to change your ineffable near-name favourite.
-              </p>
-            ) : null}
-          </div>
-        ) : null}
+        <div className="flex min-w-0 flex-col gap-3">
+          <CeremonyNameSlot
+            label="Ineffable near-name"
+            name={cat.selectedIneffableName}
+            rationale={cat.selectedIneffableRationale}
+            state={ineffableSlotState}
+            badge={ineffableSlotState === "filled" ? "★ Your choice" : undefined}
+            className="min-w-0"
+            placeholderHint={
+              unlocked && ineffableSlotState === "placeholder"
+                ? "Choose in the ineffable stage"
+                : "Unlock to discover"
+            }
+            onPlaceholderHintClick={
+              !unlocked && ineffableSlotState === "placeholder"
+                ? scrollLockedNameToUnlock
+                : undefined
+            }
+          />
+          {ineffableChips.length > 0 ? (
+            <CeremonyShortlistUnderCard
+              title="Ineffable shortlist"
+              hint={
+                canChangeIneffableFavourite
+                  ? "Tap a shortlist name to change your ineffable near-name favourite."
+                  : undefined
+              }
+            >
+              <ShortlistChipList
+                chips={ineffableChips}
+                canChangeFavourite={canChangeIneffableFavourite}
+                settingFavourite={
+                  settingStage === "ineffable" ? settingFavourite : null
+                }
+                busy={busy}
+                onSelect={(name) => void onSetIneffableFavourite(name)}
+              />
+            </CeremonyShortlistUnderCard>
+          ) : null}
+        </div>
       </div>
     </section>
   )

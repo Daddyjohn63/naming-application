@@ -17,7 +17,7 @@ import {
 const FREE_FEATURES = [
   "Cat profile with required photo and personality description",
   "Photo check and personality summary — edit until it's right",
-  "Family name styles: Elegant, Silly, Classic, Nature-inspired, and more",
+  "Family name styles: Elegant, Silly, Classic, Nature-inspired, and Non-human",
   "10 family names with rationales, plus one free regeneration",
   "Shortlist up to six names and crown a favourite family name",
   "Pause any time — progress is saved at every step",

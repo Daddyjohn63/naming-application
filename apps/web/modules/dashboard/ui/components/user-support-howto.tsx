@@ -30,7 +30,7 @@ const CEREMONY_FLOW_STEPS = [
   },
   {
     title: "Pick a family-name style",
-    body: "Choose one or more flavours for the everyday name you call your cat at home — for example Elegant, Silly, Classic, Nature-inspired, Non-human names, or Mix-it-up.",
+    body: "Choose one or more flavours for the everyday name you call your cat at home — for example Elegant, Silly, Classic, Nature-inspired, or Non-human names.",
   },
   {
     title: "Curate the family name",

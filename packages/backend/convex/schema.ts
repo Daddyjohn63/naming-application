@@ -65,7 +65,6 @@ const familyNameStyleId = v.union(
   v.literal("classic"),
   v.literal("nature_inspired"),
   v.literal("non_human_names"),
-  v.literal("mix_it_up"),
 )
 
 const catSex = v.union(v.literal("male"), v.literal("female"))
@@ -133,7 +132,7 @@ export default defineSchema({
     summaryRegenerationsUsed: v.number(),
     /** Accepted summary row; naming stages should read copy from this version. */
     acceptedSummaryVersionId: v.optional(v.id("cat_summary_versions")),
-    /** Family name styles chosen in free phase (KB-005); mix-it-up resolved to concrete styles. */
+    /** Family name styles chosen in free phase (KB-005). */
     familyNameStyles: v.optional(v.array(familyNameStyleId)),
     /** Saved family names during curation (max 6, unique by normalized name). */
     familyNameShortlist: v.optional(

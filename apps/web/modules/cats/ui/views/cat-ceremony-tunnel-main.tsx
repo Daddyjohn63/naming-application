@@ -7,7 +7,8 @@
  * optional family pipeline status, and curation in tunnel mode.
  *
  * KB-009/010 additions:
- * - `CeremonyStageSwitcher` — user picks cat-world vs ineffable vs certificate tab
+ * - `CeremonyStageSwitcher` — cat-world vs ineffable vs certificate (curation tabs
+ *   lock once all three names are chosen)
  * - `StageNameCuration` / `StageNamePipelineStatus` — paid stages share one UI pair
  * - `useCeremonyStageContinue` — prominent handoff after cat-world favourite
  * - `activeView` syncs from ceremonyStep (not from favourite alone — see ceremony-naming-view.ts)
@@ -79,12 +80,11 @@ export function CatCeremonyTunnelMain({
     showContinueToCatWorld,
   } = useCeremonyStageContinue(cat)
 
+  const readyForCertificate = allThreeCeremonyNamesChosen(cat)
   const [activeView, setActiveView] = React.useState<CeremonyNamingView>(() =>
     defaultCeremonyNamingView(cat),
   )
-  const wasReadyForCertificateRef = React.useRef(
-    allThreeCeremonyNamesChosen(cat),
-  )
+  const wasReadyForCertificateRef = React.useRef(readyForCertificate)
 
   // Re-sync tab when step advances (e.g. naming_cat_world → naming_ineffable).
   // Do not depend on selectedCatWorldName — that caused premature tab switch before Continue.
@@ -94,17 +94,17 @@ export function CatCeremonyTunnelMain({
 
   // When the third name is chosen, open Certificate and bring the main CTA into view.
   React.useEffect(() => {
-    const ready = allThreeCeremonyNamesChosen(cat)
-    if (ready && !wasReadyForCertificateRef.current) {
+    if (readyForCertificate && !wasReadyForCertificateRef.current) {
       wasReadyForCertificateRef.current = true
       setActiveView("certificate")
       scrollToCeremonyCertificatePrep()
       return
     }
-    if (!ready) {
+    if (!readyForCertificate) {
       wasReadyForCertificateRef.current = false
     }
   }, [
+    readyForCertificate,
     cat.selectedFamilyName,
     cat.selectedCatWorldName,
     cat.selectedIneffableName,
@@ -188,13 +188,17 @@ export function CatCeremonyTunnelMain({
 
       {panels.showPaidNaming ? (
         <>
-          <CeremonyStageSwitcher
-            cat={cat}
-            activeView={activeView}
-            onChange={setActiveView}
-          />
+          {/* Stage tabs only while curating — once all three names are chosen,
+              the three-name cards + shortlists + certificate CTA are enough. */}
+          {!readyForCertificate ? (
+            <CeremonyStageSwitcher
+              cat={cat}
+              activeView={activeView}
+              onChange={setActiveView}
+            />
+          ) : null}
 
-          {activeView === "cat_world" ? (
+          {!readyForCertificate && activeView === "cat_world" ? (
             <>
               {panels.showCatWorldNamePipeline ? (
                 <StageNamePipelineStatus
@@ -218,7 +222,7 @@ export function CatCeremonyTunnelMain({
             </>
           ) : null}
 
-          {activeView === "ineffable" ? (
+          {!readyForCertificate && activeView === "ineffable" ? (
             <>
               {panels.showIneffableNamePipeline ? (
                 <StageNamePipelineStatus
@@ -252,7 +256,9 @@ export function CatCeremonyTunnelMain({
             </>
           ) : null}
 
-          {activeView === "certificate" ? <CeremonyCertificatePrep cat={cat} /> : null}
+          {readyForCertificate || activeView === "certificate" ? (
+            <CeremonyCertificatePrep cat={cat} />
+          ) : null}
         </>
       ) : null}
 

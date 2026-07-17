@@ -44,14 +44,14 @@ function unlockSidebarCopy({
     return {
       title: "Ceremony complete",
       description:
-        "Open the Certificate tab in the main column to view or download your certificate.",
+        "View or download your certificate from the main column.",
     }
   }
   if (readyForCertificate) {
     return {
       title: "Ready for your certificate",
       description:
-        "Your three names are complete — open the Certificate tab in the main column to create your certificate, or save and come back later.",
+        "Your three names are complete — create your certificate in the main column, or change a favourite from the shortlists under the name cards. Shortlists stay locked.",
     }
   }
   if (step === "awaiting_payment") {
@@ -93,7 +93,7 @@ function unlockSidebarCopy({
     return {
       title: "Your naming ceremony",
       description:
-        "Review or change your picks before moving to generate your certificate.",
+        "Continue naming in the main column. You can change a favourite from your shortlist until the certificate is generated.",
     }
   }
   return {
