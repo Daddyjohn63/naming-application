@@ -12,7 +12,9 @@ export const DashboardLayout = async ({
   children: React.ReactNode
 }) => {
   const cookieStore = await cookies()
-  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true"
+  // Open on desktop by default; only stay collapsed when the user previously closed it.
+  // Mobile uses a separate sheet state that always starts closed.
+  const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false"
 
   return (
     <AuthGuard>

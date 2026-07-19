@@ -23,6 +23,7 @@ import {
   useSidebar,
 } from "@workspace/ui/components/sidebar"
 import { api } from "@workspace/backend/_generated/api"
+import { APP_NAME } from "@workspace/shared/constants/app"
 import { toast } from "@workspace/ui/components/sonner"
 import { useQuery } from "convex/react"
 
@@ -41,9 +42,9 @@ const dashboardSidebarMenuClassName = "gap-1.5"
 const dashboardSidebarGroupLabelClassName =
   "text-sm font-semibold text-sidebar-foreground/80"
 const catSidebarPhotoClassName =
-  "size-8 shrink-0 rounded-full object-cover group-data-[collapsible=icon]:size-full group-data-[collapsible=icon]:rounded-md"
+  "size-8 shrink-0 rounded-full object-cover group-data-[collapsible=icon]:size-full"
 const catSidebarPhotoButtonClassName =
-  "group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:overflow-hidden"
+  "group-data-[collapsible=icon]:rounded-full! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:overflow-hidden"
 
 function SidebarAddCatMenuItem() {
   const { execute, pending, error, clearError } = useCreateDraftCeremony()
@@ -102,13 +103,13 @@ export const DashboardSidebar = () => {
             <SidebarMenuButton
               asChild
               isActive={isNavItemActive(pathname, "/")}
-              tooltip="Home"
-              className="[&_svg]:size-8"
+              tooltip={APP_NAME}
+              className="[&_svg]:size-8 group-data-[collapsible=icon]:p-0!"
             >
               <Link href="/" onClick={closeMobileSidebar}>
                 <Logo className="size-8 shrink-0" />
-                <span className="truncate group-data-[collapsible=icon]:hidden">
-                  Home
+                <span className="truncate font-semibold group-data-[collapsible=icon]:hidden">
+                  {APP_NAME}
                 </span>
               </Link>
             </SidebarMenuButton>

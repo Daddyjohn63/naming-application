@@ -115,7 +115,7 @@ export function PublicHeader() {
       )}
     >
       <div className="flex min-w-0 flex-1 items-center">
-        <LogoLink href="/" onClick={closeMobile} />
+        <LogoLink href="/" showName onClick={closeMobile} />
       </div>
 
       <nav
