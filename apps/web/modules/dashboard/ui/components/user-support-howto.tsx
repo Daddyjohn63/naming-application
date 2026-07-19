@@ -1,5 +1,6 @@
 import { dataComponent } from "@/lib/data-component"
 import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
+import { APP_NAME } from "@workspace/shared/constants/app"
 import { MAX_CAT_PROFILE_SUBMIT_COUNT } from "@workspace/shared/constants/cat-profile"
 import { MAX_PHOTO_VALIDATION_ATTEMPTS } from "@workspace/shared/constants/cat-photo-validation"
 import {
@@ -26,7 +27,7 @@ const CEREMONY_FLOW_STEPS = [
   },
   {
     title: "Review the summary",
-    body: "Naming Buddy writes a personality summary from your story and photo. Edit it until it sounds like your cat, then submit when you’re happy — that locked summary becomes the creative truth behind every name that follows.",
+    body: `${APP_NAME} writes a personality summary from your story and photo. Edit it until it sounds like your cat, then submit when you’re happy — that locked summary becomes the creative truth behind every name that follows.`,
   },
   {
     title: "Pick a family-name style",
@@ -42,7 +43,7 @@ const CEREMONY_FLOW_STEPS = [
   },
   {
     title: "Choose the cat-world name",
-    body: `After unlock you get another set of ${NAME_BATCH_SIZE} names. Shortlist, optionally regenerate once, then confirm a favourite. Cat-world names are globally unique — once claimed, no other Naming Buddy cat can take that name.`,
+    body: `After unlock you get another set of ${NAME_BATCH_SIZE} names. Shortlist, optionally regenerate once, then confirm a favourite. Cat-world names are globally unique — once claimed, no other ${APP_NAME} cat can take that name.`,
   },
   {
     title: "Choose the ineffable near-name",
@@ -61,7 +62,7 @@ const NAME_TYPES = [
   },
   {
     title: "Cat-world name",
-    body: "Inspired by Eliot’s idea that every cat has a second name known only among cats. Ours are unique across Naming Buddy: when you confirm a favourite, it’s claimed globally so no other ceremony can use it.",
+    body: `Inspired by Eliot’s idea that every cat has a second name known only among cats. Ours are unique across ${APP_NAME}: when you confirm a favourite, it’s claimed globally so no other ceremony can use it.`,
   },
   {
     title: "Ineffable near-name",
@@ -82,10 +83,10 @@ export function UserSupportHowto() {
           id="howto-intro-heading"
           className="font-sans text-2xl font-semibold tracking-tight"
         >
-          How Naming Buddy works
+          How {APP_NAME} works
         </h2>
         <p className="max-w-3xl text-base leading-relaxed text-pretty text-muted-foreground">
-          Naming Buddy walks you through a guided naming ceremony for each cat —
+          {APP_NAME} walks you through a guided naming ceremony for each cat —
           from a short profile and personality summary to three complementary
           names and a downloadable certificate. You can stop at any time; progress
           is saved, and the dashboard lets you resume exactly where you left off.
@@ -236,7 +237,7 @@ export function UserSupportHowto() {
         <div className="overflow-x-auto rounded-xl border border-border/70">
           <table className="w-full min-w-xl border-collapse text-left text-sm">
             <caption className="sr-only">
-              Naming Buddy ceremony limits for profiles, photos, and name
+              {APP_NAME} ceremony limits for profiles, photos, and name
               curation
             </caption>
             <thead className="border-b border-border/70 bg-muted/30">

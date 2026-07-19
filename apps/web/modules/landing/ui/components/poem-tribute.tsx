@@ -1,4 +1,5 @@
 import { dataComponent } from "@/lib/data-component"
+import { APP_NAME } from "@workspace/shared/constants/app"
 
 /**
  * Original-words tribute to the poem that inspires the ceremony.
@@ -27,7 +28,7 @@ export function PoemTribute() {
             only the cat will ever know it.
           </p>
           <p className="max-w-xl text-base text-pretty text-muted-foreground">
-            He was right, of course. Naming Buddy is the ceremony built from
+            He was right, of course. {APP_NAME} is the ceremony built from
             that idea — a loving nod to{" "}
             <cite className="not-italic font-medium">The Naming of Cats</cite>,
             in our own words, for people who already take their cats seriously.

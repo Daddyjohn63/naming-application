@@ -1,6 +1,7 @@
 import Link from "next/link"
 
 import { dataComponent } from "@/lib/data-component"
+import { APP_NAME } from "@workspace/shared/constants/app"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 
@@ -20,7 +21,7 @@ export function AboutHero() {
           For cat people, by cat people
         </Badge>
         <h1 className="font-sans text-4xl leading-tight font-semibold tracking-tight text-balance md:text-5xl lg:text-6xl">
-          Naming Buddy
+          {APP_NAME}
         </h1>
         <p className="max-w-2xl font-serif text-xl leading-relaxed text-balance italic text-foreground/90 md:text-2xl">
           A naming ceremony for the cats who already run your house —

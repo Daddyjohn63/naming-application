@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { dataComponent } from "@/lib/data-component"
 import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
+import { APP_NAME } from "@workspace/shared/constants/app"
 import { Button } from "@workspace/ui/components/button"
 
 /** Intro for the Pricing page — how the free-to-unlock model works. */
@@ -21,7 +22,7 @@ export function PricingHero() {
           Free to begin. {UNLOCK_PRICE_USD} to finish — per cat.
         </h1>
         <p className="max-w-2xl text-base leading-relaxed text-pretty text-muted-foreground md:text-lg">
-          Naming Buddy is not a subscription. You explore the ceremony for free,
+          {APP_NAME} is not a subscription. You explore the ceremony for free,
           then unlock the rest for one cat at a time when you&apos;re ready —
           never at sign-up, and never automatically.
         </p>

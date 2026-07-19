@@ -1,5 +1,6 @@
 import { dataComponent } from "@/lib/data-component"
 import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
+import { APP_NAME } from "@workspace/shared/constants/app"
 import {
   Accordion,
   AccordionContent,
@@ -18,8 +19,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "Is there a subscription?",
-    answer:
-      "No. Naming Buddy does not use monthly or annual plans. You pay once per cat when you choose to finish that ceremony.",
+    answer: `No. ${APP_NAME} does not use monthly or annual plans. You pay once per cat when you choose to finish that ceremony.`,
   },
   {
     question: "Can I try the product before paying?",

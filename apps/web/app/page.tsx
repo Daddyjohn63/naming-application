@@ -10,9 +10,10 @@ import { PoemTribute } from "@/modules/landing/ui/components/poem-tribute"
 import { PricingSection } from "@/modules/landing/ui/components/pricing-section"
 import { ThreeNamesSection } from "@/modules/landing/ui/components/three-names-section"
 import { WhoItsFor } from "@/modules/landing/ui/components/who-its-for"
+import { APP_NAME } from "@workspace/shared/constants/app"
 
 export const metadata: Metadata = {
-  title: "Naming Buddy — Discover your cat's three names",
+  title: `${APP_NAME} — Discover your cat's three names`,
   description: `A guided naming ceremony for cat owners: an everyday family name, a globally unique cat-world name, and a playful guess at the ineffable one — finished with a keepsake certificate. Free to start, ${UNLOCK_PRICE_USD} per cat to complete.`,
 }
 

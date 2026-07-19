@@ -14,6 +14,7 @@ import Link from "next/link"
 import * as React from "react"
 
 import { api } from "@workspace/backend/_generated/api"
+import { APP_NAME } from "@workspace/shared/constants/app"
 import { CreateCeremonyButton } from "@/modules/cats/ui/components/create-ceremony-button"
 import { useCreateDraftCeremony } from "@/modules/cats/ui/hooks/use-create-draft-ceremony"
 import { CeremonyStepBadge } from "@/modules/ceremony/ui/components/ceremony-step-badge"
@@ -298,7 +299,7 @@ function DashboardCatsLoaded() {
             </EmptyTitle>
             <EmptyDescription>
               Start when you are ready — create a profile with a photo of your
-              cat and their story. Naming Buddy will then write a summary of
+              cat and their story. {APP_NAME} will then write a summary of
               your cat&apos;s personality from which names can be generated.
             </EmptyDescription>
           </EmptyHeader>

@@ -18,7 +18,7 @@ const AUDIENCES = [
   },
 ] as const
 
-/** Who Naming Buddy is for — target audience without sounding like a persona matrix. */
+/** Who the product is for — target audience without sounding like a persona matrix. */
 export function AboutWhoFor() {
   return (
     <section

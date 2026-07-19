@@ -1,8 +1,9 @@
 import Image from "next/image"
 
 import { dataComponent } from "@/lib/data-component"
+import { APP_NAME } from "@workspace/shared/constants/app"
 
-/** Why Naming Buddy exists: the team's love of cats. */
+/** Why the product exists: the team's love of cats. */
 export function AboutLoveOfCats() {
   return (
     <section
@@ -29,7 +30,7 @@ export function AboutLoveOfCats() {
           </h2>
           <div className="flex flex-col gap-4 text-base leading-relaxed text-pretty text-muted-foreground md:text-lg">
             <p>
-              Naming Buddy grew out of a simple truth: cats are not pets you
+              {APP_NAME} grew out of a simple truth: cats are not pets you
               merely label. They are housemates with opinions, rituals, and a
               dignity that somehow survives knocking a mug off the table for
               science.

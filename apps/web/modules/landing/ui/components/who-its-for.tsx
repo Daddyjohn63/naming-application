@@ -18,7 +18,7 @@ const AUDIENCES = [
   },
 ] as const
 
-/** Audience section adapted from About — who Naming Buddy is built for. */
+/** Audience section adapted from About — who the product is built for. */
 export function WhoItsFor() {
   return (
     <section

@@ -1,9 +1,10 @@
 import Image from "next/image"
 
 import { dataComponent } from "@/lib/data-component"
+import { APP_NAME } from "@workspace/shared/constants/app"
 
 /**
- * Origin story: Cats the musical → Eliot's poems → Naming Buddy.
+ * Origin story: Cats the musical → Eliot's poems → the product.
  * Deliberately quotes nothing from the poem (still in copyright).
  */
 export function AboutInspiration() {
@@ -20,7 +21,7 @@ export function AboutInspiration() {
           </h2>
           <div className="flex flex-col gap-4 text-base leading-relaxed text-pretty text-muted-foreground md:text-lg">
             <p>
-              Our path to Naming Buddy did not start in a library. It started
+              Our path to {APP_NAME} did not start in a library. It started
               in a theatre — watching Andrew Lloyd Webber&apos;s{" "}
               <cite className="not-italic font-medium text-foreground">
                 Cats
@@ -48,7 +49,7 @@ export function AboutInspiration() {
               building.
             </p>
             <p className="font-serif text-lg italic text-foreground/90 md:text-xl">
-              Naming Buddy is our loving, modern answer to that idea: a
+              {APP_NAME} is our loving, modern answer to that idea: a
               guided ritual, in our own words — and with deep respect for
               the work that inspired it.
             </p>

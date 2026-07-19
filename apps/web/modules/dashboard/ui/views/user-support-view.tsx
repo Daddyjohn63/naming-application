@@ -2,6 +2,7 @@ import { dataComponent } from "@/lib/data-component"
 import { UserSupportContact } from "@/modules/dashboard/ui/components/user-support-contact"
 import { UserSupportFaq } from "@/modules/dashboard/ui/components/user-support-faq"
 import { UserSupportHowto } from "@/modules/dashboard/ui/components/user-support-howto"
+import { APP_NAME } from "@workspace/shared/constants/app"
 
 /** Dashboard User Support — how-to guide, FAQ, and contact. */
 export function UserSupportView() {
@@ -15,7 +16,7 @@ export function UserSupportView() {
           User support
         </h1>
         <p className="max-w-3xl text-base leading-relaxed text-pretty text-muted-foreground">
-          A friendly guide to Naming Buddy — how the ceremony flows, what each
+          A friendly guide to {APP_NAME} — how the ceremony flows, what each
           name means, the limits that apply, and answers to common questions.
           If you still need a hand, our support email is at the bottom.
         </p>

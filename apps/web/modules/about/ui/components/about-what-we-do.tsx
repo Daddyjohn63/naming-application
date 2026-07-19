@@ -5,6 +5,7 @@ import { CatWorldMark } from "@/components/marks/cat-world-mark"
 import { FamilyMark } from "@/components/marks/family-mark"
 import { IneffableMark } from "@/components/marks/ineffable-mark"
 import { dataComponent } from "@/lib/data-component"
+import { APP_NAME } from "@workspace/shared/constants/app"
 import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 
@@ -19,8 +20,7 @@ const THREE_NAMES = [
   },
   {
     title: "Cat-world name",
-    description:
-      "The distinctive name your cat goes by among other cats — claimed uniquely across Naming Buddy so no other cat can share it.",
+    description: `The distinctive name your cat goes by among other cats — claimed uniquely across ${APP_NAME} so no other cat can share it.`,
     Mark: CatWorldMark,
     accentClassName: "text-emerald-700 dark:text-emerald-400",
     haloClassName: "bg-emerald-500/10",

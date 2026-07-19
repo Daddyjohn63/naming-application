@@ -2,6 +2,7 @@ import Image from "next/image"
 
 import { dataComponent } from "@/lib/data-component"
 import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
+import { APP_NAME } from "@workspace/shared/constants/app"
 import { Badge } from "@workspace/ui/components/badge"
 
 type CeremonyStep = {
@@ -19,8 +20,7 @@ const CEREMONY_STEPS: readonly CeremonyStep[] = [
   },
   {
     title: "Meet their personality summary",
-    description:
-      "Naming Buddy checks your photo really is a single cat, then studies it alongside your words to write a personality summary. Edit it until it sounds exactly like your cat, then submit — it becomes the creative truth behind every name.",
+    description: `${APP_NAME} checks your photo really is a single cat, then studies it alongside your words to write a personality summary. Edit it until it sounds exactly like your cat, then submit — it becomes the creative truth behind every name.`,
     phase: "Free",
   },
   {
@@ -70,7 +70,7 @@ export function HowItWorks() {
               A guided ceremony, not a name generator
             </h2>
             <p className="text-lg text-pretty text-muted-foreground">
-              You bring the story; Naming Buddy walks you through the rest —
+              You bring the story; {APP_NAME} walks you through the rest —
               summary, shortlists, and a keepsake certificate. Your progress is
               saved at every step, so you can pause mid-ceremony and pick up
               exactly where you left off — for as many cats as you have.

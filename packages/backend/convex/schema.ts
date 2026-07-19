@@ -2,7 +2,7 @@ import { defineSchema, defineTable } from "convex/server"
 import { v } from "convex/values"
 
 /**
- * Convex database schema for Naming Buddy.
+ * Convex database schema for the naming ceremony app.
  *
  * KB-004 adds: summary pipeline `ceremonyStep` substates, `photoValidation` /
  * `summaryGenerationError` on `cats`, and the `cat_summary_versions` table.

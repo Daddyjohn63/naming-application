@@ -1,5 +1,6 @@
 import { dataComponent } from "@/lib/data-component"
 import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
+import { APP_NAME } from "@workspace/shared/constants/app"
 import { MAX_CAT_PROFILE_SUBMIT_COUNT } from "@workspace/shared/constants/cat-profile"
 import { MAX_PHOTO_VALIDATION_ATTEMPTS } from "@workspace/shared/constants/cat-photo-validation"
 import {
@@ -32,8 +33,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "What are the three names for?",
-    answer:
-      "The family name is the everyday name you call your cat. The cat-world name is unique among Naming Buddy cats — a second identity inspired by T. S. Eliot. The ineffable near-name is a poetic approximation of the secret third name no owner can truly know.",
+    answer: `The family name is the everyday name you call your cat. The cat-world name is unique among ${APP_NAME} cats — a second identity inspired by T. S. Eliot. The ineffable near-name is a poetic approximation of the secret third name no owner can truly know.`,
   },
   {
     question: "How many names do I get, and how many can I shortlist?",
@@ -49,8 +49,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "Is the cat-world name really unique?",
-    answer:
-      "Yes. When you confirm your favourite, it’s claimed globally across Naming Buddy so no other cat can take it. If a name was just claimed by someone else, simply pick another from your shortlist (or regenerate if you still can).",
+    answer: `Yes. When you confirm your favourite, it’s claimed globally across ${APP_NAME} so no other cat can take it. If a name was just claimed by someone else, simply pick another from your shortlist (or regenerate if you still can).`,
   },
   {
     question: "Can I edit the personality summary?",

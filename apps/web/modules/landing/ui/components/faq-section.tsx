@@ -1,5 +1,6 @@
 import { dataComponent } from "@/lib/data-component"
 import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
+import { APP_NAME } from "@workspace/shared/constants/app"
 import {
   Accordion,
   AccordionContent,
@@ -19,8 +20,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "Is the cat-world name really unique?",
-    answer:
-      "Yes. In Eliot's telling, a cat's second name is theirs and theirs alone — so ours are too. When you confirm your favourite, it's claimed globally across every cat named with Naming Buddy, and no other cat can ever take it. If a name has already been claimed, you'll simply pick another from your shortlist.",
+    answer: `Yes. In Eliot's telling, a cat's second name is theirs and theirs alone — so ours are too. When you confirm your favourite, it's claimed globally across every cat named with ${APP_NAME}, and no other cat can ever take it. If a name has already been claimed, you'll simply pick another from your shortlist.`,
   },
   {
     question: "What if I don't like the names the app suggests?",

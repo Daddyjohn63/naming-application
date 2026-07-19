@@ -6,6 +6,7 @@
 import { openai } from "@ai-sdk/openai"
 import { generateText, Output } from "ai"
 
+import { APP_NAME } from "@workspace/shared/constants/app"
 import {
   formatCatSexLabel,
   type CatSex,
@@ -52,7 +53,7 @@ const ELIOT_POEM_FORBIDDEN_NAMES = [
 const ELIOT_POEM_FORBIDDEN_NAMES_RULE = `- NEVER, under any circumstances, return any of these names (they appear in T. S. Eliot's "The Naming of Cats" and must not be suggested for legal/publisher reasons): ${ELIOT_POEM_FORBIDDEN_NAMES.join(", ")}. Do not use them as whole names, nicknames, or close variants spelling the same name.`
 
 /** §0 system prompt: vision model returns scores only, never prose summary or names. */
-const PHOTO_VALIDATION_SYSTEM_PROMPT = `You are Naming Buddy's photo validator for a cat naming ceremony.
+const PHOTO_VALIDATION_SYSTEM_PROMPT = `You are ${APP_NAME}'s photo validator for a cat naming ceremony.
 
 Examine the uploaded image and return structured scores only — no summary, no name suggestions.
 
@@ -72,7 +73,7 @@ const PHOTO_VALIDATION_USER_TEXT =
   "Validate this uploaded photo for a cat naming ceremony."
 
 /** §1 system prompt: Eliot-inspired personality portrait writer (no name suggestions). */
-const SUMMARY_SYSTEM_PROMPT = `You are the Naming Buddy cat portrait writer — part poet, part observant friend.
+const SUMMARY_SYSTEM_PROMPT = `You are the ${APP_NAME} cat portrait writer — part poet, part observant friend.
 
 Your job is to write a short personality summary of someone's cat for a playful naming ceremony inspired by T. S. Eliot's "The Naming of Cats."
 
@@ -220,7 +221,7 @@ export async function generateCatSummaryWithAi(args: {
 }
 
 /** §2 system prompt: everyday family names grounded in the cat summary. */
-const FAMILY_NAMES_SYSTEM_PROMPT = `You are Naming Buddy's family-name generator for the "family name" a cat's humans use daily (T. S. Eliot's first name).
+const FAMILY_NAMES_SYSTEM_PROMPT = `You are ${APP_NAME}'s family-name generator for the "family name" a cat's humans use daily (T. S. Eliot's first name).
 
 Rules:
 - Return exactly 10 name options.
@@ -291,7 +292,7 @@ export async function generateFamilyNamesWithAi(args: {
 }
 
 /** §2.8 — cat-world names (second ceremony name); structured JSON via nameBatchSchema. */
-const CAT_WORLD_NAMES_SYSTEM_PROMPT = `You are Naming Buddy's cat-world name generator — the grand, distinctive second name a cat carries among other cats (T. S. Eliot's "cat-world name").
+const CAT_WORLD_NAMES_SYSTEM_PROMPT = `You are ${APP_NAME}'s cat-world name generator — the grand, distinctive second name a cat carries among other cats (T. S. Eliot's "cat-world name").
 
 Rules:
 - Return exactly ${NAME_BATCH_SIZE} name options.
@@ -305,7 +306,7 @@ ${ELIOT_POEM_FORBIDDEN_NAMES_RULE}
 - Respond with valid JSON only — no markdown, no preamble.`
 
 /** §2.9 — ineffable near-names (third ceremony name); no global uniqueness. */
-const INEFFABLE_NAMES_SYSTEM_PROMPT = `You are Naming Buddy's ineffable near-name generator — playful approximations of a cat's unknowable secret name (T. S. Eliot's third name that no human can truly know).
+const INEFFABLE_NAMES_SYSTEM_PROMPT = `You are ${APP_NAME}'s ineffable near-name generator — playful approximations of a cat's unknowable secret name (T. S. Eliot's third name that no human can truly know).
 
 Rules:
 - Return exactly ${NAME_BATCH_SIZE} near-name options.

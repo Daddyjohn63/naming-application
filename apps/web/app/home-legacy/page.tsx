@@ -3,9 +3,10 @@ import type { Metadata } from "next"
 import { LandingHeroLegacy } from "@/modules/landing/ui/legacy/landing-hero-legacy"
 import { NameCards } from "@/modules/landing/ui/components/name-cards"
 import { SectionHeader } from "@/modules/landing/ui/components/section-header"
+import { APP_NAME } from "@workspace/shared/constants/app"
 
 export const metadata: Metadata = {
-  title: "Naming Buddy — Previous home page",
+  title: `${APP_NAME} — Previous home page`,
   description:
     "Snapshot of the previous home page, kept for reference during the redesign.",
   robots: { index: false, follow: false },
