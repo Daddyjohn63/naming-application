@@ -7,7 +7,12 @@ import { ConvexError, v } from "convex/values"
 import { catCreateFieldsSchema } from "@workspace/shared/schemas/cat"
 import { DRAFT_CAT_DESCRIPTION_PLACEHOLDER } from "@workspace/shared/constants/cat-profile"
 
-import { query, mutation, type MutationCtx, type QueryCtx } from "./_generated/server"
+import {
+  query,
+  mutation,
+  type MutationCtx,
+  type QueryCtx,
+} from "./_generated/server"
 import { getCurrentUser, getCurrentUserOrThrow } from "./users"
 import type { Doc, Id } from "./_generated/dataModel"
 
@@ -59,19 +64,19 @@ export const generateUploadUrl = mutation({
 })
 
 //get all cats
-export const getCats = query({
-  args: {},
-  handler: async (ctx) => {
-    const cats = await ctx.db.query("cats").collect()
-    return Promise.all(
-      cats.map(async (cat) => {
-        const user = await ctx.db.get(cat.userId)
-        const withUrls = await catWithStorageUrls(ctx, cat)
-        return { ...withUrls, user }
-      })
-    )
-  },
-})
+// export const getCats = query({
+//   args: {},
+//   handler: async (ctx) => {
+//     const cats = await ctx.db.query("cats").collect()
+//     return Promise.all(
+//       cats.map(async (cat) => {
+//         const user = await ctx.db.get(cat.userId)
+//         const withUrls = await catWithStorageUrls(ctx, cat)
+//         return { ...withUrls, user }
+//       })
+//     )
+//   },
+// })
 
 /** Current user's cats for dashboard cards — ordered newest first with optional photo URL. */
 export const listMyCatsForDashboard = query({
@@ -164,19 +169,19 @@ export const getCatsForSidebar = query({
 })
 
 //get recent cats
-export const getRecentCats = query({
-  args: {},
-  handler: async (ctx) => {
-    const cats = await ctx.db.query("cats").order("desc").take(5)
-    return Promise.all(
-      cats.map(async (cat) => {
-        const user = await ctx.db.get(cat.userId)
-        const withUrls = await catWithStorageUrls(ctx, cat)
-        return { ...withUrls, user }
-      })
-    )
-  },
-})
+// export const getRecentCats = query({
+//   args: {},
+//   handler: async (ctx) => {
+//     const cats = await ctx.db.query("cats").order("desc").take(5)
+//     return Promise.all(
+//       cats.map(async (cat) => {
+//         const user = await ctx.db.get(cat.userId)
+//         const withUrls = await catWithStorageUrls(ctx, cat)
+//         return { ...withUrls, user }
+//       })
+//     )
+//   },
+// })
 //get cats by user ID
 export const getCatsByUserId = query({
   args: { userId: v.id("users") },
@@ -249,7 +254,9 @@ export const deleteCeremony = mutation({
       throw new ConvexError("Ceremony not found.")
     }
     if (cat.userId !== currentUser._id) {
-      throw new ConvexError("You do not have permission to delete this ceremony.")
+      throw new ConvexError(
+        "You do not have permission to delete this ceremony."
+      )
     }
 
     const summaryVersions = await ctx.db

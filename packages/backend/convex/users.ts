@@ -3,20 +3,20 @@ import { v, Validator } from "convex/values"
 import { UserJSON } from "@clerk/backend"
 
 //get all users
-export const getUsers = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("users").collect()
-  },
-})
+// export const getUsers = query({
+//   args: {},
+//   handler: async (ctx) => {
+//     return await ctx.db.query("users").collect()
+//   },
+// })
 
 //get recent users
-export const getRecentUsers = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("users").order("desc").take(5)
-  },
-})
+// export const getRecentUsers = query({
+//   args: {},
+//   handler: async (ctx) => {
+//     return await ctx.db.query("users").order("desc").take(5)
+//   },
+// })
 
 //get current user
 export const current = query({
