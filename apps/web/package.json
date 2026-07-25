@@ -10,7 +10,8 @@
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "next typegen && tsc --noEmit",
-    "generate:svg-marks": "node scripts/generate-svg-marks.mjs"
+    "generate:svg-marks": "node scripts/generate-svg-marks.mjs",
+    "generate:favicon": "node scripts/generate-favicon.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",

@@ -1,16 +1,16 @@
-import type { Metadata } from "next"
-
 import { LandingHeroLegacy } from "@/modules/landing/ui/legacy/landing-hero-legacy"
 import { NameCards } from "@/modules/landing/ui/components/name-cards"
 import { SectionHeader } from "@/modules/landing/ui/components/section-header"
-import { APP_NAME } from "@workspace/shared/constants/app"
+import { createPageMetadata, NO_INDEX_ROBOTS } from "@/lib/seo/metadata"
 
-export const metadata: Metadata = {
-  title: `${APP_NAME} — Previous home page`,
+export const metadata = createPageMetadata({
+  title: "Previous home page",
   description:
     "Snapshot of the previous home page, kept for reference during the redesign.",
-  robots: { index: false, follow: false },
-}
+  path: "/home-legacy",
+  robots: NO_INDEX_ROBOTS,
+  absoluteTitle: true,
+})
 
 /** Snapshot of the home page before the redesign — kept so nothing is lost. */
 export default function HomeLegacyPage() {

@@ -9,6 +9,14 @@ const isPublicRoute = createRouteMatcher([
   "/examples(.*)",
   "/privacy(.*)",
   "/terms(.*)",
+  // SEO / PWA discovery endpoints must stay crawlable without auth
+  "/robots.txt",
+  "/sitemap.xml",
+  "/manifest.webmanifest",
+  "/opengraph-image(.*)",
+  "/twitter-image(.*)",
+  "/icon(.*)",
+  "/apple-icon(.*)",
 ])
 
 export default clerkMiddleware(async (auth, req) => {

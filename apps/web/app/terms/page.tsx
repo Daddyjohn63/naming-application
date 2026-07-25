@@ -1,13 +1,28 @@
-import type { Metadata } from "next"
-
 import { TermsView } from "@/modules/legal/ui/views/terms-view"
+import { JsonLd, buildWebPageJsonLd } from "@/lib/seo/json-ld"
+import { createPageMetadata } from "@/lib/seo/metadata"
 import { APP_NAME } from "@workspace/shared/constants/app"
 
-export const metadata: Metadata = {
-  title: `Terms & Conditions — ${APP_NAME}`,
-  description: `Terms governing your use of ${APP_NAME}, including accounts, content, payments, and acceptable use.`,
-}
+const title = "Terms & Conditions"
+const description = `Terms governing your use of ${APP_NAME}, including accounts, content, payments, and acceptable use.`
+
+export const metadata = createPageMetadata({
+  title,
+  description,
+  path: "/terms",
+})
 
 export default function TermsPage() {
-  return <TermsView />
+  return (
+    <>
+      <JsonLd
+        data={buildWebPageJsonLd({
+          path: "/terms",
+          name: `${title} | ${APP_NAME}`,
+          description,
+        })}
+      />
+      <TermsView />
+    </>
+  )
 }
