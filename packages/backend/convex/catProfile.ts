@@ -14,7 +14,10 @@ import {
   isCatProfileEditableStep,
   MAX_CAT_PROFILE_SUBMIT_COUNT,
 } from "@workspace/shared/constants/cat-profile"
-import { MAX_PHOTO_VALIDATION_ATTEMPTS } from "@workspace/shared/constants/cat-photo-validation"
+import {
+  CAT_PHOTO_CHECK_FAILED_MESSAGE,
+  MAX_PHOTO_VALIDATION_ATTEMPTS,
+} from "@workspace/shared/constants/cat-photo-validation"
 import { CAT_PROFILE_SUBMIT_ERROR_CODE } from "@workspace/shared/constants/cat-profile-errors"
 import {
   normalizeCatSex,
@@ -78,7 +81,17 @@ export const applyCatProfileSubmit = internalMutation({
     // validate, including after a draft-save with the same storage id or a block.
     const skipPhotoRevalidation = !photoChanged && isSummaryReviewResubmit
 
-    const photoAttemptsUsed = cat.photoValidationAttemptsUsed ?? 0
+    // Older outage handling blamed the photo and burned an attempt; refund once
+    // when the owner re-submits after that generic "couldn't check" message.
+    const priorPhotoMessage = cat.photoValidation?.userMessage?.trim() ?? ""
+    const refundFalsePhotoCheck =
+      !skipPhotoRevalidation &&
+      priorPhotoMessage === CAT_PHOTO_CHECK_FAILED_MESSAGE
+
+    const photoAttemptsUsed = Math.max(
+      0,
+      (cat.photoValidationAttemptsUsed ?? 0) - (refundFalsePhotoCheck ? 1 : 0),
+    )
     if (
       !skipPhotoRevalidation &&
       photoAttemptsUsed >= MAX_PHOTO_VALIDATION_ATTEMPTS
@@ -114,8 +127,10 @@ export const applyCatProfileSubmit = internalMutation({
       ...(isSummaryReviewResubmit
         ? { profileSubmitsUsed: submitsUsed + 1 }
         : {}),
-      ...(!skipPhotoRevalidation
-        ? { photoValidationAttemptsUsed: photoAttemptsUsed + 1 }
+      // photoValidationAttemptsUsed increments only when vision returns a result
+      // (see applyPhotoValidationResult) so OpenAI outages do not burn attempts.
+      ...(refundFalsePhotoCheck
+        ? { photoValidationAttemptsUsed: photoAttemptsUsed }
         : {}),
       ...(skipPhotoRevalidation
         ? {}

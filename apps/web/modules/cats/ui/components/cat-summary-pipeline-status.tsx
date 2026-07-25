@@ -14,7 +14,10 @@ import {
   resolvePhotoIssueDisplay,
 } from "@workspace/shared/constants/cat-photo-validation"
 import { isCatSummaryCeremonyStep } from "@workspace/shared/constants/cat-summary"
-import { pipelineErrorUsesBackToProfile } from "@workspace/shared/utils/summary-pipeline-error"
+import {
+  AI_SERVICE_UNAVAILABLE_MESSAGE,
+  pipelineErrorUsesBackToProfile,
+} from "@workspace/shared/utils/summary-pipeline-error"
 import {
   Alert,
   AlertDescription,
@@ -116,10 +119,15 @@ export function CatSummaryPipelineStatus({
       )
     }
 
+    const transientTitle =
+      cat.summaryGenerationError === AI_SERVICE_UNAVAILABLE_MESSAGE
+        ? "Please try again shortly"
+        : "Something went wrong"
+
     return (
       <Card {...dataComponent("CatSummaryPipelineStatus")} className="ceremony-panel">
         <CardHeader className="border-b">
-          <CardTitle className="text-base">Something went wrong</CardTitle>
+          <CardTitle className="text-base">{transientTitle}</CardTitle>
           <CardDescription>{cat.summaryGenerationError}</CardDescription>
         </CardHeader>
         <div className="px-4 py-4">

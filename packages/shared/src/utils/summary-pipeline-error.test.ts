@@ -7,23 +7,25 @@ import {
   resolvePhotoIssueUserMessage,
 } from "../constants/cat-photo-validation.ts"
 import {
+  AI_SERVICE_UNAVAILABLE_MESSAGE,
   CAT_PHOTO_LOAD_FAILED_MESSAGE,
   CAT_PHOTO_SUMMARY_FAILED_MESSAGE,
   SUMMARY_PIPELINE_TRANSIENT_ERROR_MESSAGE,
   canReturnToProfileForPhotoReplace,
   classifySummaryPipelineError,
   isPhotoPipelineUserMessage,
+  isTransientPipelineUserMessage,
   pipelineErrorUsesBackToProfile,
 } from "./summary-pipeline-error.ts"
 
 describe("classifySummaryPipelineError", () => {
-  it("returns transient when no photo was attached", () => {
+  it("returns AI-unavailable for provider outages even without a photo", () => {
     const result = classifySummaryPipelineError({
       error: new Error("Rate limit exceeded"),
       hasPhoto: false,
     })
     assert.equal(result.kind, "transient")
-    assert.equal(result.userMessage, SUMMARY_PIPELINE_TRANSIENT_ERROR_MESSAGE)
+    assert.equal(result.userMessage, AI_SERVICE_UNAVAILABLE_MESSAGE)
   })
 
   it("returns photo when storage URL cannot be resolved", () => {
@@ -53,9 +55,18 @@ describe("classifySummaryPipelineError", () => {
     assert.equal(result.userMessage, CAT_PHOTO_SUMMARY_FAILED_MESSAGE)
   })
 
-  it("returns transient for generic API errors even when a photo exists", () => {
+  it("returns AI-unavailable for provider outages when a photo exists", () => {
     const result = classifySummaryPipelineError({
       error: new Error("Service unavailable"),
+      hasPhoto: true,
+    })
+    assert.equal(result.kind, "transient")
+    assert.equal(result.userMessage, AI_SERVICE_UNAVAILABLE_MESSAGE)
+  })
+
+  it("returns generic transient for unknown non-photo errors", () => {
+    const result = classifySummaryPipelineError({
+      error: new Error("Unexpected zod parse failure"),
       hasPhoto: true,
     })
     assert.equal(result.kind, "transient")
@@ -117,13 +128,23 @@ describe("catPhotoBlockAlertTitle", () => {
 })
 
 describe("pipelineErrorUsesBackToProfile", () => {
-  it("always uses back to profile during photo validation", () => {
+  it("uses back to profile for non-transient errors during photo validation", () => {
     assert.equal(
       pipelineErrorUsesBackToProfile({
         ceremonyStep: "awaiting_photo_validation",
         summaryGenerationError: "Anything",
       }),
       true,
+    )
+  })
+
+  it("uses retry for AI-unavailable during photo validation", () => {
+    assert.equal(
+      pipelineErrorUsesBackToProfile({
+        ceremonyStep: "awaiting_photo_validation",
+        summaryGenerationError: AI_SERVICE_UNAVAILABLE_MESSAGE,
+      }),
+      false,
     )
   })
 
@@ -143,6 +164,23 @@ describe("pipelineErrorUsesBackToProfile", () => {
         ceremonyStep: "awaiting_summary",
         summaryGenerationError: SUMMARY_PIPELINE_TRANSIENT_ERROR_MESSAGE,
       }),
+      false,
+    )
+  })
+})
+
+describe("isTransientPipelineUserMessage", () => {
+  it("recognises apology and generic retry copy", () => {
+    assert.equal(
+      isTransientPipelineUserMessage(AI_SERVICE_UNAVAILABLE_MESSAGE),
+      true,
+    )
+    assert.equal(
+      isTransientPipelineUserMessage(SUMMARY_PIPELINE_TRANSIENT_ERROR_MESSAGE),
+      true,
+    )
+    assert.equal(
+      isTransientPipelineUserMessage(CAT_PHOTO_SUMMARY_FAILED_MESSAGE),
       false,
     )
   })

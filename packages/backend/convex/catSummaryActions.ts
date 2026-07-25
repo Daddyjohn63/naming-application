@@ -9,7 +9,6 @@
 
 import { v } from "convex/values"
 
-import { CAT_PHOTO_CHECK_FAILED_MESSAGE } from "@workspace/shared/constants/cat-photo-validation"
 import { classifySummaryPipelineError } from "@workspace/shared/utils/summary-pipeline-error"
 
 import {
@@ -81,26 +80,34 @@ export const validateCatPhoto = internalAction({
         )
       }
     } catch (error) {
+      console.error("Photo validation failed:", error)
       const failure = classifySummaryPipelineError({ error, hasPhoto: true })
-      const userMessage =
-        failure.kind === "photo"
-          ? failure.userMessage
-          : CAT_PHOTO_CHECK_FAILED_MESSAGE
 
-      await ctx.runMutation(internal.catSummary.applyPhotoValidationResult, {
+      if (failure.kind === "photo") {
+        // Photo/storage issue — send back to profile and consume one check attempt.
+        await ctx.runMutation(internal.catSummary.applyPhotoValidationResult, {
+          catId,
+          validation: {
+            isCat: true,
+            isSingleCat: true,
+            catLikelihoodScore: 0,
+            qualityScore: 0,
+            userMessage: failure.userMessage,
+            blockReason:
+              error instanceof Error
+                ? error.message
+                : "Photo validation failed",
+          },
+          outcome: "block",
+        })
+        return
+      }
+
+      // OpenAI / infra outage — keep step, show Retry, do not burn a photo check.
+      await ctx.runMutation(internal.catSummary.applySummaryPipelineFailure, {
         catId,
-        validation: {
-          isCat: true,
-          isSingleCat: true,
-          catLikelihoodScore: 0,
-          qualityScore: 0,
-          userMessage,
-          blockReason:
-            error instanceof Error
-              ? error.message
-              : "Photo validation failed",
-        },
-        outcome: "block",
+        errorMessage: failure.userMessage,
+        step: "awaiting_photo_validation",
       })
     }
   },

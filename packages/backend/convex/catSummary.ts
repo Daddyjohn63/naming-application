@@ -56,6 +56,7 @@ async function returnCatToProfileForPhotoIssueDoc(
   ctx: MutationCtx,
   catId: Id<"cats">,
   validation: PhotoValidationInput,
+  options?: { consumePhotoAttempt?: boolean },
 ) {
   const cat = await ctx.db.get(catId)
   if (cat === null) {
@@ -64,6 +65,7 @@ async function returnCatToProfileForPhotoIssueDoc(
 
   const now = Date.now()
   const userMessage = resolvePhotoIssueUserMessage(validation)
+  const attemptsUsed = cat.photoValidationAttemptsUsed ?? 0
 
   await ctx.db.patch(catId, {
     ceremonyStep: "draft",
@@ -72,6 +74,9 @@ async function returnCatToProfileForPhotoIssueDoc(
       userMessage,
       validatedAt: now,
     },
+    ...(options?.consumePhotoAttempt === true
+      ? { photoValidationAttemptsUsed: attemptsUsed + 1 }
+      : {}),
     photoQualityAcknowledged: undefined,
     summaryGenerationError: undefined,
     updatedAt: now,
@@ -299,8 +304,11 @@ export const retrySummaryPipeline = mutation({
     }
     const cat = await getOwnedCatOrThrow(ctx, id, currentUser._id)
 
-    // Only retry transient summary failures — photo issues return to profile.
-    if (cat.ceremonyStep !== "awaiting_summary") {
+    // Transient failures stay on awaiting_* with Retry; photo issues go Back to profile.
+    if (
+      cat.ceremonyStep !== "awaiting_summary" &&
+      cat.ceremonyStep !== "awaiting_photo_validation"
+    ) {
       throw new ConvexError({ code: CAT_SUMMARY_ERROR_CODE.STEP_LOCKED })
     }
     if (cat.summaryGenerationError === undefined) {
@@ -311,10 +319,18 @@ export const retrySummaryPipeline = mutation({
 
     const now = Date.now()
     await ctx.db.patch(id, {
-      ceremonyStep: "awaiting_summary",
+      ceremonyStep: cat.ceremonyStep,
       summaryGenerationError: undefined,
       updatedAt: now,
     })
+    if (cat.ceremonyStep === "awaiting_photo_validation") {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.catSummaryActions.validateCatPhoto,
+        { catId: id },
+      )
+      return
+    }
     await ctx.scheduler.runAfter(0, internal.catSummaryActions.generateCatSummary, {
       catId: id,
     })
@@ -436,7 +452,10 @@ export const applyPhotoValidationResult = internalMutation({
 
     if (args.outcome === "block" || args.outcome === "warn") {
       // MVP: any photo issue sends the owner back to the profile form to re-upload.
-      await returnCatToProfileForPhotoIssueDoc(ctx, args.catId, args.validation)
+      // Vision returned a judgment — consume one automated photo-check attempt.
+      await returnCatToProfileForPhotoIssueDoc(ctx, args.catId, args.validation, {
+        consumePhotoAttempt: true,
+      })
       return
     }
 
@@ -449,9 +468,12 @@ export const applyPhotoValidationResult = internalMutation({
     }
 
     // Pass — advance to awaiting_summary; action layer schedules generateCatSummary.
+    // Count this as a consumed photo check (block/warn already counted in return helper).
+    const attemptsUsed = cat.photoValidationAttemptsUsed ?? 0
     await ctx.db.patch(args.catId, {
       ceremonyStep: "awaiting_summary",
       photoValidation: validationRecord,
+      photoValidationAttemptsUsed: attemptsUsed + 1,
       summaryGenerationError: undefined,
       updatedAt: now,
     })
