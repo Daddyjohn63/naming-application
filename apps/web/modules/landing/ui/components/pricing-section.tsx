@@ -1,7 +1,10 @@
 import Link from "next/link"
 
 import { dataComponent } from "@/lib/data-component"
-import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
+import {
+  UNLOCK_PRICE_QUALIFIER,
+  UNLOCK_PRICE_USD,
+} from "@/modules/landing/lib/pricing"
 import { FeatureList } from "@/modules/landing/ui/components/feature-list"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
@@ -32,7 +35,7 @@ const UNLOCK_FEATURES = [
   "PDF download to print, share, or frame",
 ] as const
 
-/** Free-vs-unlock pricing cards: the ceremony is free to start, $3.99 per cat to finish. */
+/** Free-vs-unlock pricing cards — unlock is free during the public beta. */
 export function PricingSection() {
   return (
     <section
@@ -44,12 +47,12 @@ export function PricingSection() {
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-base/7 font-semibold">Pricing</p>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-            Free to begin. One small payment to finish.
+            Free to begin. Free to finish during beta.
           </h2>
           <p className="mt-6 text-lg text-pretty text-muted-foreground">
             No subscription, no bundle, no surprises. Everything up to your
-            cat&apos;s family name is free — unlock the rest of the ceremony
-            only if you fall in love with it.
+            cat&apos;s family name is free — and while we&apos;re in beta,
+            unlocking the rest of the ceremony is free too.
           </p>
         </div>
 
@@ -91,12 +94,13 @@ export function PricingSection() {
                     {UNLOCK_PRICE_USD}
                   </span>
                   <span className="text-sm text-muted-foreground">
-                    one-time, per cat
+                    {UNLOCK_PRICE_QUALIFIER}
                   </span>
                 </div>
                 <CardDescription className="text-base">
                   Complete the ceremony with the cat-world name, the ineffable
-                  near-name, and the certificate.
+                  near-name, and the certificate — no charge while we&apos;re in
+                  beta.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -115,10 +119,9 @@ export function PricingSection() {
         </div>
 
         <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-pretty text-muted-foreground">
-          You&apos;re only charged when you choose to unlock — never at sign-up,
-          and never automatically. Each cat&apos;s ceremony is its own unlock,
-          so a household of three cats is three ceremonies (and three
-          certificates).
+          During beta there is no charge to unlock — never at sign-up, and never
+          automatically. Each cat&apos;s ceremony is its own unlock, so a
+          household of three cats is three ceremonies (and three certificates).
         </p>
       </div>
     </section>

@@ -1,5 +1,4 @@
 import { dataComponent } from "@/lib/data-component"
-import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
 import { APP_NAME } from "@workspace/shared/constants/app"
 import {
   Accordion,
@@ -15,8 +14,9 @@ const FAQ_ITEMS = [
       "Yes — a clear photo of your cat is required to generate their personality summary and appears on the certificate. We quickly check it really is a single cat before the ceremony continues. You can still save a draft profile without a photo and come back to upload one later.",
   },
   {
-    question: "What does it cost, and when am I charged?",
-    answer: `Everything up to and including your cat's everyday family name is free. Finishing the ceremony — the cat-world name, the ineffable near-name, and the certificate — is a one-time ${UNLOCK_PRICE_USD} (USD) per cat. You're only charged when you tap Unlock, never at sign-up, and payment happens right on the ceremony page without redirecting you anywhere.`,
+    question: "What does it cost during beta?",
+    answer:
+      "During beta, the full ceremony is free — including unlock. Everything up to your cat's everyday family name has always been free, and while we're in beta there's no charge to finish with the cat-world name, ineffable near-name, and certificate. You're never charged at sign-up.",
   },
   {
     question: "Is the cat-world name really unique?",
@@ -34,7 +34,8 @@ const FAQ_ITEMS = [
   },
   {
     question: "Can I name more than one cat?",
-    answer: `Yes — your dashboard supports as many cats as live with you (or visit regularly). Each cat gets their own profile, summary, names, and certificate. Each ceremony is unlocked separately at ${UNLOCK_PRICE_USD}.`,
+    answer:
+      "Yes — your dashboard supports as many cats as live with you (or visit regularly). Each cat gets their own profile, summary, names, and certificate. Each ceremony is unlocked separately, and during beta unlock is free for every cat.",
   },
   {
     question: "Can I stop halfway and come back later?",

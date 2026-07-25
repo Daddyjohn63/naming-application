@@ -1,5 +1,4 @@
 import { dataComponent } from "@/lib/data-component"
-import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
 import { APP_NAME } from "@workspace/shared/constants/app"
 import { MAX_CAT_PROFILE_SUBMIT_COUNT } from "@workspace/shared/constants/cat-profile"
 import { MAX_PHOTO_VALIDATION_ATTEMPTS } from "@workspace/shared/constants/cat-photo-validation"
@@ -44,8 +43,9 @@ const FAQ_ITEMS = [
     answer: `Yes. During family-name curation you may add ${MAX_CUSTOM_FAMILY_NAMES === 1 ? "one custom name" : `${MAX_CUSTOM_FAMILY_NAMES} custom names`} to the shortlist alongside suggestions from the app. Custom names aren’t available for the cat-world or ineffable stages.`,
   },
   {
-    question: "What does unlock cost, and when am I charged?",
-    answer: `Everything through the everyday family name is free. Finishing the ceremony — cat-world name, ineffable near-name, and certificate — is a one-time ${UNLOCK_PRICE_USD} (USD) per cat. You’re only charged when you unlock, never at sign-up, and payment happens on the ceremony page.`,
+    question: "What does unlock cost during beta?",
+    answer:
+      "During beta, unlock is free. Everything through the everyday family name is free, and finishing the ceremony — cat-world name, ineffable near-name, and certificate — has no charge while we’re in beta. You’re never charged at sign-up.",
   },
   {
     question: "Is the cat-world name really unique?",
@@ -66,7 +66,8 @@ const FAQ_ITEMS = [
   },
   {
     question: "Can I name more than one cat?",
-    answer: `Yes — as many as you like. Each cat has its own profile, summary, names, and certificate. Unlock is ${UNLOCK_PRICE_USD} per cat.`,
+    answer:
+      "Yes — as many as you like. Each cat has its own profile, summary, names, and certificate. Unlock is per cat, and during beta it’s free for every cat.",
   },
   {
     question: "Can I stop halfway and come back later?",

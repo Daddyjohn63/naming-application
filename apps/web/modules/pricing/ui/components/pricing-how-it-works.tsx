@@ -1,5 +1,4 @@
 import { dataComponent } from "@/lib/data-component"
-import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
 
 const PRICING_POINTS = [
   {
@@ -8,7 +7,7 @@ const PRICING_POINTS = [
   },
   {
     title: "Unlock only when you’re ready",
-    body: `When you want the cat-world name, the ineffable near-name, and the keepsake certificate, unlock that ceremony for a one-time ${UNLOCK_PRICE_USD} (USD). Payment stays on the ceremony page — you don’t get sent elsewhere.`,
+    body: "When you want the cat-world name, the ineffable near-name, and the keepsake certificate, unlock that ceremony on the ceremony page. During beta, unlock is free — no charge, and you don’t get sent elsewhere.",
   },
   {
     title: "One unlock per cat",
@@ -16,11 +15,11 @@ const PRICING_POINTS = [
   },
   {
     title: "No subscription, no surprise renewals",
-    body: "You’re only charged when you choose Unlock. There’s no monthly plan, no trial that converts, and no automatic charge after sign-up.",
+    body: "There’s no monthly plan, no trial that converts, and no automatic charge after sign-up. During beta you won’t be charged for unlock at all.",
   },
 ] as const
 
-/** Plain-language explanation of free vs unlock pricing. */
+/** Plain-language explanation of free vs unlock pricing during beta. */
 export function PricingHowItWorks() {
   return (
     <section
@@ -31,11 +30,12 @@ export function PricingHowItWorks() {
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-base/7 font-semibold">How pricing works</p>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-            Pay for the ending, not for getting started
+            Free to explore — and free to finish in beta
           </h2>
           <p className="mt-6 text-lg text-pretty text-muted-foreground">
             The idea is simple: fall in love with the ceremony first. Unlock
-            the rest only if you want all three names and the certificate.
+            the rest when you want all three names and the certificate —
+            at no charge while we&apos;re in beta.
           </p>
         </div>
 

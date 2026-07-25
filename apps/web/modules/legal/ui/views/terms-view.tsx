@@ -38,7 +38,7 @@ export function TermsView() {
         {
           title: "Payments and unlocks",
           paragraphs: [
-            "Parts of the ceremony may be free to explore. Unlocking later stages may require a one-time payment per cat. Prices and what unlock includes are shown before you confirm payment. Except where required by law, unlock fees are non-refundable once the paid stages have been unlocked for that cat.",
+            "Parts of the ceremony are free to explore. During our public beta, unlocking later stages is also free. When paid unlock is introduced, prices and what unlock includes will be shown before you confirm payment. Except where required by law, unlock fees will be non-refundable once the paid stages have been unlocked for that cat.",
           ],
         },
         {

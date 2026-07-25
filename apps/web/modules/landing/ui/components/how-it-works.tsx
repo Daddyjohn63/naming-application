@@ -1,14 +1,13 @@
 import Image from "next/image"
 
 import { dataComponent } from "@/lib/data-component"
-import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
 import { APP_NAME } from "@workspace/shared/constants/app"
 import { Badge } from "@workspace/ui/components/badge"
 
 type CeremonyStep = {
   title: string
   description: string
-  phase: "Free" | "Paid"
+  phase: "Free" | "Unlock"
 }
 
 const CEREMONY_STEPS: readonly CeremonyStep[] = [
@@ -31,26 +30,27 @@ const CEREMONY_STEPS: readonly CeremonyStep[] = [
   },
   {
     title: "Unlock the full ceremony",
-    description: `A single payment of ${UNLOCK_PRICE_USD} for this cat opens the remaining stages — cat-world name, ineffable near-name, and the certificate. You never leave the ceremony page, and nothing is charged before this moment.`,
-    phase: "Paid",
+    description:
+      "During beta, unlock is free for this cat and opens the remaining stages — cat-world name, ineffable near-name, and the certificate. You never leave the ceremony page.",
+    phase: "Unlock",
   },
   {
     title: "Claim their cat-world name",
     description:
       "The grander, more mysterious name your cat goes by among other cats. Ten suggestions, the same shortlist-and-favourite flow — and the name you confirm is globally unique. No other cat, anywhere, can ever share it.",
-    phase: "Paid",
+    phase: "Unlock",
   },
   {
     title: "Approximate the ineffable",
     description:
       "One name will always stay just out of reach — the secret one your cat keeps entirely to themselves. So we guess, wonderfully: ten strange and lovely near-names with short poetic rationales. Pick the one that feels closest to the truth.",
-    phase: "Paid",
+    phase: "Unlock",
   },
   {
     title: "Download the certificate",
     description:
       "All three names on a storybook keepsake certificate, with their photo and the ceremony date. Download it as a PDF and reopen it from your dashboard any time.",
-    phase: "Paid",
+    phase: "Unlock",
   },
 ] as const
 
@@ -102,7 +102,7 @@ export function HowItWorks() {
                       variant={phase === "Free" ? "secondary" : "default"}
                       className="rounded-full px-2.5 py-0.5 text-xs"
                     >
-                      {phase}
+                      {phase === "Unlock" ? "Free during beta" : phase}
                     </Badge>
                   </div>
                   <p className="leading-relaxed text-pretty text-muted-foreground">

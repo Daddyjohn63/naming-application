@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 
-import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
 import { CertificateShowcase } from "@/modules/landing/ui/components/certificate-showcase"
 import { FaqSection } from "@/modules/landing/ui/components/faq-section"
 import { FinalCta } from "@/modules/landing/ui/components/final-cta"
@@ -14,7 +13,7 @@ import { APP_NAME } from "@workspace/shared/constants/app"
 
 export const metadata: Metadata = {
   title: `${APP_NAME} — Discover your cat's three names`,
-  description: `A guided naming ceremony for cat owners: an everyday family name, a globally unique cat-world name, and a playful guess at the ineffable one — finished with a keepsake certificate. Free to start, ${UNLOCK_PRICE_USD} per cat to complete.`,
+  description: `A guided naming ceremony for cat owners: an everyday family name, a globally unique cat-world name, and a playful guess at the ineffable one — finished with a keepsake certificate. Free to start, and free to unlock during beta.`,
 }
 
 export default function HomePage() {

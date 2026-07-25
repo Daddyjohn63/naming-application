@@ -91,7 +91,7 @@ export function CeremonyUnlockPrompt({
       <div className="flex flex-col gap-4 px-4 py-4">
         {showUnlockCheckout || showStubUnlock ? (
           <p className="text-sm font-semibold tracking-tight text-foreground">
-            No charge
+            Free during beta
           </p>
         ) : null}
 
@@ -117,8 +117,8 @@ export function CeremonyUnlockPrompt({
         {showStubUnlock ? (
           <>
             <p className="text-sm text-muted-foreground">
-              Stub unlock for development — no charge. Your names remain visible
-              while you complete payment.
+              Unlock is free during beta. Your names remain visible while you
+              continue.
             </p>
             <Button
               type="button"
@@ -129,7 +129,7 @@ export function CeremonyUnlockPrompt({
             >
               {paying || unlocking
                 ? "Unlocking…"
-                : "Unlock now ($3.99 — no charge)"}
+                : "Unlock now — free during beta"}
             </Button>
           </>
         ) : null}

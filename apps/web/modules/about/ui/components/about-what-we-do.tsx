@@ -96,10 +96,10 @@ export function AboutWhatWeDo() {
             </h3>
             <p className="text-base leading-relaxed text-pretty text-muted-foreground md:text-lg">
               The early steps — profile, personality summary, and family name —
-              are free. When you&apos;re ready, a one-time unlock per cat opens
-              the cat-world name, the ineffable near-name, and the
-              certificate. Come back mid-ceremony any time; we pick up exactly
-              where you left off.
+              are free. When you&apos;re ready, unlock per cat opens the
+              cat-world name, the ineffable near-name, and the certificate —
+              free during beta. Come back mid-ceremony any time; we pick up
+              exactly where you left off.
             </p>
             <div>
               <Button variant="outline" size="lg" asChild>

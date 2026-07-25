@@ -6,6 +6,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect } from "react"
 
+import { BetaBadge } from "@/components/beta-badge"
 import { Logo } from "@/components/logo"
 import { useCreateDraftCeremony } from "@/modules/cats/ui/hooks/use-create-draft-ceremony"
 import {
@@ -111,6 +112,7 @@ export const DashboardSidebar = () => {
                 <span className="truncate font-semibold group-data-[collapsible=icon]:hidden">
                   {APP_NAME}
                 </span>
+                <BetaBadge className="group-data-[collapsible=icon]:hidden" />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

@@ -1,5 +1,4 @@
 import { dataComponent } from "@/lib/data-component"
-import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
 import { APP_NAME } from "@workspace/shared/constants/app"
 import { MAX_CAT_PROFILE_SUBMIT_COUNT } from "@workspace/shared/constants/cat-profile"
 import { MAX_PHOTO_VALIDATION_ATTEMPTS } from "@workspace/shared/constants/cat-photo-validation"
@@ -39,7 +38,7 @@ const CEREMONY_FLOW_STEPS = [
   },
   {
     title: "Unlock the rest of the ceremony",
-    body: `Everything up to the family name is free. Unlocking the cat-world name, ineffable near-name, and certificate is a one-time ${UNLOCK_PRICE_USD} (USD) per cat. Payment stays on the ceremony page — you don’t get sent elsewhere.`,
+    body: "Everything up to the family name is free. During beta, unlocking the cat-world name, ineffable near-name, and certificate is free too — no charge, and you stay on the ceremony page.",
   },
   {
     title: "Choose the cat-world name",
@@ -311,8 +310,8 @@ export function UserSupportHowto() {
                   Unlock
                 </th>
                 <td className="px-4 py-3 text-muted-foreground">
-                  {UNLOCK_PRICE_USD} USD once per cat for cat-world, ineffable,
-                  and certificate
+                  Free during beta — once per cat for cat-world, ineffable, and
+                  certificate
                 </td>
               </tr>
             </tbody>

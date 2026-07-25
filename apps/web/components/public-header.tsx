@@ -6,6 +6,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import * as React from "react"
 
+import { BetaBadge } from "@/components/beta-badge"
 import { LogoLink } from "@/components/logo"
 import { PUBLIC_NAV_LINKS } from "@/components/public-nav"
 import { dataComponent } from "@/lib/data-component"
@@ -114,8 +115,9 @@ export function PublicHeader() {
           : "border-border/50 bg-background/95 shadow-[0_1px_0_0_var(--border),0_4px_8px_-2px_rgba(0,0,0,0.06)] supports-backdrop-filter:bg-background/80 supports-backdrop-filter:backdrop-blur-sm dark:border-white/15 dark:shadow-[0_1px_0_0_rgba(255,255,255,0.14),0_8px_20px_-4px_rgba(0,0,0,0.75)]"
       )}
     >
-      <div className="flex min-w-0 flex-1 items-center">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
         <LogoLink href="/" showName onClick={closeMobile} />
+        <BetaBadge />
       </div>
 
       <nav

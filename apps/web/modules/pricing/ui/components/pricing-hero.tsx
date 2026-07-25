@@ -1,11 +1,10 @@
 import Link from "next/link"
 
 import { dataComponent } from "@/lib/data-component"
-import { UNLOCK_PRICE_USD } from "@/modules/landing/lib/pricing"
 import { APP_NAME } from "@workspace/shared/constants/app"
 import { Button } from "@workspace/ui/components/button"
 
-/** Intro for the Pricing page — how the free-to-unlock model works. */
+/** Intro for the Pricing page — how the free-to-unlock model works in beta. */
 export function PricingHero() {
   return (
     <section
@@ -19,12 +18,12 @@ export function PricingHero() {
       <div className="relative mx-auto flex min-h-[55svh] w-full max-w-3xl flex-col items-center justify-center gap-5 px-4 pt-28 pb-16 text-center md:pt-24 md:pb-20">
         <p className="text-base/7 font-semibold">Pricing</p>
         <h1 className="font-sans text-4xl leading-tight font-semibold tracking-tight text-balance md:text-5xl">
-          Free to begin. {UNLOCK_PRICE_USD} to finish — per cat.
+          Free to begin. Free to finish during beta.
         </h1>
         <p className="max-w-2xl text-base leading-relaxed text-pretty text-muted-foreground md:text-lg">
           {APP_NAME} is not a subscription. You explore the ceremony for free,
           then unlock the rest for one cat at a time when you&apos;re ready —
-          never at sign-up, and never automatically.
+          and while we&apos;re in beta, that unlock is free too.
         </p>
         <nav
           aria-label="Pricing page actions"
