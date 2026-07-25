@@ -15,6 +15,7 @@ import {
   CAT_PROFILE_SUBMIT_ERROR_CODE,
   catProfileSubmitErrorMessage,
 } from "@workspace/shared/constants/cat-profile-errors"
+import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
 
 type UseCatPhotoUploadResult = {
   upload: (file: File) => Promise<Id<"_storage">>
@@ -116,8 +117,7 @@ export function useCatPhotoUpload(): UseCatPhotoUploadResult {
         }
         return json.storageId as Id<"_storage">
       } catch (e) {
-        const message =
-          e instanceof Error ? e.message : "Upload failed. Please try again."
+        const message = getConvexErrorMessage(e)
         setError(message)
         throw e
       } finally {

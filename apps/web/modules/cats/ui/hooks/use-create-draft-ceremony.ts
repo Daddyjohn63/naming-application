@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useCallback, useRef, useState } from "react"
 
 import { api } from "@workspace/backend/_generated/api"
+import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
 
 /**
  * Creates a draft ceremony server-side and navigates to its editor page.
@@ -46,9 +47,7 @@ export function useCreateDraftCeremony() {
       const id = await createDraftCat()
       router.push(`/cats/${id}`)
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Could not create ceremony."
-      )
+      setError(getConvexErrorMessage(err))
     } finally {
       // Always release the guard so a retry after failure works.
       isExecutingRef.current = false

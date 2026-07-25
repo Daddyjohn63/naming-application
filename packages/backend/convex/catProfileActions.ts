@@ -32,6 +32,7 @@ import {
   parseSaveCatProfileDraftFields,
   parseSubmitCatProfileFields,
 } from "./catProfile"
+import { enforceRateLimit } from "./lib/rateLimiter"
 import type { Id } from "./_generated/dataModel"
 
 const profileActionResultValidator = v.union(
@@ -153,6 +154,8 @@ export const submitCatProfile = action({
         code: CAT_PROFILE_SUBMIT_ERROR_CODE.NOT_AUTHENTICATED,
       })
     }
+
+    await enforceRateLimit(ctx, "submitCatProfile", user._id)
 
     const cat = await ctx.runQuery(api.cats.getCatByIdForOwner, {
       catId: args.catId,

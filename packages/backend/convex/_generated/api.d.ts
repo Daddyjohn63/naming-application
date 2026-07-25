@@ -25,6 +25,7 @@ import type * as ineffableNaming from "../ineffableNaming.js";
 import type * as ineffableNamingActions from "../ineffableNamingActions.js";
 import type * as lib_beginCatWorldGeneration from "../lib/beginCatWorldGeneration.js";
 import type * as lib_namingStage from "../lib/namingStage.js";
+import type * as lib_rateLimiter from "../lib/rateLimiter.js";
 import type * as lib_stubUnlock from "../lib/stubUnlock.js";
 import type * as users from "../users.js";
 
@@ -52,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   ineffableNamingActions: typeof ineffableNamingActions;
   "lib/beginCatWorldGeneration": typeof lib_beginCatWorldGeneration;
   "lib/namingStage": typeof lib_namingStage;
+  "lib/rateLimiter": typeof lib_rateLimiter;
   "lib/stubUnlock": typeof lib_stubUnlock;
   users: typeof users;
 }>;
@@ -82,4 +84,6 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  rateLimiter: import("@convex-dev/rate-limiter/_generated/component.js").ComponentApi<"rateLimiter">;
+};

@@ -32,6 +32,7 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "./_generated/server"
+import { enforceRateLimit } from "./lib/rateLimiter"
 import { getCurrentUser } from "./users"
 import {
   allGenerationsForCat,
@@ -561,6 +562,7 @@ export const regenerateFamilyNames = mutation({
     if (currentUser === null) {
       throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.NOT_AUTHENTICATED })
     }
+    await enforceRateLimit(ctx, "regenerateNames", currentUser._id)
     const id = ctx.db.normalizeId("cats", args.catId)
     if (id === null) {
       throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.NOT_FOUND })
@@ -602,6 +604,7 @@ export const retryFamilyNameGeneration = mutation({
     if (currentUser === null) {
       throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.NOT_AUTHENTICATED })
     }
+    await enforceRateLimit(ctx, "regenerateNames", currentUser._id)
     const id = ctx.db.normalizeId("cats", catId)
     if (id === null) {
       throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.NOT_FOUND })

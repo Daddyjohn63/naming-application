@@ -1,6 +1,7 @@
 import { catProfileSubmitErrorMessage } from "../constants/cat-profile-errors"
 import { catSummaryErrorMessage } from "../constants/cat-summary-errors"
 import { familyNamingErrorMessage } from "../constants/family-naming-errors"
+import { rateLimitErrorMessage } from "../constants/rate-limit-errors"
 import { stagedNamingErrorMessage } from "../constants/staged-naming-errors"
 
 type ConvexErrorData = {
@@ -31,6 +32,7 @@ export function getConvexErrorMessage(error: unknown): string {
       catProfileSubmitErrorMessage,
       catSummaryErrorMessage,
       familyNamingErrorMessage,
+      rateLimitErrorMessage,
       stagedNamingErrorMessage,
     ]) {
       const message = resolve(data.code, UNKNOWN_ERROR_MESSAGE)

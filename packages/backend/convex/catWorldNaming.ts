@@ -43,6 +43,7 @@ import {
   type ShortlistEntry,
 } from "./lib/namingStage"
 import { beginCatWorldGenerationIfNeeded } from "./lib/beginCatWorldGeneration"
+import { enforceRateLimit } from "./lib/rateLimiter"
 import { getCurrentUser } from "./users"
 import type { Doc, Id } from "./_generated/dataModel"
 
@@ -409,6 +410,7 @@ export const regenerateCatWorldNames = mutation({
     if (currentUser === null) {
       throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NOT_AUTHENTICATED })
     }
+    await enforceRateLimit(ctx, "regenerateNames", currentUser._id)
     const id = ctx.db.normalizeId("cats", catId)
     if (id === null) {
       throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NOT_FOUND })
@@ -446,6 +448,7 @@ export const retryCatWorldNameGeneration = mutation({
     if (currentUser === null) {
       throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NOT_AUTHENTICATED })
     }
+    await enforceRateLimit(ctx, "regenerateNames", currentUser._id)
     const id = ctx.db.normalizeId("cats", catId)
     if (id === null) {
       throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NOT_FOUND })

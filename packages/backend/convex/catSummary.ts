@@ -29,6 +29,7 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "./_generated/server"
+import { enforceRateLimit } from "./lib/rateLimiter"
 import { getCurrentUser } from "./users"
 import type { Id } from "./_generated/dataModel"
 
@@ -291,6 +292,7 @@ export const retrySummaryPipeline = mutation({
         code: CAT_SUMMARY_ERROR_CODE.NOT_AUTHENTICATED,
       })
     }
+    await enforceRateLimit(ctx, "retrySummaryPipeline", currentUser._id)
     const id = ctx.db.normalizeId("cats", catId)
     if (id === null) {
       throw new ConvexError({ code: CAT_SUMMARY_ERROR_CODE.NOT_FOUND })

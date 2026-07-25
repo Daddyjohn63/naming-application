@@ -5,6 +5,7 @@
  * Used by `use-cat-ceremony-page` when Convex mutations fail.
  */
 
+import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
 import { toast } from "@workspace/ui/components/sonner"
 
 /**
@@ -14,12 +15,7 @@ import { toast } from "@workspace/ui/components/sonner"
  * @param err - Caught value from try/catch (Error, string, or unknown)
  */
 export function toastCatCeremonyMutationError(label: string, err: unknown) {
-  const detail =
-    err instanceof Error && err.message.length > 0
-      ? err.message
-      : err != null
-        ? String(err)
-        : ""
+  const detail = getConvexErrorMessage(err)
 
   console.error(label, err)
   toast.error(detail.length > 0 ? `${label}: ${detail}` : label)

@@ -11,6 +11,7 @@ import { CEREMONY_UNLOCK_AMOUNT_MINOR_USD } from "@workspace/shared/constants/na
 import { STAGED_NAMING_ERROR_CODE } from "@workspace/shared/constants/staged-naming-errors"
 
 import { beginCatWorldGenerationIfNeeded } from "./lib/beginCatWorldGeneration"
+import { enforceRateLimit } from "./lib/rateLimiter"
 import { isStubUnlockAllowedOnDeployment } from "./lib/stubUnlock"
 import { mutation } from "./_generated/server"
 import { getCurrentUser } from "./users"
@@ -25,6 +26,7 @@ export const completeStubUnlock = mutation({
         code: STAGED_NAMING_ERROR_CODE.NOT_AUTHENTICATED,
       })
     }
+    await enforceRateLimit(ctx, "completeStubUnlock", currentUser._id)
 
     const id = ctx.db.normalizeId("cats", catId)
     if (id === null) {

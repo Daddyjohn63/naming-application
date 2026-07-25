@@ -13,6 +13,7 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "./_generated/server"
+import { enforceRateLimit } from "./lib/rateLimiter"
 import { getCurrentUser, getCurrentUserOrThrow } from "./users"
 import type { Doc, Id } from "./_generated/dataModel"
 
@@ -59,6 +60,9 @@ async function catWithStorageUrls(ctx: QueryCtx, cat: Doc<"cats">) {
 export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx): Promise<string> => {
+    // Auth required so the limit can be keyed per user (SECURITY.md M6; also closes C4).
+    const currentUser = await getCurrentUserOrThrow(ctx)
+    await enforceRateLimit(ctx, "generateUploadUrl", currentUser._id)
     return await ctx.storage.generateUploadUrl()
   },
 })
@@ -332,6 +336,7 @@ export const createCat = mutation({
   },
   handler: async (ctx, args) => {
     const currentUser = await getCurrentUserOrThrow(ctx)
+    await enforceRateLimit(ctx, "createCat", currentUser._id)
     const parsed = catCreateFieldsSchema.safeParse({
       title: args.title,
       description: args.description,
@@ -364,6 +369,7 @@ export const createDraftCat = mutation({
   args: {},
   handler: async (ctx): Promise<Doc<"cats">["_id"]> => {
     const currentUser = await getCurrentUserOrThrow(ctx)
+    await enforceRateLimit(ctx, "createCat", currentUser._id)
     const now = Date.now()
     const siblings = await ctx.db
       .query("cats")
