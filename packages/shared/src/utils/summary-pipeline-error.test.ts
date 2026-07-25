@@ -211,4 +211,14 @@ describe("canReturnToProfileForPhotoReplace", () => {
       true,
     )
   })
+
+  it("allows return from summary step on AI-unavailable errors", () => {
+    assert.equal(
+      canReturnToProfileForPhotoReplace({
+        ceremonyStep: "awaiting_summary",
+        summaryGenerationError: AI_SERVICE_UNAVAILABLE_MESSAGE,
+      }),
+      true,
+    )
+  })
 })

@@ -158,14 +158,8 @@ export function canReturnToProfileForPhotoReplace(args: {
     return true
   }
   if (args.ceremonyStep === "awaiting_summary") {
-    return (
-      args.summaryGenerationError !== undefined &&
-      pipelineErrorUsesBackToProfile({
-        ceremonyStep: "awaiting_summary",
-        summaryGenerationError: args.summaryGenerationError,
-        hasPhotoValidation: args.hasPhotoValidation,
-      })
-    )
+    // Photo issues and transient/AI-unavailable errors can leave this step.
+    return args.summaryGenerationError !== undefined
   }
   return args.hasPhotoValidation === true
 }

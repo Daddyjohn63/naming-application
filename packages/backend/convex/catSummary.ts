@@ -13,7 +13,10 @@ import {
   CAT_PHOTO_CHECK_FAILED_MESSAGE,
   resolvePhotoIssueUserMessage,
 } from "@workspace/shared/constants/cat-photo-validation"
-import { canReturnToProfileForPhotoReplace } from "@workspace/shared/utils/summary-pipeline-error"
+import {
+  canReturnToProfileForPhotoReplace,
+  isTransientPipelineUserMessage,
+} from "@workspace/shared/utils/summary-pipeline-error"
 import { CAT_SUMMARY_ERROR_CODE } from "@workspace/shared/constants/cat-summary-errors"
 import {
   saveCatSummaryDraftSchema,
@@ -380,6 +383,23 @@ export const returnToProfileForPhotoReplace = mutation({
     }
 
     const pipelineMessage = cat.summaryGenerationError?.trim() ?? ""
+
+    // Transient / AI-unavailable: return to a clean draft so they can resubmit
+    // without a false "bad photo" alert.
+    if (
+      pipelineMessage.length > 0 &&
+      isTransientPipelineUserMessage(pipelineMessage)
+    ) {
+      await ctx.db.patch(id, {
+        ceremonyStep: "draft",
+        photoQualityAcknowledged: undefined,
+        summaryGenerationError: undefined,
+        photoValidation: undefined,
+        updatedAt: now,
+      })
+      return
+    }
+
     const photoValidation =
       cat.photoValidation !== undefined
         ? cat.photoValidation

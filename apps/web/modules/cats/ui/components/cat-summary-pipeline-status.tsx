@@ -5,7 +5,7 @@
  *
  * Shown during awaiting_photo_validation / awaiting_summary, or when
  * summaryGenerationError is set. Photo issues offer Back to profile; transient
- * summary failures offer Retry.
+ * / AI-unavailable failures offer Retry and Back to profile.
  */
 
 import type { Doc } from "@workspace/backend/_generated/dataModel"
@@ -123,6 +123,7 @@ export function CatSummaryPipelineStatus({
       cat.summaryGenerationError === AI_SERVICE_UNAVAILABLE_MESSAGE
         ? "Please try again shortly"
         : "Something went wrong"
+    const actionsDisabled = retrying || returningToProfile
 
     return (
       <Card {...dataComponent("CatSummaryPipelineStatus")} className="ceremony-panel">
@@ -130,9 +131,21 @@ export function CatSummaryPipelineStatus({
           <CardTitle className="text-base">{transientTitle}</CardTitle>
           <CardDescription>{cat.summaryGenerationError}</CardDescription>
         </CardHeader>
-        <div className="px-4 py-4">
-          <Button type="button" disabled={retrying} onClick={onRetry}>
+        <div className="flex flex-wrap gap-2 px-4 py-4">
+          <Button
+            type="button"
+            disabled={actionsDisabled}
+            onClick={onRetry}
+          >
             {retrying ? "Retrying…" : "Retry"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={actionsDisabled}
+            onClick={onBackToProfile}
+          >
+            {returningToProfile ? "Opening profile…" : "Back to profile"}
           </Button>
         </div>
       </Card>
