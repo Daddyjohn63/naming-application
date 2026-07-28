@@ -24,6 +24,12 @@ export const STAGED_NAMING_ERROR_CODE = {
   NAME_GLOBALLY_TAKEN: "name_globally_taken",
   ALL_NAMES_COMPLETE: "all_names_complete",
   STUB_UNLOCK_DISABLED: "stub_unlock_disabled",
+  /** Certificate blob missing, not a PDF, or too large. */
+  INVALID_CERTIFICATE_UPLOAD: "invalid_certificate_upload",
+  /** completeCeremony storage id was not registered by this user for this cat. */
+  CERTIFICATE_STORAGE_UNBOUND: "certificate_storage_unbound",
+  /** Storage id already bound to a different ceremony or user. */
+  CERTIFICATE_STORAGE_IN_USE: "certificate_storage_in_use",
 } as const
 
 export type StagedNamingErrorCode =
@@ -64,6 +70,12 @@ const MESSAGES: Record<StagedNamingErrorCode, string> = {
     "All three names are chosen — you're ready for your certificate.",
   [STAGED_NAMING_ERROR_CODE.STUB_UNLOCK_DISABLED]:
     "Stub unlock is not available in this environment.",
+  [STAGED_NAMING_ERROR_CODE.INVALID_CERTIFICATE_UPLOAD]:
+    "That certificate file is invalid. Generate the PDF again and retry.",
+  [STAGED_NAMING_ERROR_CODE.CERTIFICATE_STORAGE_UNBOUND]:
+    "Certificate upload could not be verified. Download again to finish.",
+  [STAGED_NAMING_ERROR_CODE.CERTIFICATE_STORAGE_IN_USE]:
+    "That certificate file is already linked to another ceremony.",
 }
 
 export function stagedNamingErrorMessage(
