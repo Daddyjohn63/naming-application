@@ -13,6 +13,7 @@ import {
   FAMILY_NAME_STYLE_IDS,
   FAMILY_NAME_STYLE_LABELS,
   isCustomFamilyShortlistEntry,
+  isExistingFamilyNameSuggestion,
   MAX_CUSTOM_FAMILY_NAMES,
   MAX_FAMILY_NAME_REGENERATIONS,
   MAX_FAMILY_SHORTLIST_TOTAL,
@@ -263,6 +264,11 @@ export function FamilyNameCuration({
             <span className="text-base font-semibold tracking-tight">
               {entry.name}
             </span>
+            {isExistingFamilyNameSuggestion(entry) ? (
+              <Badge variant="outline" className="rounded-full">
+                Current name
+              </Badge>
+            ) : null}
             {onShortlist ? <ShortlistSavedBadge /> : null}
             {isFavourite ? <ShortlistFavouriteBadge /> : null}
           </div>

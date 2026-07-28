@@ -34,10 +34,53 @@ export type FamilyShortlistSource = (typeof FAMILY_SHORTLIST_SOURCES)[number]
 /** Rationale stored when the user adds their own family name. */
 export const CUSTOM_FAMILY_NAME_RATIONALE = "A name you chose yourself."
 
+/** Rationale for the profile “Current name” pinned at the top of suggestions. */
+export const EXISTING_FAMILY_NAME_RATIONALE =
+  "The name your cat already goes by."
+
+/**
+ * Normalize a family name for duplicate detection.
+ * Rule: trim, lowercase, collapse internal whitespace — case-insensitive match.
+ */
+export function normalizeFamilyName(name: string): string {
+  return name.trim().toLowerCase().replace(/\s+/g, " ")
+}
+
 export function isCustomFamilyShortlistEntry(entry: {
   source?: FamilyShortlistSource
 }): boolean {
   return entry.source === "custom"
+}
+
+/** True when a suggestion is the profile current name (not an AI invention). */
+export function isExistingFamilyNameSuggestion(entry: {
+  rationale: string
+}): boolean {
+  return entry.rationale === EXISTING_FAMILY_NAME_RATIONALE
+}
+
+/**
+ * Pin the profile’s current family name at the front of a suggestion batch.
+ * Case-insensitive dedupe against AI names; no-op when existingName is empty.
+ */
+export function withExistingFamilyNamePinned(
+  names: readonly { name: string; rationale: string }[],
+  existingName: string | undefined,
+): Array<{ name: string; rationale: string }> {
+  const trimmed = existingName?.trim()
+  if (trimmed === undefined || trimmed === "") {
+    return [...names]
+  }
+
+  const normalized = normalizeFamilyName(trimmed)
+  const withoutDupes = names.filter(
+    (entry) => normalizeFamilyName(entry.name) !== normalized,
+  )
+
+  return [
+    { name: trimmed, rationale: EXISTING_FAMILY_NAME_RATIONALE },
+    ...withoutDupes,
+  ]
 }
 
 /** Ceremony steps where KB-006 curation UI is active (including generation substates). */
@@ -53,14 +96,6 @@ export function isFamilyCurationCeremonyStep(
   step: string,
 ): step is FamilyCurationCeremonyStep {
   return (FAMILY_CURATION_CEREMONY_STEPS as readonly string[]).includes(step)
-}
-
-/**
- * Normalize a family name for duplicate detection.
- * Rule: trim, lowercase, collapse internal whitespace — case-insensitive match.
- */
-export function normalizeFamilyName(name: string): string {
-  return name.trim().toLowerCase().replace(/\s+/g, " ")
 }
 
 /** Expand stored style ids to prompt-facing labels. */

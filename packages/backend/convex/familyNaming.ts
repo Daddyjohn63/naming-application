@@ -6,11 +6,13 @@ import { ConvexError, v } from "convex/values"
 
 import {
   CUSTOM_FAMILY_NAME_RATIONALE,
+  EXISTING_FAMILY_NAME_RATIONALE,
   FAMILY_NAME_STYLE_IDS,
   MAX_CUSTOM_FAMILY_NAMES,
   MAX_FAMILY_NAME_REGENERATIONS,
   MAX_FAMILY_SHORTLIST_TOTAL,
   normalizeFamilyName,
+  withExistingFamilyNamePinned,
   type FamilyNameStyleId,
   type FamilyShortlistSource,
 } from "@workspace/shared/constants/family-naming"
@@ -105,6 +107,11 @@ async function excludedNamesForGeneration(
   cat: Doc<"cats">,
 ): Promise<string[]> {
   const excluded = new Set<string>()
+  const existingName = cat.existingName?.trim()
+  if (existingName !== undefined && existingName !== "") {
+    // Keep AI batches from re-suggesting the profile current name we pin at the top.
+    excluded.add(existingName)
+  }
   for (const entry of shortlistOf(cat)) {
     excluded.add(entry.name)
   }
@@ -124,6 +131,31 @@ async function excludedNamesForGeneration(
 
 function countCustomShortlistEntries(shortlist: ShortlistEntry[]): number {
   return shortlist.filter((entry) => entry.source === "custom").length
+}
+
+/** Ensure profile current name leads the first suggestion batch (display + persist). */
+function pinExistingNameOnFirstBatch(
+  batches: Array<{
+    generationIndex: number
+    names: Array<{ name: string; rationale: string }>
+  }> | null,
+  existingName: string | undefined,
+): Array<{
+  generationIndex: number
+  names: Array<{ name: string; rationale: string }>
+}> | null {
+  if (batches === null || batches.length === 0) {
+    return batches
+  }
+
+  return batches.map((batch) =>
+    batch.generationIndex === 0
+      ? {
+          ...batch,
+          names: withExistingFamilyNamePinned(batch.names, existingName),
+        }
+      : batch,
+  )
 }
 
 async function isNameInFamilyGenerations(
@@ -232,6 +264,16 @@ export const getFamilyNamingStateForOwner = query({
     const generations = await allGenerationsForCat(ctx, id, "family")
     const shortlist = shortlistOf(cat)
     const latestBatch = generations.at(-1) ?? null
+    const generatedBatches = pinExistingNameOnFirstBatch(
+      generatedBatchesFromGenerations(generations),
+      cat.existingName,
+    )
+    const currentBatchNames =
+      generatedBatches === null
+        ? null
+        : (generatedBatches.find(
+            (batch) => batch.generationIndex === latestBatch?.generationIndex,
+          )?.names ?? latestBatch?.names ?? null)
 
     return {
       catId: id,
@@ -242,13 +284,13 @@ export const getFamilyNamingStateForOwner = query({
       selectedFamilyRationale: cat.selectedFamilyRationale,
       familyNameRegenerationsUsed: regenUsed(cat),
       familyNameGenerationError: cat.familyNameGenerationError,
-      generatedBatches: generatedBatchesFromGenerations(generations),
+      generatedBatches,
       currentBatch:
-        latestBatch === null
+        latestBatch === null || currentBatchNames === null
           ? null
           : {
               generationIndex: latestBatch.generationIndex,
-              names: latestBatch.names,
+              names: currentBatchNames,
             },
       customShortlistCount: countCustomShortlistEntries(shortlist),
     }
@@ -354,11 +396,28 @@ export const addToFamilyShortlist = mutation({
       parsed.data.name,
       normalizeFamilyName,
     )
-    if (match === null) {
+
+    const existingTrimmed = cat.existingName?.trim()
+    const matchesExistingName =
+      existingTrimmed !== undefined &&
+      existingTrimmed !== "" &&
+      normalizeFamilyName(existingTrimmed) ===
+        normalizeFamilyName(parsed.data.name)
+
+    // Profile current name may be pinned in the UI before it was stored in a
+    // generation row (e.g. ceremonies created before this feature).
+    const batchEntry =
+      match?.entry ??
+      (matchesExistingName
+        ? {
+            name: existingTrimmed,
+            rationale: EXISTING_FAMILY_NAME_RATIONALE,
+          }
+        : null)
+
+    if (batchEntry === null) {
       throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.NAME_NOT_IN_BATCH })
     }
-
-    const { entry: batchEntry } = match
 
     const shortlist = shortlistOf(cat)
     if (shortlist.length >= MAX_FAMILY_SHORTLIST_TOTAL) {
@@ -421,7 +480,16 @@ export const addCustomFamilyNameToShortlist = mutation({
       throw new ConvexError({ code: FAMILY_NAMING_ERROR_CODE.DUPLICATE_NAME })
     }
 
-    if (await isNameInFamilyGenerations(ctx, id, normalized)) {
+    const existingTrimmed = cat.existingName?.trim()
+    const matchesExistingName =
+      existingTrimmed !== undefined &&
+      existingTrimmed !== "" &&
+      normalizeFamilyName(existingTrimmed) === normalized
+
+    if (
+      matchesExistingName ||
+      (await isNameInFamilyGenerations(ctx, id, normalized))
+    ) {
       throw new ConvexError({
         code: FAMILY_NAMING_ERROR_CODE.NAME_ALREADY_SUGGESTED,
       })
@@ -690,12 +758,17 @@ export const applyFamilyNameGenerationSuccess = internalMutation({
     }
 
     const now = Date.now()
+    const names =
+      args.generationIndex === 0
+        ? withExistingFamilyNamePinned(args.names, cat.existingName)
+        : args.names
+
     await ctx.db.insert("cat_name_generations", {
       catId: args.catId,
       stage: "family",
       generationIndex: args.generationIndex,
       styleHints: args.styleHints,
-      names: args.names,
+      names,
       createdAt: now,
     })
 
