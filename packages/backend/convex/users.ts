@@ -1,6 +1,14 @@
-import { internalMutation, query, QueryCtx } from "./_generated/server"
-import { v, Validator } from "convex/values"
 import { UserJSON } from "@clerk/backend"
+import { v, Validator } from "convex/values"
+
+import { internal } from "./_generated/api"
+import { internalMutation, query, QueryCtx } from "./_generated/server"
+import { deleteCeremonyData } from "./lib/deleteCeremony"
+
+/** Cats purged per batch — each ceremony deletes many related rows + blobs. */
+const CATS_PER_PURGE_BATCH = 3
+/** Funnel events purged per batch after ceremonies are gone. */
+const FUNNEL_EVENTS_PER_PURGE_BATCH = 100
 
 //get all users
 // export const getUsers = query({
@@ -62,19 +70,85 @@ export const upsertFromClerk = internalMutation({
   },
 })
 
-//delete user from Clerk
+/**
+ * Clerk `user.deleted` entry point (SECURITY.md M2).
+ * Schedules batched cascade so the webhook stays within mutation limits.
+ */
 export const deleteFromClerk = internalMutation({
   args: { clerkUserId: v.string() },
+  returns: v.null(),
   async handler(ctx, { clerkUserId }) {
     const user = await userByClerkUserId(ctx, clerkUserId)
 
-    if (user !== null) {
-      await ctx.db.delete(user._id)
-    } else {
+    if (user === null) {
       console.warn(
-        `Can't delete user, there is none for Clerk user ID: ${clerkUserId}`
+        `Can't delete user, there is none for Clerk user ID: ${clerkUserId}`,
       )
+      return null
     }
+
+    await ctx.scheduler.runAfter(0, internal.users.purgeUserDataBatch, {
+      userId: user._id,
+    })
+    return null
+  },
+})
+
+/**
+ * Deletes the user's ceremonies (related tables + storage), leftover user-scoped
+ * rows, then the `users` document. Re-schedules itself until finished.
+ */
+export const purgeUserDataBatch = internalMutation({
+  args: { userId: v.id("users") },
+  returns: v.null(),
+  async handler(ctx, { userId }) {
+    const user = await ctx.db.get(userId)
+    if (user === null) {
+      return null
+    }
+
+    const cats = await ctx.db
+      .query("cats")
+      .withIndex("by_userId_createdAt", (q) => q.eq("userId", userId))
+      .take(CATS_PER_PURGE_BATCH)
+
+    for (const cat of cats) {
+      await deleteCeremonyData(ctx, cat)
+    }
+
+    if (cats.length === CATS_PER_PURGE_BATCH) {
+      await ctx.scheduler.runAfter(0, internal.users.purgeUserDataBatch, {
+        userId,
+      })
+      return null
+    }
+
+    // Orphan payments not tied to a remaining cat (should be rare after cat purge).
+    const payments = await ctx.db
+      .query("cat_payments")
+      .withIndex("by_userId_createdAt", (q) => q.eq("userId", userId))
+      .collect()
+    for (const payment of payments) {
+      await ctx.db.delete(payment._id)
+    }
+
+    const funnelEvents = await ctx.db
+      .query("funnel_events")
+      .withIndex("by_userId_occurredAt", (q) => q.eq("userId", userId))
+      .take(FUNNEL_EVENTS_PER_PURGE_BATCH)
+    for (const event of funnelEvents) {
+      await ctx.db.delete(event._id)
+    }
+
+    if (funnelEvents.length === FUNNEL_EVENTS_PER_PURGE_BATCH) {
+      await ctx.scheduler.runAfter(0, internal.users.purgeUserDataBatch, {
+        userId,
+      })
+      return null
+    }
+
+    await ctx.db.delete(userId)
+    return null
   },
 })
 

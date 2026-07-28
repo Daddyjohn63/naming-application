@@ -24,6 +24,7 @@ import type * as http from "../http.js";
 import type * as ineffableNaming from "../ineffableNaming.js";
 import type * as ineffableNamingActions from "../ineffableNamingActions.js";
 import type * as lib_beginCatWorldGeneration from "../lib/beginCatWorldGeneration.js";
+import type * as lib_deleteCeremony from "../lib/deleteCeremony.js";
 import type * as lib_namingStage from "../lib/namingStage.js";
 import type * as lib_rateLimiter from "../lib/rateLimiter.js";
 import type * as lib_stubUnlock from "../lib/stubUnlock.js";
@@ -52,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   ineffableNaming: typeof ineffableNaming;
   ineffableNamingActions: typeof ineffableNamingActions;
   "lib/beginCatWorldGeneration": typeof lib_beginCatWorldGeneration;
+  "lib/deleteCeremony": typeof lib_deleteCeremony;
   "lib/namingStage": typeof lib_namingStage;
   "lib/rateLimiter": typeof lib_rateLimiter;
   "lib/stubUnlock": typeof lib_stubUnlock;
