@@ -17,6 +17,7 @@ import {
 } from "@workspace/ui/components/card"
 
 import { dataComponent } from "@/lib/data-component"
+import { CAT_WORLD_NAMES_SIDEBAR } from "@/modules/cats/lib/pipeline-status-copy"
 
 type CeremonyUnlockSidebarProps = {
   cat: Doc<"cats">
@@ -62,11 +63,7 @@ function unlockSidebarCopy({
     }
   }
   if (step === "awaiting_cat_world_names") {
-    return {
-      title: "Generating cat-world names",
-      description:
-        "We're crafting distinctive cat-world names — this usually takes a moment.",
-    }
+    return CAT_WORLD_NAMES_SIDEBAR
   }
   if (step === "naming_cat_world" && selectedCatWorldName === undefined) {
     return {
@@ -99,7 +96,7 @@ function unlockSidebarCopy({
   return {
     title: "What's next",
     description:
-      "Your family name is free. Unlock once per cat to reveal cat-world and ineffable names, then receive your certificate.",
+      "Your family name is free. As our app is currently in Beta phase you can unlock the cat-world and ineffable names for free, then receive your certificate for free.",
   }
 }
 

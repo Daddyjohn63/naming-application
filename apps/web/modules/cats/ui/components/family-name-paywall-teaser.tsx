@@ -36,8 +36,9 @@ export function FamilyNamePaywallTeaser({
           You can always change your favourite family name later if you want to.
         </CardTitle>
         <CardDescription>
-          Your family name is free. Unlock once per cat to reveal
-          cat-world and ineffable names, then receive your certificate.
+          Your family name is free. As our app is currently in Beta phase you
+          can unlock the cat-world and ineffable names for free,then receive
+          your certificate for free.
         </CardDescription>
       </CardHeader>
 

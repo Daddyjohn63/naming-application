@@ -13,6 +13,7 @@ import {
 import { Spinner } from "@workspace/ui/components/spinner"
 
 import { dataComponent } from "@/lib/data-component"
+import { SUMMARY_LOADING } from "@/modules/cats/lib/pipeline-status-copy"
 
 type CatProfileAwaitingSummaryProps = {
   cat: Doc<"cats"> & { photoUrl?: string }
@@ -39,11 +40,8 @@ export function CatProfileAwaitingSummary({
         <CardHeader className="flex flex-row items-center gap-3 border-0 pb-0">
           <Spinner className="text-primary size-5 shrink-0" />
           <div className="flex flex-col gap-1">
-            <CardTitle className="text-base">Generating your summary</CardTitle>
-            <CardDescription>
-              We&apos;re getting ready for the next step. You can leave and come
-              back — your profile is saved.
-            </CardDescription>
+            <CardTitle className="text-base">{SUMMARY_LOADING.title}</CardTitle>
+            <CardDescription>{SUMMARY_LOADING.description}</CardDescription>
           </div>
         </CardHeader>
       </Card>

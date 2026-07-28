@@ -16,6 +16,11 @@ import { Skeleton } from "@workspace/ui/components/skeleton"
 import { Spinner } from "@workspace/ui/components/spinner"
 
 import { dataComponent } from "@/lib/data-component"
+import {
+  CAT_WORLD_NAMES_LOADING,
+  INEFFABLE_NAMES_LOADING,
+  type PipelineStatusCopy,
+} from "@/modules/cats/lib/pipeline-status-copy"
 
 export type NamingStageKind = "cat_world" | "ineffable"
 
@@ -26,20 +31,9 @@ type StageNamePipelineStatusProps = {
   retrying: boolean
 }
 
-const STAGE_COPY: Record<
-  NamingStageKind,
-  { title: string; loading: string }
-> = {
-  cat_world: {
-    title: "Generating cat-world names…",
-    loading:
-      "We're crafting ten literary names for your cat's secret identity. You can leave and come back — your progress is saved.",
-  },
-  ineffable: {
-    title: "Generating ineffable near-names…",
-    loading:
-      "We're guessing at the unguessable — ten whimsical approximations of your cat's secret name.",
-  },
+const STAGE_COPY: Record<NamingStageKind, PipelineStatusCopy> = {
+  cat_world: CAT_WORLD_NAMES_LOADING,
+  ineffable: INEFFABLE_NAMES_LOADING,
 }
 
 export function StageNamePipelineStatus({
@@ -80,7 +74,7 @@ export function StageNamePipelineStatus({
         <Spinner className="size-5 shrink-0 text-primary" />
         <div className="flex flex-col gap-1">
           <CardTitle className="text-base">{copy.title}</CardTitle>
-          <CardDescription>{copy.loading}</CardDescription>
+          <CardDescription>{copy.description}</CardDescription>
         </div>
       </CardHeader>
       <div className="flex flex-col gap-3 px-4 pt-4 pb-6">

@@ -33,6 +33,10 @@ import {
 import { Spinner } from "@workspace/ui/components/spinner"
 
 import { dataComponent } from "@/lib/data-component"
+import {
+  PHOTO_CHECK_LOADING,
+  SUMMARY_LOADING,
+} from "@/modules/cats/lib/pipeline-status-copy"
 
 type CatSummaryPipelineStatusProps = {
   cat: Doc<"cats">
@@ -44,20 +48,11 @@ type CatSummaryPipelineStatusProps = {
   returningToProfile: boolean
 }
 
-/** Headline copy differs for photo check vs summary generation. */
-function loadingTitle(step: Doc<"cats">["ceremonyStep"]): string {
+function loadingCopy(step: Doc<"cats">["ceremonyStep"]) {
   if (step === "awaiting_photo_validation") {
-    return "Checking your photo…"
+    return PHOTO_CHECK_LOADING
   }
-  return "Generating your summary"
-}
-
-/** Supporting text under the spinner for each loading substate. */
-function loadingDescription(step: Doc<"cats">["ceremonyStep"]): string {
-  if (step === "awaiting_photo_validation") {
-    return "We're making sure your photo shows your cat before we write the personality summary."
-  }
-  return "We're crafting a personality summary from your profile. You can leave and come back — your progress is saved."
+  return SUMMARY_LOADING
 }
 
 function resolvePhotoPipelineErrorDisplay(cat: Doc<"cats">): {
@@ -152,6 +147,8 @@ export function CatSummaryPipelineStatus({
     )
   }
 
+  const copy = loadingCopy(cat.ceremonyStep)
+
   return (
     <Card
       {...dataComponent("CatSummaryPipelineStatus")}
@@ -160,8 +157,8 @@ export function CatSummaryPipelineStatus({
       <CardHeader className="flex flex-row items-center gap-3 border-0 pb-0">
         <Spinner className="text-primary size-5 shrink-0" />
         <div className="flex flex-col gap-1">
-          <CardTitle className="text-base">{loadingTitle(cat.ceremonyStep)}</CardTitle>
-          <CardDescription>{loadingDescription(cat.ceremonyStep)}</CardDescription>
+          <CardTitle className="text-base">{copy.title}</CardTitle>
+          <CardDescription>{copy.description}</CardDescription>
         </div>
       </CardHeader>
     </Card>

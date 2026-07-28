@@ -14,7 +14,7 @@ export const PRICING_FAQ_ITEMS = [
   },
   {
     question: "Is there a subscription?",
-    answer: `No. ${APP_NAME} does not use monthly or annual plans. You unlock once per cat when you choose to finish that ceremony — free during beta.`,
+    answer: `No. ${APP_NAME} does not use monthly or annual plans. You unlock once per cat when you choose to finish that ceremony — free during beta. As our app is currently in Beta phase you can unlock the cat-world and ineffable names for free, then receive your certificate for free.`,
   },
   {
     question: "Can I try the product before unlocking?",

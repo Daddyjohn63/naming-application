@@ -16,6 +16,7 @@ import { Skeleton } from "@workspace/ui/components/skeleton"
 import { Spinner } from "@workspace/ui/components/spinner"
 
 import { dataComponent } from "@/lib/data-component"
+import { FAMILY_NAMES_LOADING } from "@/modules/cats/lib/pipeline-status-copy"
 
 type FamilyNamePipelineStatusProps = {
   cat: Doc<"cats">
@@ -52,11 +53,8 @@ export function FamilyNamePipelineStatus({
       <CardHeader className="flex flex-row items-center gap-3 border-0 pb-0">
         <Spinner className="size-5 shrink-0 text-primary" />
         <div className="flex flex-col gap-1">
-          <CardTitle className="text-base">Generating family names…</CardTitle>
-          <CardDescription>
-            We&apos;re crafting ten family names from your summary and style.
-            You can leave and come back — your progress is saved.
-          </CardDescription>
+          <CardTitle className="text-base">{FAMILY_NAMES_LOADING.title}</CardTitle>
+          <CardDescription>{FAMILY_NAMES_LOADING.description}</CardDescription>
         </div>
       </CardHeader>
       <div className="flex flex-col gap-3 px-4 pt-4 pb-6">
