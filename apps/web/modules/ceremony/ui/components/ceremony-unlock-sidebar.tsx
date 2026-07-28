@@ -198,9 +198,9 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
 
         {showAwaitingPaymentPlaceholder ? (
           <p className="text-sm text-muted-foreground">
-            Checkout is disabled in this environment (
+            Checkout is disabled in this environment (stub unlock requires{" "}
             <code className="text-foreground">
-              NEXT_PUBLIC_ENABLE_STUB_UNLOCK=false
+              NEXT_PUBLIC_ENABLE_STUB_UNLOCK=true
             </code>
             ). Your family name and shortlist are saved — return when payment is
             available.
