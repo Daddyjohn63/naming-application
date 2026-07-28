@@ -132,14 +132,6 @@ export const purgeUserDataBatch = internalMutation({
       await ctx.db.delete(payment._id)
     }
 
-    const uploads = await ctx.db
-      .query("user_uploads")
-      .withIndex("by_userId_createdAt", (q) => q.eq("userId", userId))
-      .collect()
-    for (const upload of uploads) {
-      await ctx.db.delete(upload._id)
-    }
-
     const funnelEvents = await ctx.db
       .query("funnel_events")
       .withIndex("by_userId_occurredAt", (q) => q.eq("userId", userId))

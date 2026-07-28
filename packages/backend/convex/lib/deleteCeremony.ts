@@ -75,14 +75,6 @@ export async function deleteCeremonyData(
     await ctx.db.delete(event._id)
   }
 
-  const uploads = await ctx.db
-    .query("user_uploads")
-    .withIndex("by_catId_purpose", (q) => q.eq("catId", catId))
-    .collect()
-  for (const upload of uploads) {
-    await ctx.db.delete(upload._id)
-  }
-
   if (cat.photoStorageId !== undefined) {
     await deleteStorageIfPresent(ctx, cat.photoStorageId)
   }

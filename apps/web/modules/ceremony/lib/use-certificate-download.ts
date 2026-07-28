@@ -4,14 +4,13 @@
  * KB-011 — client-side certificate PDF pipeline.
  *
  * Order matters (AC: `ceremony_complete` only after the PDF path succeeded):
- * capture HTML → build PDF → trigger local download → mint certificate upload URL →
- * upload blob → register on ledger (PDF validation) → `completeCeremony`.
- * Re-downloads on completed ceremonies skip the upload/mutation (the mutation is
- * idempotent anyway).
+ * capture HTML → build PDF → trigger local download → upload blob to Convex
+ * storage → `completeCeremony`. Re-downloads on completed ceremonies skip the
+ * upload/mutation (the mutation is idempotent anyway).
  */
 
 import * as React from "react"
-import { useAction, useMutation } from "convex/react"
+import { useMutation } from "convex/react"
 
 import { api } from "@workspace/backend/_generated/api"
 import type { Id } from "@workspace/backend/_generated/dataModel"
@@ -86,12 +85,7 @@ export function useCertificateDownload({
   alreadyComplete,
   captureRef,
 }: UseCertificateDownloadArgs) {
-  const generateCertificateUploadUrl = useMutation(
-    api.certificate.generateCertificateUploadUrl,
-  )
-  const registerCertificateUpload = useAction(
-    api.certificateActions.registerCertificateUpload,
-  )
+  const generateUploadUrl = useMutation(api.cats.generateUploadUrl)
   const completeCeremony = useMutation(api.certificate.completeCeremony)
   const [working, setWorking] = React.useState(false)
 
@@ -130,7 +124,7 @@ export function useCertificateDownload({
       }
 
       const pdfBlob = pdf.output("blob")
-      const uploadUrl = await generateCertificateUploadUrl({ catId })
+      const uploadUrl = await generateUploadUrl({})
       const uploadResponse = await fetch(uploadUrl, {
         method: "POST",
         headers: { "Content-Type": "application/pdf" },
@@ -143,7 +137,6 @@ export function useCertificateDownload({
         storageId: Id<"_storage">
       }
 
-      await registerCertificateUpload({ catId, storageId })
       await completeCeremony({ catId, certificateStorageId: storageId })
       toast.success("Ceremony complete — your certificate is ready!")
     } catch (error) {
@@ -158,8 +151,7 @@ export function useCertificateDownload({
     catId,
     completeCeremony,
     everydayName,
-    generateCertificateUploadUrl,
-    registerCertificateUpload,
+    generateUploadUrl,
     working,
   ])
 

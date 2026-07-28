@@ -2,8 +2,9 @@
  * KB-011 — certificate completion (pre-certificate everyday-name edit + ceremony_complete).
  *
  * The certificate itself is rendered client-side (HTML → PNG → PDF). The client
- * mints a purpose-bound upload URL, uploads the PDF, registers it on the upload
- * ledger (with PDF validation), then calls `completeCeremony`.
+ * uploads the final PDF to Convex storage, then calls `completeCeremony` with the
+ * storage id. Completion is final: name mutations across all stages already refuse
+ * `ceremony_complete`.
  */
 
 import { ConvexError, v } from "convex/values"
@@ -17,8 +18,7 @@ import { setFamilyFavouriteSchema } from "@workspace/shared/schemas/family-namin
 
 import type { Doc, Id } from "./_generated/dataModel"
 import type { MutationCtx } from "./_generated/server"
-import { internalMutation, mutation } from "./_generated/server"
-import { enforceRateLimit } from "./lib/rateLimiter"
+import { mutation } from "./_generated/server"
 import { allThreeNamesChosen } from "./lib/namingStage"
 import { getCurrentUser } from "./users"
 
@@ -41,26 +41,6 @@ function assertUnlocked(cat: Doc<"cats">): void {
   if (cat.ceremonyPaymentId === undefined) {
     throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NOT_UNLOCKED })
   }
-}
-
-async function assertReadyForCertificate(
-  ctx: MutationCtx,
-  catIdArg: string,
-  userId: Id<"users">,
-): Promise<{ cat: Doc<"cats">; catId: Id<"cats"> }> {
-  const catId = ctx.db.normalizeId("cats", catIdArg)
-  if (catId === null) {
-    throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NOT_FOUND })
-  }
-  const cat = await getOwnedCatOrThrow(ctx, catId, userId)
-  assertUnlocked(cat)
-  if (cat.ceremonyStep === "ceremony_complete") {
-    throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.STEP_LOCKED })
-  }
-  if (!allThreeNamesChosen(cat)) {
-    throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NO_FAVOURITE })
-  }
-  return { cat, catId }
 }
 
 /**
@@ -110,86 +90,8 @@ export const updateEverydayName = mutation({
 })
 
 /**
- * Mint a storage upload URL for this ceremony's certificate PDF (SECURITY.md M3).
- * Prefer this over the generic `cats.generateUploadUrl` for certificate uploads.
- */
-export const generateCertificateUploadUrl = mutation({
-  args: { catId: v.string() },
-  returns: v.string(),
-  handler: async (ctx, args) => {
-    const currentUser = await getCurrentUser(ctx)
-    if (currentUser === null) {
-      throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NOT_AUTHENTICATED })
-    }
-    await assertReadyForCertificate(ctx, args.catId, currentUser._id)
-    await enforceRateLimit(ctx, "generateUploadUrl", currentUser._id)
-    return await ctx.storage.generateUploadUrl()
-  },
-})
-
-/**
- * Records a validated certificate PDF on the upload ledger (called from the
- * register action after magic-byte / size checks).
- */
-export const recordCertificateUpload = internalMutation({
-  args: {
-    userId: v.id("users"),
-    catId: v.id("cats"),
-    storageId: v.id("_storage"),
-  },
-  returns: v.null(),
-  handler: async (ctx, args) => {
-    const cat = await getOwnedCatOrThrow(ctx, args.catId, args.userId)
-    assertUnlocked(cat)
-    if (cat.ceremonyStep === "ceremony_complete") {
-      throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.STEP_LOCKED })
-    }
-    if (!allThreeNamesChosen(cat)) {
-      throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NO_FAVOURITE })
-    }
-
-    const existingForStorage = await ctx.db
-      .query("user_uploads")
-      .withIndex("by_storageId", (q) => q.eq("storageId", args.storageId))
-      .unique()
-
-    if (existingForStorage !== null) {
-      if (
-        existingForStorage.userId !== args.userId ||
-        existingForStorage.catId !== args.catId ||
-        existingForStorage.purpose !== "certificate"
-      ) {
-        throw new ConvexError({
-          code: STAGED_NAMING_ERROR_CODE.CERTIFICATE_STORAGE_IN_USE,
-        })
-      }
-      return null
-    }
-
-    const previousForCat = await ctx.db
-      .query("user_uploads")
-      .withIndex("by_catId_purpose", (q) =>
-        q.eq("catId", args.catId).eq("purpose", "certificate"),
-      )
-      .collect()
-    for (const previous of previousForCat) {
-      await ctx.db.delete(previous._id)
-    }
-
-    await ctx.db.insert("user_uploads", {
-      userId: args.userId,
-      storageId: args.storageId,
-      purpose: "certificate",
-      catId: args.catId,
-      createdAt: Date.now(),
-    })
-    return null
-  },
-})
-
-/**
  * Marks the ceremony complete after the client generated + downloaded the PDF
- * and registered the upload. Idempotent: a repeat call on a completed ceremony
+ * and uploaded it to storage. Idempotent: a repeat call on a completed ceremony
  * is a no-op so retries never create duplicate snapshots.
  */
 export const completeCeremony = mutation({
@@ -215,24 +117,6 @@ export const completeCeremony = mutation({
     }
     if (!allThreeNamesChosen(cat)) {
       throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NO_FAVOURITE })
-    }
-
-    const ledger = await ctx.db
-      .query("user_uploads")
-      .withIndex("by_storageId", (q) =>
-        q.eq("storageId", args.certificateStorageId),
-      )
-      .unique()
-
-    if (
-      ledger === null ||
-      ledger.userId !== currentUser._id ||
-      ledger.catId !== id ||
-      ledger.purpose !== "certificate"
-    ) {
-      throw new ConvexError({
-        code: STAGED_NAMING_ERROR_CODE.CERTIFICATE_STORAGE_UNBOUND,
-      })
     }
 
     const now = Date.now()

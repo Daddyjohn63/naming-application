@@ -301,20 +301,4 @@ export default defineSchema({
   })
     .index("by_catId_occurredAt", ["catId", "occurredAt"])
     .index("by_userId_occurredAt", ["userId", "occurredAt"]),
-
-  /**
-   * Upload ledger (SECURITY.md M3 / F1) — binds a storage blob to the uploader
-   * before attach/complete. Certificate path registers after PDF validation;
-   * photo purpose reserved for F1.
-   */
-  user_uploads: defineTable({
-    userId: v.id("users"),
-    storageId: v.id("_storage"),
-    purpose: v.union(v.literal("certificate"), v.literal("cat_photo")),
-    catId: v.id("cats"),
-    createdAt: v.number(),
-  })
-    .index("by_storageId", ["storageId"])
-    .index("by_catId_purpose", ["catId", "purpose"])
-    .index("by_userId_createdAt", ["userId", "createdAt"]),
 })
