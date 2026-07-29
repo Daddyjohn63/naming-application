@@ -77,6 +77,8 @@ type UseCertificateDownloadArgs = {
   /** Already `ceremony_complete` — re-download only, no upload/mutation. */
   alreadyComplete: boolean
   captureRef: React.RefObject<HTMLDivElement | null>
+  /** Fired after `completeCeremony` succeeds (first generate only). */
+  onCeremonyComplete?: () => void
 }
 
 export function useCertificateDownload({
@@ -84,6 +86,7 @@ export function useCertificateDownload({
   everydayName,
   alreadyComplete,
   captureRef,
+  onCeremonyComplete,
 }: UseCertificateDownloadArgs) {
   const generateUploadUrl = useMutation(api.cats.generateUploadUrl)
   const completeCeremony = useMutation(api.certificate.completeCeremony)
@@ -139,6 +142,7 @@ export function useCertificateDownload({
 
       await completeCeremony({ catId, certificateStorageId: storageId })
       toast.success("Ceremony complete — your certificate is ready!")
+      onCeremonyComplete?.()
     } catch (error) {
       console.error("Certificate generation failed", error)
       toast.error(getConvexErrorMessage(error))
@@ -152,6 +156,7 @@ export function useCertificateDownload({
     completeCeremony,
     everydayName,
     generateUploadUrl,
+    onCeremonyComplete,
     working,
   ])
 

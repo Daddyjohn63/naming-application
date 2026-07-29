@@ -45,12 +45,21 @@ export const upsertFromClerk = internalMutation({
       data.email_addresses?.[0]?.email_address ??
       ""
 
+    const publicMetadata = data.public_metadata as
+      | { role?: unknown }
+      | null
+      | undefined
+    const role =
+      publicMetadata?.role === "admin" ? ("admin" as const) : ("user" as const)
+
     const userAttributes = {
       email: primaryEmail,
       clerkUserId: data.id,
       firstName: data.first_name ?? undefined,
       lastName: data.last_name ?? undefined,
       imageUrl: data.image_url ?? undefined,
+      /** Mirrored from Clerk public metadata; source of truth for Convex admin checks. */
+      role,
     }
 
     const user = await userByClerkUserId(ctx, data.id)
@@ -145,6 +154,22 @@ export const purgeUserDataBatch = internalMutation({
         userId,
       })
       return null
+    }
+
+    // Beta reviews: anonymize (keep rating/body) — strip userId/catId before user delete.
+    const reviews = await ctx.db
+      .query("beta_reviews")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .collect()
+    const anonymizedAt = Date.now()
+    for (const review of reviews) {
+      await ctx.db.replace(review._id, {
+        rating: review.rating,
+        body: review.body,
+        source: review.source,
+        createdAt: review.createdAt,
+        anonymizedAt,
+      })
     }
 
     await ctx.db.delete(userId)

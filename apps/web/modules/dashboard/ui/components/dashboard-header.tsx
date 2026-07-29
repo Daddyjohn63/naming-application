@@ -25,6 +25,9 @@ const SEGMENT_LABELS: Record<string, string> = {
   cats: "Cats",
   "new-cat": "New cat",
   "user-support": "User support",
+  feedback: "Leave feedback",
+  admin: "Admin",
+  reviews: "Beta reviews",
   settings: "Settings",
 }
 

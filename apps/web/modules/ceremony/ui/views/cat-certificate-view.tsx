@@ -42,6 +42,7 @@ import {
 } from "@/modules/ceremony/lib/use-certificate-download"
 import type { CeremonyCertificateData } from "@/modules/ceremony/ui/components/ceremony-certificate-document"
 import { CeremonyCertificateDocument } from "@/modules/ceremony/ui/components/ceremony-certificate-document"
+import { CertificateFeedbackBanner, CertificateFeedbackDialog, useCertificateFeedbackState } from "@/modules/feedback/ui/components/certificate-feedback-prompt"
 
 export function CatCertificateView() {
   const params = useParams()
@@ -67,6 +68,7 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
   const router = useRouter()
   const eligible = allThreeCeremonyNamesChosen(cat)
   const complete = cat.ceremonyStep === "ceremony_complete"
+  const [feedbackOpenSignal, setFeedbackOpenSignal] = React.useState(0)
 
   React.useEffect(() => {
     if (!eligible) {
@@ -86,6 +88,14 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
     everydayName,
     alreadyComplete: complete,
     captureRef,
+    onCeremonyComplete: () => {
+      setFeedbackOpenSignal((n) => n + 1)
+    },
+  })
+
+  const feedback = useCertificateFeedbackState({
+    ceremonyComplete: complete,
+    openSignal: feedbackOpenSignal,
   })
 
   if (!eligible) {
@@ -139,6 +149,13 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
         </p>
       </div>
 
+      <CertificateFeedbackBanner
+        loading={feedback.loading}
+        alreadyReviewed={feedback.alreadyReviewed}
+        canLeaveFeedback={feedback.canLeaveFeedback}
+        onLeaveFeedback={feedback.openPrompt}
+      />
+
       {!complete ? <EverydayNameEditCard cat={cat} disabled={working} /> : null}
 
       <CeremonyCertificateDocument data={certificateData} />
@@ -151,20 +168,39 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
               names become final and can no longer be changed.
             </p>
           ) : null}
-          <Button
-            type="button"
-            disabled={working || (latestSummary === undefined && !complete)}
-            onClick={() => void download()}
-          >
-            <Download className="size-4" aria-hidden />
-            {working
-              ? "Preparing your PDF…"
-              : complete
-                ? "Download PDF"
-                : "Generate certificate & download PDF"}
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <Button
+              type="button"
+              disabled={working || (latestSummary === undefined && !complete)}
+              onClick={() => void download()}
+            >
+              <Download className="size-4" aria-hidden />
+              {working
+                ? "Preparing your PDF…"
+                : complete
+                  ? "Download PDF"
+                  : "Generate certificate & download PDF"}
+            </Button>
+            {feedback.canLeaveFeedback ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="border-primary/30"
+                onClick={feedback.openPrompt}
+              >
+                Leave feedback
+              </Button>
+            ) : null}
+          </div>
         </div>
       </Card>
+
+      <CertificateFeedbackDialog
+        catId={cat._id}
+        open={feedback.open}
+        onOpenChange={feedback.handleOpenChange}
+        onSubmitSuccess={feedback.onSubmitSuccess}
+      />
 
       {/* Off-screen fixed-width instance captured for the PDF (consistent on all viewports). */}
       <div

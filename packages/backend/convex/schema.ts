@@ -80,6 +80,11 @@ export default defineSchema({
     lastName: v.optional(v.string()),
     email: v.string(),
     imageUrl: v.optional(v.string()),
+    /**
+     * Mirrored from Clerk public metadata (`role: "admin"`).
+     * Optional so existing rows stay valid until webhook re-sync.
+     */
+    role: v.optional(v.union(v.literal("admin"), v.literal("user"))),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_clerkUserId", ["clerkUserId"]),
@@ -301,4 +306,26 @@ export default defineSchema({
   })
     .index("by_catId_occurredAt", ["catId", "occurredAt"])
     .index("by_userId_occurredAt", ["userId", "occurredAt"]),
+
+  /**
+   * In-app beta feedback: 1–5 star rating + free-text body.
+   * One active review per user (enforced in submit mutation).
+   * On account delete, reviews are anonymized (userId/catId cleared) not removed.
+   */
+  beta_reviews: defineTable({
+    /** Omitted after account delete anonymization. */
+    userId: v.optional(v.id("users")),
+    /** Integer 1–5; validated in the submit mutation. */
+    rating: v.number(),
+    /** Trimmed free text; may be empty for stars-only. */
+    body: v.string(),
+    /** Optional ceremony context when submitted from certificate flow. */
+    catId: v.optional(v.id("cats")),
+    source: v.union(v.literal("certificate"), v.literal("dashboard")),
+    createdAt: v.number(),
+    /** Set when the owning account was deleted; identity fields stripped. */
+    anonymizedAt: v.optional(v.number()),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_createdAt", ["createdAt"]),
 })
