@@ -184,12 +184,12 @@ export const DashboardSidebar = () => {
                     asChild
                     isActive={isNavItemActive(
                       pathname,
-                      "/dashboard/admin/reviews",
+                      "/dashboard/admin/beta-reviews",
                     )}
                     tooltip="Beta reviews"
                   >
                     <Link
-                      href="/dashboard/admin/reviews"
+                      href="/dashboard/admin/beta-reviews"
                       onClick={closeMobileSidebar}
                     >
                       <Shield />
