@@ -55,8 +55,11 @@ export function useCertificateFeedbackState({
     if (isDismissed()) {
       return
     }
-    setOpen(true)
     setAutoOpened(true)
+    const timer = window.setTimeout(() => {
+      setOpen(true)
+    }, OPEN_AFTER_COMPLETE_MS)
+    return () => window.clearTimeout(timer)
   }, [alreadyReviewed, autoOpened, ceremonyComplete, loading])
 
   useEffect(() => {

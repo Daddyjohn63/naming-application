@@ -310,7 +310,7 @@ export default defineSchema({
   /**
    * In-app beta feedback: 1–5 star rating + free-text body.
    * One active review per user (enforced in submit mutation).
-   * On account delete, reviews are anonymized (userId/catId cleared) not removed.
+   * On account delete, reviews are anonymized (identity + free text cleared; rating kept).
    */
   beta_reviews: defineTable({
     /** Omitted after account delete anonymization. */

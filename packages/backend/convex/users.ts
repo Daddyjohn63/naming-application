@@ -156,7 +156,7 @@ export const purgeUserDataBatch = internalMutation({
       return null
     }
 
-    // Beta reviews: anonymize (keep rating/body) — strip userId/catId before user delete.
+    // Beta reviews: anonymize — keep rating/source/createdAt; strip identity + free text.
     const reviews = await ctx.db
       .query("beta_reviews")
       .withIndex("by_userId", (q) => q.eq("userId", userId))
@@ -165,7 +165,7 @@ export const purgeUserDataBatch = internalMutation({
     for (const review of reviews) {
       await ctx.db.replace(review._id, {
         rating: review.rating,
-        body: review.body,
+        body: "",
         source: review.source,
         createdAt: review.createdAt,
         anonymizedAt,
