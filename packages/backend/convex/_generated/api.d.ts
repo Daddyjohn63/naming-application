@@ -31,6 +31,7 @@ import type * as lib_namingStage from "../lib/namingStage.js";
 import type * as lib_rateLimiter from "../lib/rateLimiter.js";
 import type * as lib_stubUnlock from "../lib/stubUnlock.js";
 import type * as users from "../users.js";
+import type * as usersActions from "../usersActions.js";
 
 import type {
   ApiFromModules,
@@ -62,6 +63,7 @@ declare const fullApi: ApiFromModules<{
   "lib/rateLimiter": typeof lib_rateLimiter;
   "lib/stubUnlock": typeof lib_stubUnlock;
   users: typeof users;
+  usersActions: typeof usersActions;
 }>;
 
 /**
