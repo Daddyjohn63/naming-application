@@ -27,6 +27,17 @@ export function PublicFooter() {
           <p className="text-muted-foreground text-sm">
             © {year} {APP_NAME}. All rights reserved.
           </p>
+          <p className="text-muted-foreground text-sm">
+            Built by{" "}
+            <a
+              href="https://johnpaulweb.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground underline-offset-4 transition-colors hover:underline"
+            >
+              johnpaulweb.dev
+            </a>
+          </p>
         </div>
 
         <nav
