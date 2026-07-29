@@ -2,7 +2,8 @@
 
 import { format } from "date-fns"
 import { Star } from "lucide-react"
-import { usePaginatedQuery, useQuery } from "convex/react"
+import { useEffect } from "react"
+import { useAction, usePaginatedQuery, useQuery } from "convex/react"
 
 import { dataComponent } from "@/lib/data-component"
 import { api } from "@workspace/backend/_generated/api"
@@ -28,11 +29,31 @@ function formatReviewerName(user: {
 /** Admin-only paginated list of beta reviews. */
 export function AdminReviewsView() {
   const isAdmin = useQuery(api.betaReviews.isAdmin)
+  const syncMyRoleFromClerk = useAction(api.usersActions.syncMyRoleFromClerk)
   const { results, status, loadMore } = usePaginatedQuery(
     api.betaReviews.listBetaReviewsForAdmin,
     isAdmin === true ? {} : "skip",
     { initialNumItems: PAGE_SIZE },
   )
+
+  useEffect(() => {
+    if (isAdmin !== false) {
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      try {
+        await syncMyRoleFromClerk({})
+      } catch (error) {
+        if (!cancelled) {
+          console.warn("Failed to sync admin role from Clerk", error)
+        }
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [isAdmin, syncMyRoleFromClerk])
 
   if (isAdmin === undefined) {
     return (

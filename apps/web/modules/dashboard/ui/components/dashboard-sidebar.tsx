@@ -26,7 +26,7 @@ import {
 import { api } from "@workspace/backend/_generated/api"
 import { APP_NAME } from "@workspace/shared/constants/app"
 import { toast } from "@workspace/ui/components/sonner"
-import { useQuery } from "convex/react"
+import { useAction, useQuery } from "convex/react"
 
 import { dataComponent } from "@/lib/data-component"
 
@@ -93,7 +93,31 @@ export const DashboardSidebar = () => {
   const pathname = usePathname()
   const cats = useQuery(api.cats.getCatsForSidebar)
   const isAdmin = useQuery(api.betaReviews.isAdmin)
+  const syncMyRoleFromClerk = useAction(api.usersActions.syncMyRoleFromClerk)
   const { isMobile, setOpenMobile } = useSidebar()
+
+  // Self-heal on admin routes: Clerk may have role:admin while Convex users.role is stale.
+  useEffect(() => {
+    if (!pathname.startsWith("/dashboard/admin")) {
+      return
+    }
+    if (isAdmin !== false) {
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      try {
+        await syncMyRoleFromClerk({})
+      } catch (error) {
+        if (!cancelled) {
+          console.warn("Failed to sync admin role from Clerk", error)
+        }
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [isAdmin, pathname, syncMyRoleFromClerk])
 
   const closeMobileSidebar = () => {
     if (isMobile) {

@@ -49,8 +49,15 @@ export const upsertFromClerk = internalMutation({
       | { role?: unknown }
       | null
       | undefined
+    const privateMetadata = data.private_metadata as
+      | { role?: unknown }
+      | null
+      | undefined
+    // Prefer public (canonical for this feature); accept private if ops set it there by mistake.
     const role =
-      publicMetadata?.role === "admin" ? ("admin" as const) : ("user" as const)
+      publicMetadata?.role === "admin" || privateMetadata?.role === "admin"
+        ? ("admin" as const)
+        : ("user" as const)
 
     const userAttributes = {
       email: primaryEmail,
@@ -58,7 +65,7 @@ export const upsertFromClerk = internalMutation({
       firstName: data.first_name ?? undefined,
       lastName: data.last_name ?? undefined,
       imageUrl: data.image_url ?? undefined,
-      /** Mirrored from Clerk public metadata; source of truth for Convex admin checks. */
+      /** Mirrored from Clerk metadata; source of truth for Convex admin checks. */
       role,
     }
 
@@ -99,6 +106,28 @@ export const deleteFromClerk = internalMutation({
     await ctx.scheduler.runAfter(0, internal.users.purgeUserDataBatch, {
       userId: user._id,
     })
+    return null
+  },
+})
+
+/** Apply a role mirrored from Clerk (webhook or syncMyRoleFromClerk action). */
+export const patchMyRole = internalMutation({
+  args: {
+    clerkUserId: v.string(),
+    role: v.union(v.literal("admin"), v.literal("user")),
+  },
+  returns: v.null(),
+  async handler(ctx, { clerkUserId, role }) {
+    const user = await userByClerkUserId(ctx, clerkUserId)
+    if (user === null) {
+      throw new Error("User not found")
+    }
+    if (user.role !== role) {
+      await ctx.db.patch(user._id, {
+        role,
+        updatedAt: Date.now(),
+      })
+    }
     return null
   },
 })
