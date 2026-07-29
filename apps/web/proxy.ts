@@ -50,8 +50,19 @@ export default clerkMiddleware(
     // Merge Convex (realtime + storage) and blob/data for certificate capture.
     contentSecurityPolicy: {
       directives: {
-        "connect-src": convexHosts,
-        "img-src": [...convexHosts.filter((h) => h.startsWith("https://")), "blob:", "data:"],
+        "script-src": ["https://www.googletagmanager.com"],
+        "connect-src": [
+          ...convexHosts,
+          "https://www.google-analytics.com",
+          "https://region1.google-analytics.com",
+          "https://www.googletagmanager.com",
+        ],
+        "img-src": [
+          ...convexHosts.filter((h) => h.startsWith("https://")),
+          "blob:",
+          "data:",
+          "https://www.google-analytics.com",
+        ],
       },
     },
   },

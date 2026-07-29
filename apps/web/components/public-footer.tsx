@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { ConsentDialogLink } from "@c15t/nextjs/components/consent-dialog-link"
 
 import { LogoLink } from "@/components/logo"
 import { dataComponent } from "@/lib/data-component"
@@ -8,6 +9,9 @@ const FOOTER_LINKS = [
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms & Conditions" },
 ] as const
+
+const footerLinkClassName =
+  "text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
 
 export function PublicFooter() {
   const year = new Date().getFullYear()
@@ -23,6 +27,17 @@ export function PublicFooter() {
           <p className="text-muted-foreground text-sm">
             © {year} {APP_NAME}. All rights reserved.
           </p>
+          <p className="text-muted-foreground text-sm">
+            Built by{" "}
+            <a
+              href="https://johnpaulweb.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground underline-offset-4 transition-colors hover:underline"
+            >
+              johnpaulweb.dev
+            </a>
+          </p>
         </div>
 
         <nav
@@ -33,11 +48,14 @@ export function PublicFooter() {
             <Link
               key={item.href}
               href={item.href}
-              className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
+              className={footerLinkClassName}
             >
               {item.label}
             </Link>
           ))}
+          <ConsentDialogLink className={footerLinkClassName}>
+            Cookie settings
+          </ConsentDialogLink>
         </nav>
       </div>
     </footer>

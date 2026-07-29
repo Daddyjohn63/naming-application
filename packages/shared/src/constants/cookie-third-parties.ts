@@ -9,6 +9,9 @@ export type CookieThirdParty = {
   privacyPolicyUrl: string
 }
 
+/** GA4 measurement ID — load only via consent-gated gtag (c15t). */
+export const GOOGLE_ANALYTICS_MEASUREMENT_ID = "G-MRXW1BT29T"
+
 export const COOKIE_THIRD_PARTIES = [
   {
     id: "google-analytics",
