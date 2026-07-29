@@ -1,7 +1,7 @@
 "use client"
 
 import { UserButton } from "@clerk/nextjs"
-import { Cat, PlusCircle, SettingsIcon, UsersIcon } from "lucide-react"
+import { Cat, MessageSquareText, PlusCircle, Shield, UsersIcon } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect } from "react"
@@ -34,8 +34,12 @@ const userSupportItems = [
   {
     title: "User Support",
     icon: UsersIcon,
-
     url: "/dashboard/user-support",
+  },
+  {
+    title: "Leave feedback",
+    icon: MessageSquareText,
+    url: "/dashboard/feedback",
   },
 ]
 
@@ -88,6 +92,7 @@ function isNavItemActive(pathname: string, url: string) {
 export const DashboardSidebar = () => {
   const pathname = usePathname()
   const cats = useQuery(api.cats.getCatsForSidebar)
+  const isAdmin = useQuery(api.betaReviews.isAdmin)
   const { isMobile, setOpenMobile } = useSidebar()
 
   const closeMobileSidebar = () => {
@@ -143,6 +148,35 @@ export const DashboardSidebar = () => {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        {isAdmin === true ? (
+          <SidebarGroup>
+            <SidebarGroupLabel className={dashboardSidebarGroupLabelClassName}>
+              Admin
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className={dashboardSidebarMenuClassName}>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isNavItemActive(
+                      pathname,
+                      "/dashboard/admin/reviews",
+                    )}
+                    tooltip="Beta reviews"
+                  >
+                    <Link
+                      href="/dashboard/admin/reviews"
+                      onClick={closeMobileSidebar}
+                    >
+                      <Shield />
+                      <span>Beta reviews</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ) : null}
         {/* Cats owned by user */}
         <SidebarGroup>
           <SidebarGroupLabel className={dashboardSidebarGroupLabelClassName}>

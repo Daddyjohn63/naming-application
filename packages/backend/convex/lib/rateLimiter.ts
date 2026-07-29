@@ -33,6 +33,8 @@ const rateLimits = {
   regenerateNames: { kind: "fixed window" as const, rate: 30, period: HOUR },
   /** Stub unlock while the payment bypass exists. */
   completeStubUnlock: { kind: "fixed window" as const, rate: 10, period: HOUR },
+  /** Beta review submit / upsert — keep spam low; one review per user anyway. */
+  submitBetaReview: { kind: "fixed window" as const, rate: 5, period: HOUR },
 }
 
 export const rateLimiter = new RateLimiter(components.rateLimiter, rateLimits)

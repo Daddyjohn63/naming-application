@@ -9,6 +9,7 @@
  */
 
 import type * as ai_naming from "../ai/naming.js";
+import type * as betaReviews from "../betaReviews.js";
 import type * as catProfile from "../catProfile.js";
 import type * as catProfileActions from "../catProfileActions.js";
 import type * as catSummary from "../catSummary.js";
@@ -23,6 +24,7 @@ import type * as familyNamingActions from "../familyNamingActions.js";
 import type * as http from "../http.js";
 import type * as ineffableNaming from "../ineffableNaming.js";
 import type * as ineffableNamingActions from "../ineffableNamingActions.js";
+import type * as lib_admin from "../lib/admin.js";
 import type * as lib_beginCatWorldGeneration from "../lib/beginCatWorldGeneration.js";
 import type * as lib_deleteCeremony from "../lib/deleteCeremony.js";
 import type * as lib_namingStage from "../lib/namingStage.js";
@@ -38,6 +40,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   "ai/naming": typeof ai_naming;
+  betaReviews: typeof betaReviews;
   catProfile: typeof catProfile;
   catProfileActions: typeof catProfileActions;
   catSummary: typeof catSummary;
@@ -52,6 +55,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   ineffableNaming: typeof ineffableNaming;
   ineffableNamingActions: typeof ineffableNamingActions;
+  "lib/admin": typeof lib_admin;
   "lib/beginCatWorldGeneration": typeof lib_beginCatWorldGeneration;
   "lib/deleteCeremony": typeof lib_deleteCeremony;
   "lib/namingStage": typeof lib_namingStage;
