@@ -2,7 +2,7 @@ import { LegalPageShell } from "@/modules/legal/ui/components/legal-page-shell"
 import { APP_NAME } from "@workspace/shared/constants/app"
 import { COOKIE_THIRD_PARTIES } from "@workspace/shared/constants/cookie-third-parties"
 
-const LAST_UPDATED = "19 July 2026"
+const LAST_UPDATED = "29 July 2026"
 
 export function PrivacyView() {
   const thirdPartyNames = COOKIE_THIRD_PARTIES.map((party) => party.name).join(
@@ -41,8 +41,8 @@ export function PrivacyView() {
         {
           title: "Cookies and similar technologies",
           paragraphs: [
-            `${APP_NAME} uses cookies and similar technologies for essential site functions (such as keeping you signed in) and, where enabled, analytics. The third-party services that may set or read cookies on our site are: ${thirdPartyNames}.`,
-            "You can control cookies through your browser settings. Blocking essential cookies may prevent sign-in or other core features from working.",
+            `${APP_NAME} uses cookies and similar technologies for essential site functions (such as keeping you signed in) and, where you consent, analytics. The third-party services that may set or read cookies on our site are: ${thirdPartyNames}.`,
+            "When you visit the site, we show a cookie banner so you can accept or refuse analytics cookies. You can change that choice later via Cookie settings in the site footer. You can also control cookies through your browser settings. Blocking essential cookies may prevent sign-in or other core features from working.",
           ],
           bullets: COOKIE_THIRD_PARTIES.map(
             (party) =>
@@ -65,6 +65,7 @@ export function PrivacyView() {
           title: "Your choices",
           paragraphs: [
             "Depending on where you live, you may have rights to access, correct, delete, or export your personal information, or to object to certain processing. Contact us if you would like to exercise those rights.",
+            "You can manage analytics cookie consent at any time using Cookie settings in the site footer.",
           ],
         },
         {

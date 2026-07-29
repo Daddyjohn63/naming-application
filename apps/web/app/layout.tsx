@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google"
 
 import "@workspace/ui/globals.css"
+import "@c15t/nextjs/styles.css"
 import { BackToTopButton } from "@/components/back-to-top-button"
 import { ConditionalRootFooter } from "@/components/conditional-root-footer"
 import { ConditionalRootHeader } from "@/components/conditional-root-header"
@@ -8,6 +9,7 @@ import { PublicRouteShell } from "@/components/public-route-shell"
 import { Providers } from "@/components/providers"
 import { dataComponent } from "@/lib/data-component"
 import { createRootMetadata } from "@/lib/seo/metadata"
+import { ConsentManager } from "@/modules/consent/ui/components/consent-manager"
 import { ClerkProvider } from "@clerk/nextjs"
 import { cn } from "@workspace/ui/lib/utils"
 
@@ -40,17 +42,19 @@ export default function RootLayout({
         {...dataComponent("RootLayout")}
         className="flex min-h-svh flex-col"
       >
-        <ClerkProvider>
-          <Providers>
-            <PublicRouteShell>
-              <ConditionalRootHeader />
+        <ConsentManager>
+          <ClerkProvider>
+            <Providers>
+              <PublicRouteShell>
+                <ConditionalRootHeader />
 
-              <div className="flex flex-1 flex-col">{children}</div>
-              <ConditionalRootFooter />
-              <BackToTopButton />
-            </PublicRouteShell>
-          </Providers>
-        </ClerkProvider>
+                <div className="flex flex-1 flex-col">{children}</div>
+                <ConditionalRootFooter />
+                <BackToTopButton />
+              </PublicRouteShell>
+            </Providers>
+          </ClerkProvider>
+        </ConsentManager>
       </body>
     </html>
   )
