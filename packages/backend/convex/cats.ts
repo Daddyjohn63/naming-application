@@ -98,6 +98,9 @@ export const listMyCatsForDashboard = query({
           ...(typeof photoRaw === "string" && photoRaw.trim().length > 0
             ? { photoUrl: photoRaw.trim() }
             : {}),
+          ...(cat.selectedFamilyName !== undefined
+            ? { selectedFamilyName: cat.selectedFamilyName }
+            : {}),
         }
       })
     )
@@ -143,9 +146,9 @@ export const getCatsForSidebar = query({
         const rawPhotoUrl =
           cat.photoStorageId !== undefined
             ? await ctx.storage.getUrl(cat.photoStorageId)
-            : undefined
+            : null
         const photoUrl =
-          rawPhotoUrl !== undefined && rawPhotoUrl !== ""
+          rawPhotoUrl !== null && rawPhotoUrl !== ""
             ? rawPhotoUrl
             : undefined
 
@@ -154,6 +157,9 @@ export const getCatsForSidebar = query({
           name: cat.title,
           slug: cat.slug,
           ...(photoUrl !== undefined ? { photoUrl } : {}),
+          ...(cat.selectedFamilyName !== undefined
+            ? { selectedFamilyName: cat.selectedFamilyName }
+            : {}),
         }
       })
     )

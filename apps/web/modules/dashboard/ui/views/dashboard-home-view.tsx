@@ -56,12 +56,12 @@ function DashboardCatsSkeletonGrid() {
   return (
     <ul
       {...dataComponent("DashboardCatsSkeletonGrid")}
-      className="mx-auto grid w-full max-w-6xl list-none grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+      className="ceremony-theme mx-auto grid w-full max-w-6xl list-none grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
       aria-hidden
     >
       {DASHBOARD_SKELETON_CARD_KEYS.map((k) => (
         <li key={k} className="min-w-0">
-          <div className="rounded-xl border border-border p-4">
+          <div className="ceremony-sidebar-panel border-primary/20 p-4">
             <Skeleton className="aspect-4/3 w-full rounded-lg" />
             <Skeleton className="mt-4 h-4 w-2/3" />
             <Skeleton className="mt-2 h-3 w-full" />
@@ -112,6 +112,11 @@ function CatCeremonyCard({ cat }: CatCeremonyCardProps) {
     `Delete "${cat.title}"?`,
     "This will permanently remove this naming ceremony and all its progress. This cannot be undone."
   )
+  const familyName =
+    typeof cat.selectedFamilyName === "string"
+      ? cat.selectedFamilyName.trim()
+      : ""
+  const showFamilyName = familyName !== ""
 
   async function handleDeleteClick(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault()
@@ -153,9 +158,9 @@ function CatCeremonyCard({ cat }: CatCeremonyCardProps) {
       <Link
         href={href}
         prefetch
-        className="group block h-full rounded-xl hover:border-primary/25 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        className="group block h-full rounded-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
       >
-        <Card className="h-full border-border/80 transition-[box-shadow,border-color] duration-150 group-hover:shadow-md hover:border-primary/40">
+        <Card className="ceremony-sidebar-panel h-full border-primary/20 ring-0 transition-[box-shadow,border-color] duration-150 group-hover:border-primary/40 group-hover:shadow-md">
           <CardHeader className="gap-0 pb-3">
             <div className="relative aspect-4/3 overflow-hidden rounded-lg bg-muted">
               {cat.photoUrl !== undefined ? (
@@ -175,6 +180,11 @@ function CatCeremonyCard({ cat }: CatCeremonyCardProps) {
             <CardTitle className="pt-3 font-sans text-base tracking-tight">
               {cat.title}
             </CardTitle>
+            {showFamilyName ? (
+              <p className="truncate pt-1 text-sm font-medium text-foreground/80">
+                {familyName}
+              </p>
+            ) : null}
             <CardDescription className="line-clamp-2 text-xs">
               Open to resume this ceremony where you left off.
             </CardDescription>
@@ -277,7 +287,7 @@ function DashboardCatsLoaded() {
       {hasCats ? (
         <>
           <DashboardAddCeremonyLead />
-          <section aria-labelledby="cat-grid-heading">
+          <section aria-labelledby="cat-grid-heading" className="ceremony-theme">
             <h2 id="cat-grid-heading" className="sr-only">
               Ceremony cards
             </h2>

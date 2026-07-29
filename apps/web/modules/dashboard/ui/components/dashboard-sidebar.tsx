@@ -1,7 +1,14 @@
 "use client"
 
 import { UserButton } from "@clerk/nextjs"
-import { Cat, MessageSquareText, PlusCircle, Shield, UsersIcon } from "lucide-react"
+import {
+  Cat,
+  MessageSquareText,
+  PlusCircle,
+  Shield,
+  UsersIcon,
+  type LucideIcon,
+} from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect } from "react"
@@ -25,12 +32,19 @@ import {
 } from "@workspace/ui/components/sidebar"
 import { api } from "@workspace/backend/_generated/api"
 import { APP_NAME } from "@workspace/shared/constants/app"
+import { Button } from "@workspace/ui/components/button"
 import { toast } from "@workspace/ui/components/sonner"
+import { cn } from "@workspace/ui/lib/utils"
 import { useAction, useQuery } from "convex/react"
+import type { FunctionReturnType } from "convex/server"
 
 import { dataComponent } from "@/lib/data-component"
 
-const userSupportItems = [
+const userSupportItems: Array<{
+  title: string
+  icon: LucideIcon
+  url: string
+}> = [
   {
     title: "User Support",
     icon: UsersIcon,
@@ -46,12 +60,10 @@ const userSupportItems = [
 const dashboardSidebarMenuClassName = "gap-1.5"
 const dashboardSidebarGroupLabelClassName =
   "text-sm font-semibold text-sidebar-foreground/80"
-const catSidebarPhotoClassName =
-  "size-8 shrink-0 rounded-full object-cover group-data-[collapsible=icon]:size-full"
-const catSidebarPhotoButtonClassName =
-  "group-data-[collapsible=icon]:rounded-full! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:overflow-hidden"
 
-function SidebarAddCatMenuItem() {
+type SidebarCat = FunctionReturnType<typeof api.cats.getCatsForSidebar>[number]
+
+function SidebarAddCatControl() {
   const { execute, pending, error, clearError } = useCreateDraftCeremony()
 
   useEffect(() => {
@@ -63,19 +75,180 @@ function SidebarAddCatMenuItem() {
   }, [error, clearError])
 
   return (
-    <SidebarMenuItem {...dataComponent("SidebarAddCatMenuItem")}>
-      <SidebarMenuButton
+    <div {...dataComponent("SidebarAddCatControl")} className="mt-1">
+      {/* Expanded: full-width outline control */}
+      <Button
+        type="button"
+        variant="outline"
         disabled={pending}
-        tooltip={pending === true ? undefined : "Add a cat"}
-        className="pl-4 [&_svg]:size-4"
+        className="h-9 w-full gap-2 border-primary/30 group-data-[collapsible=icon]:hidden"
         onClick={() => {
           void execute()
         }}
       >
-        <PlusCircle className="text-muted-foreground" aria-hidden />
-        <span className="pl-2">{pending ? "Starting…" : "Add a cat"}</span>
-      </SidebarMenuButton>
-    </SidebarMenuItem>
+        <PlusCircle className="size-4" aria-hidden />
+        {pending ? "Starting…" : "Add a cat"}
+      </Button>
+      {/* Collapsed icon mode */}
+      <SidebarMenu className="hidden group-data-[collapsible=icon]:flex">
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            disabled={pending}
+            tooltip={pending === true ? undefined : "Add a cat"}
+            onClick={() => {
+              void execute()
+            }}
+          >
+            <PlusCircle aria-hidden />
+            <span>Add a cat</span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </div>
+  )
+}
+
+function SidebarNavLinkRow({
+  title,
+  url,
+  icon: Icon,
+  isActive,
+  onNavigate,
+}: {
+  title: string
+  url: string
+  icon: LucideIcon
+  isActive: boolean
+  onNavigate: () => void
+}) {
+  return (
+    <li {...dataComponent("SidebarNavLinkRow")} className="min-w-0">
+      <Link
+        href={url}
+        onClick={onNavigate}
+        aria-current={isActive ? "page" : undefined}
+        className={cn(
+          "flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-[box-shadow,border-color,background-color] duration-150 group-data-[collapsible=icon]:hidden",
+          "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+          isActive
+            ? "ceremony-highlight-panel border-primary/35 shadow-sm"
+            : "ceremony-sidebar-panel border-primary/20 hover:border-primary/35 hover:shadow-sm",
+        )}
+      >
+        <span
+          className={cn(
+            "flex size-8 shrink-0 items-center justify-center rounded-lg",
+            isActive
+              ? "bg-primary/15 text-primary"
+              : "bg-primary/10 text-primary/80",
+          )}
+        >
+          <Icon className="size-4" aria-hidden />
+        </span>
+        <span className="truncate text-sm font-medium text-foreground">
+          {title}
+        </span>
+      </Link>
+
+      <div className="hidden group-data-[collapsible=icon]:block">
+        <SidebarMenuButton asChild isActive={isActive} tooltip={title}>
+          <Link href={url} onClick={onNavigate}>
+            <Icon aria-hidden />
+            <span>{title}</span>
+          </Link>
+        </SidebarMenuButton>
+      </div>
+    </li>
+  )
+}
+
+function SidebarCatCard({
+  cat,
+  isSelected,
+  onNavigate,
+}: {
+  cat: SidebarCat
+  isSelected: boolean
+  onNavigate: () => void
+}) {
+  const href = `/cats/${encodeURIComponent(cat._id)}`
+  // "Selected" means the cat has a chosen family name (not route-active —
+  // this sidebar only mounts under /dashboard, never on /cats/[id]).
+  const familyName =
+    typeof cat.selectedFamilyName === "string"
+      ? cat.selectedFamilyName.trim()
+      : ""
+  const showFamilyName = familyName !== ""
+
+  return (
+    <li {...dataComponent("SidebarCatCard")} className="min-w-0">
+      {/* Expanded photo card */}
+      <Link
+        href={href}
+        onClick={onNavigate}
+        aria-current={isSelected ? "page" : undefined}
+        className={cn(
+          "flex flex-col overflow-hidden transition-[box-shadow,border-color] duration-150 group-data-[collapsible=icon]:hidden",
+          "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+          isSelected
+            ? "ceremony-highlight-panel border-primary/35 shadow-sm"
+            : "ceremony-sidebar-panel border-primary/20 hover:border-primary/35 hover:shadow-sm",
+        )}
+      >
+        <div className="flex justify-center px-3 pt-3">
+          <div className="relative aspect-square w-18 overflow-hidden rounded-xl bg-muted">
+            {typeof cat.photoUrl === "string" ? (
+              // eslint-disable-next-line @next/next/no-img-element -- Convex storage URL
+              <img
+                src={cat.photoUrl}
+                alt=""
+                className="size-full object-cover"
+              />
+            ) : (
+              <div className="flex size-full items-center justify-center text-muted-foreground">
+                <Cat className="size-8 opacity-40" aria-hidden />
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="space-y-0.5 px-3 pt-2.5 pb-3 text-center">
+          <p className="truncate text-sm font-semibold tracking-tight text-foreground">
+            {cat.name}
+          </p>
+          {showFamilyName ? (
+            <p className="truncate text-xs text-muted-foreground">{familyName}</p>
+          ) : null}
+        </div>
+      </Link>
+
+      {/* Collapsed icon mode: circular photo / icon */}
+      <div className="hidden group-data-[collapsible=icon]:block">
+        <SidebarMenuButton
+          asChild
+          isActive={isSelected}
+          tooltip={cat.name}
+          className={
+            typeof cat.photoUrl === "string"
+              ? "group-data-[collapsible=icon]:rounded-full! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:overflow-hidden"
+              : undefined
+          }
+        >
+          <Link href={href} onClick={onNavigate}>
+            {typeof cat.photoUrl === "string" ? (
+              // eslint-disable-next-line @next/next/no-img-element -- Convex storage URL
+              <img
+                src={cat.photoUrl}
+                alt=""
+                className="size-8 shrink-0 rounded-full object-cover group-data-[collapsible=icon]:size-full"
+              />
+            ) : (
+              <Cat aria-hidden />
+            )}
+            <span className="truncate">{cat.name}</span>
+          </Link>
+        </SidebarMenuButton>
+      </div>
+    </li>
   )
 }
 
@@ -134,130 +307,100 @@ export const DashboardSidebar = () => {
               asChild
               isActive={isNavItemActive(pathname, "/")}
               tooltip={APP_NAME}
-              className="[&_svg]:size-8 group-data-[collapsible=icon]:p-0!"
+              className="h-auto min-h-8 gap-2.5 py-1.5 [&_svg]:size-[52px] [&>span:last-child]:overflow-visible [&>span:last-child]:whitespace-normal [&>span:last-child]:text-clip group-data-[collapsible=icon]:size-[52px]! group-data-[collapsible=icon]:p-0!"
             >
               <Link href="/" onClick={closeMobileSidebar}>
-                <Logo className="size-8 shrink-0" />
-                <span className="truncate font-semibold group-data-[collapsible=icon]:hidden">
-                  {APP_NAME}
+                <Logo className="size-[52px] shrink-0" />
+                <span className="flex min-w-0 flex-1 flex-col items-start gap-0.5 group-data-[collapsible=icon]:hidden">
+                  <span className="text-xl leading-tight font-semibold text-pretty">
+                    {APP_NAME}
+                  </span>
+                  <BetaBadge />
                 </span>
-                <BetaBadge className="group-data-[collapsible=icon]:hidden" />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {/* User support items */}
-        <SidebarGroup>
+        {/* Cats first — primary job of the dashboard */}
+        <SidebarGroup className="ceremony-theme min-h-0 flex-1">
           <SidebarGroupLabel className={dashboardSidebarGroupLabelClassName}>
-            User Support
+            Your Cats
           </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className={dashboardSidebarMenuClassName}>
-              {userSupportItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isNavItemActive(pathname, item.url)}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.url} onClick={closeMobileSidebar}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+          <SidebarGroupContent className="flex min-h-0 flex-1 flex-col">
+            {cats === undefined ? (
+              <div className="flex items-center gap-2 px-2 py-2 text-sm text-muted-foreground opacity-60 group-data-[collapsible=icon]:justify-center">
+                <Cat className="size-4 shrink-0" aria-hidden />
+                <span className="group-data-[collapsible=icon]:hidden">
+                  Loading…
+                </span>
+              </div>
+            ) : cats.length === 0 ? (
+              <SidebarAddCatControl />
+            ) : (
+              <>
+                <ul className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto group-data-[collapsible=icon]:gap-1 group-data-[collapsible=icon]:overflow-hidden">
+                  {cats.map((cat) => {
+                    const href = `/cats/${encodeURIComponent(cat._id)}`
+                    return (
+                      <SidebarCatCard
+                        key={cat._id}
+                        cat={cat}
+                        isSelected={pathname === href}
+                        onNavigate={closeMobileSidebar}
+                      />
+                    )
+                  })}
+                </ul>
+                <SidebarAddCatControl />
+              </>
+            )}
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Utility links — quieter panels below cats */}
+        <SidebarGroup className="ceremony-theme shrink-0">
+          <SidebarGroupLabel className={dashboardSidebarGroupLabelClassName}>
+            Help
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <ul className="flex flex-col gap-1.5 group-data-[collapsible=icon]:gap-1">
+              {userSupportItems.map((item) => (
+                <SidebarNavLinkRow
+                  key={item.url}
+                  title={item.title}
+                  url={item.url}
+                  icon={item.icon}
+                  isActive={isNavItemActive(pathname, item.url)}
+                  onNavigate={closeMobileSidebar}
+                />
+              ))}
+            </ul>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         {isAdmin === true ? (
-          <SidebarGroup>
+          <SidebarGroup className="ceremony-theme shrink-0">
             <SidebarGroupLabel className={dashboardSidebarGroupLabelClassName}>
               Admin
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu className={dashboardSidebarMenuClassName}>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isNavItemActive(
-                      pathname,
-                      "/dashboard/admin/beta-reviews",
-                    )}
-                    tooltip="Beta reviews"
-                  >
-                    <Link
-                      href="/dashboard/admin/beta-reviews"
-                      onClick={closeMobileSidebar}
-                    >
-                      <Shield />
-                      <span>Beta reviews</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
+              <ul className="flex flex-col gap-1.5 group-data-[collapsible=icon]:gap-1">
+                <SidebarNavLinkRow
+                  title="Beta reviews"
+                  url="/dashboard/admin/beta-reviews"
+                  icon={Shield}
+                  isActive={isNavItemActive(
+                    pathname,
+                    "/dashboard/admin/beta-reviews",
+                  )}
+                  onNavigate={closeMobileSidebar}
+                />
+              </ul>
             </SidebarGroupContent>
           </SidebarGroup>
         ) : null}
-        {/* Cats owned by user */}
-        <SidebarGroup>
-          <SidebarGroupLabel className={dashboardSidebarGroupLabelClassName}>
-            Your Cats
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className={dashboardSidebarMenuClassName}>
-              {cats === undefined ? (
-                <SidebarMenuItem>
-                  <SidebarMenuButton disabled className="opacity-60">
-                    <Cat aria-hidden />
-                    <span>Loading…</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ) : cats.length === 0 ? (
-                <SidebarAddCatMenuItem />
-              ) : (
-                <>
-                  {cats.map((cat) => {
-                    const href = `/cats/${encodeURIComponent(cat._id)}`
-                    return (
-                      <SidebarMenuItem key={cat._id}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={pathname === href}
-                          tooltip={cat.name}
-                          className={
-                            cat.photoUrl
-                              ? catSidebarPhotoButtonClassName
-                              : undefined
-                          }
-                        >
-                          <Link href={href} onClick={closeMobileSidebar}>
-                            {cat.photoUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element -- Convex storage URL
-                              <img
-                                src={cat.photoUrl}
-                                alt=""
-                                className={catSidebarPhotoClassName}
-                              />
-                            ) : (
-                              <Cat aria-hidden />
-                            )}
-                            <span className="truncate group-data-[collapsible=icon]:hidden">
-                              {cat.name}
-                            </span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    )
-                  })}
-                  <SidebarAddCatMenuItem />
-                </>
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu className={dashboardSidebarMenuClassName}>

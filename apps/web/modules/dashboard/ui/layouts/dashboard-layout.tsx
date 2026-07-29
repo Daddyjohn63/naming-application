@@ -3,6 +3,7 @@ import { DashboardHeader } from "@/modules/dashboard/ui/components/dashboard-hea
 import { DashboardSidebar } from "@/modules/dashboard/ui/components/dashboard-sidebar"
 import { SidebarInset, SidebarProvider } from "@workspace/ui/components/sidebar"
 import { cookies } from "next/headers"
+import type { CSSProperties } from "react"
 
 import { dataComponent } from "@/lib/data-component"
 
@@ -18,7 +19,14 @@ export const DashboardLayout = async ({
 
   return (
     <AuthGuard>
-      <SidebarProvider defaultOpen={defaultOpen}>
+      <SidebarProvider
+        defaultOpen={defaultOpen}
+        style={
+          {
+            "--sidebar-width": "18rem",
+          } as CSSProperties
+        }
+      >
         <DashboardSidebar />
         <SidebarInset
           {...dataComponent("DashboardLayout")}
