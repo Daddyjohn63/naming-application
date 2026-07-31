@@ -11,9 +11,7 @@
 export const MAX_STANDARD_USER_CAT_CEREMONIES = 3
 
 /** True only when the Convex deployment env var is exactly `"true"`. */
-export function isCatCeremonyLimitEnforced(
-  flag: string | undefined,
-): boolean {
+export function isCatCeremonyLimitEnforced(flag: string | undefined): boolean {
   return flag === "true"
 }
 
