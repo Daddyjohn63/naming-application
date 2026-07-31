@@ -1,3 +1,4 @@
+import { catCeremonyErrorMessage } from "../constants/cat-ceremony-errors"
 import { catProfileSubmitErrorMessage } from "../constants/cat-profile-errors"
 import { catSummaryErrorMessage } from "../constants/cat-summary-errors"
 import { familyNamingErrorMessage } from "../constants/family-naming-errors"
@@ -29,6 +30,7 @@ export function getConvexErrorMessage(error: unknown): string {
   const data = getConvexErrorData(error)
   if (data?.code !== undefined) {
     for (const resolve of [
+      catCeremonyErrorMessage,
       catProfileSubmitErrorMessage,
       catSummaryErrorMessage,
       familyNamingErrorMessage,

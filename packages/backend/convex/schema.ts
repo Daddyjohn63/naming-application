@@ -85,6 +85,11 @@ export default defineSchema({
      * Optional so existing rows stay valid until webhook re-sync.
      */
     role: v.optional(v.union(v.literal("admin"), v.literal("user"))),
+    /**
+     * Lifetime cat ceremony creates (product quota). Monotonic — deleteCeremony
+     * must not decrement. Optional until first create backfills from current cats.
+     */
+    catsCreatedTotal: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_clerkUserId", ["clerkUserId"]),
