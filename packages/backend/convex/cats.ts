@@ -16,6 +16,7 @@ import {
 import { isAdminRole } from "./lib/admin"
 import {
   consumeCatCeremonyCreateSlot,
+  ensureLifetimeCatCeremonyCreates,
   isCatCeremonyLimitAllowedOnDeployment,
   resolveLifetimeCatCeremonyCreates,
 } from "./lib/catCeremonyLimit"
@@ -199,7 +200,7 @@ export const getMyCatCeremonyEntitlement = query({
     const enforced = isCatCeremonyLimitAllowedOnDeployment()
     const isAdmin = isAdminRole(currentUser)
     const unlimited = !enforced || isAdmin
-    const used = await resolveLifetimeCatCeremonyCreates(ctx, currentUser)
+    const used = resolveLifetimeCatCeremonyCreates(currentUser)
     const limit = unlimited ? null : MAX_STANDARD_USER_CAT_CEREMONIES
     const remaining = unlimited
       ? null
@@ -215,6 +216,20 @@ export const getMyCatCeremonyEntitlement = query({
       remaining,
       canCreate,
     }
+  },
+})
+
+/**
+ * One-time durable baseline for `users.catsCreatedTotal` from owned cats.
+ * Safe to call repeatedly. Run in its own mutation before create so a later
+ * limit error cannot roll back the baseline (Convex transactions).
+ */
+export const ensureMyCatCeremonyQuotaBaseline = mutation({
+  args: {},
+  returns: v.number(),
+  handler: async (ctx) => {
+    const currentUser = await getCurrentUserOrThrow(ctx)
+    return await ensureLifetimeCatCeremonyCreates(ctx, currentUser)
   },
 })
 

@@ -22,6 +22,7 @@ export function useCreateDraftCeremony(
 ) {
   const { enabled = true } = options
   const router = useRouter()
+  const ensureBaseline = useMutation(api.cats.ensureMyCatCeremonyQuotaBaseline)
   const createDraftCat = useMutation(api.cats.createDraftCat)
 
   /**
@@ -55,6 +56,9 @@ export function useCreateDraftCeremony(
     setError(null)
     setPending(true)
     try {
+      // Commit durable lifetime baseline before create (separate transaction)
+      // so a limit rejection cannot roll back the baseline.
+      await ensureBaseline()
       const id = await createDraftCat()
       router.push(`/cats/${id}`)
     } catch (err) {

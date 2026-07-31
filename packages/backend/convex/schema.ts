@@ -87,7 +87,8 @@ export default defineSchema({
     role: v.optional(v.union(v.literal("admin"), v.literal("user"))),
     /**
      * Lifetime cat ceremony creates (product quota). Monotonic — deleteCeremony
-     * must not decrement. Optional until first create backfills from current cats.
+     * must not decrement. Optional until `ensureMyCatCeremonyQuotaBaseline` or a
+     * successful create initializes it from owned cats (one-time durable baseline).
      */
     catsCreatedTotal: v.optional(v.number()),
     createdAt: v.number(),
