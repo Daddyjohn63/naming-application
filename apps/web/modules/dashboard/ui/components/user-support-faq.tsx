@@ -59,7 +59,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "How many times can I change the profile or regenerate names?",
-    answer: `You can successfully submit a cat’s profile up to ${MAX_CAT_PROFILE_SUBMIT_COUNT} times. Each ceremony also has up to ${MAX_PHOTO_VALIDATION_ATTEMPTS} automated photo checks. Each naming stage (family, cat-world, ineffable) allows ${MAX_FAMILY_NAME_REGENERATIONS === 1 ? "one" : MAX_FAMILY_NAME_REGENERATIONS} regeneration. If a ceremony’s budgets are exhausted, start a new cat ceremony from the dashboard for fresh limits, or contact support.`,
+    answer: `You can submit a cat’s profile up to ${MAX_CAT_PROFILE_SUBMIT_COUNT} times. Each ceremony also allows up to ${MAX_PHOTO_VALIDATION_ATTEMPTS} photo checks. Each naming stage (family, cat-world, ineffable) lets you ask for a fresh set of names ${MAX_FAMILY_NAME_REGENERATIONS === 1 ? "once" : `${MAX_FAMILY_NAME_REGENERATIONS} times`}. If you’ve used those up, start another ceremony from the dashboard (if you still have one left on your account), or contact support.`,
   },
   {
     question: "What if I run out of photo checks?",
@@ -67,7 +67,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "Can I name more than one cat?",
-    answer: `Yes — each cat has its own profile, summary, names, and certificate. In production you can start up to ${MAX_STANDARD_USER_CAT_CEREMONIES} naming ceremonies per account. Deleting a ceremony does not restore a create. Unlock is per cat, and during beta it’s free for every cat.`,
+    answer: `Yes — each cat has its own profile, summary, names, and certificate. You can start up to ${MAX_STANDARD_USER_CAT_CEREMONIES} naming ceremonies on your account. Deleting a ceremony does not let you start an extra one later. Unlock is per cat, and during beta it’s free for every cat.`,
   },
   {
     question: "Can I stop halfway and come back later?",
@@ -81,7 +81,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "I deleted a ceremony by mistake — can I recover it?",
-    answer: `Deleted ceremonies can’t be restored. If you’re unsure, pause before confirming delete. You can start a new ceremony for the same cat only if you still have creates left under the account limit of ${MAX_STANDARD_USER_CAT_CEREMONIES} — deleting does not free a create.`,
+    answer: `Deleted ceremonies can’t be restored. If you’re unsure, pause before confirming delete. You can start another ceremony for the same cat only if you haven’t already used all ${MAX_STANDARD_USER_CAT_CEREMONIES} ceremonies on your account — deleting one does not give you another.`,
   },
 ] as const
 
