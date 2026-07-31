@@ -16,6 +16,7 @@ import * as React from "react"
 import { api } from "@workspace/backend/_generated/api"
 import { APP_NAME } from "@workspace/shared/constants/app"
 import { CreateCeremonyButton } from "@/modules/cats/ui/components/create-ceremony-button"
+import { useCatCeremonyEntitlement } from "@/modules/cats/ui/hooks/use-cat-ceremony-entitlement"
 import { useCreateDraftCeremony } from "@/modules/cats/ui/hooks/use-create-draft-ceremony"
 import { CeremonyStepBadge } from "@/modules/ceremony/ui/components/ceremony-step-badge"
 import { ceremonyCtaButtonClassName } from "@/modules/ceremony/lib/ceremony-styles"
@@ -203,7 +204,11 @@ function CatCeremonyCard({ cat }: CatCeremonyCardProps) {
 
 /** Primary “Add” with inline recovery (KB-002). Shown once the user has ceremonies. */
 function DashboardAddCeremonyLead() {
-  const { execute, pending, error, clearError } = useCreateDraftCeremony()
+  const { canCreate, quotaMessage } = useCatCeremonyEntitlement()
+  const { execute, pending, error, clearError } = useCreateDraftCeremony({
+    enabled: canCreate,
+  })
+  const addDisabled = pending || !canCreate
 
   return (
     <div
@@ -221,7 +226,7 @@ function DashboardAddCeremonyLead() {
               variant="outline"
               size="sm"
               className="shrink-0 self-start border-current/40 sm:self-center"
-              disabled={pending}
+              disabled={addDisabled}
               onClick={() => {
                 clearError()
                 void execute()
@@ -240,13 +245,21 @@ function DashboardAddCeremonyLead() {
           <p className="leading-relaxed text-pretty text-muted-foreground">
             Each cat has its own naming ceremony.
           </p>
+          {quotaMessage !== null ? (
+            <p className="text-sm leading-relaxed text-pretty text-muted-foreground">
+              {quotaMessage}
+            </p>
+          ) : null}
         </div>
         <div className="shrink-0">
           <Button
             type="button"
             size="lg"
-            disabled={pending}
+            disabled={addDisabled}
             aria-busy={pending}
+            title={
+              !canCreate && quotaMessage !== null ? quotaMessage : undefined
+            }
             className={cn(ceremonyCtaButtonClassName, "px-6")}
             onClick={() => {
               clearError()

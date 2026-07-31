@@ -1,5 +1,6 @@
 import { dataComponent } from "@/lib/data-component"
 import { APP_NAME } from "@workspace/shared/constants/app"
+import { MAX_STANDARD_USER_CAT_CEREMONIES } from "@workspace/shared/constants/cat-ceremony-limits"
 import { MAX_CAT_PROFILE_SUBMIT_COUNT } from "@workspace/shared/constants/cat-profile"
 import { MAX_PHOTO_VALIDATION_ATTEMPTS } from "@workspace/shared/constants/cat-photo-validation"
 import {
@@ -18,7 +19,7 @@ import {
 const CEREMONY_FLOW_STEPS = [
   {
     title: "Start a ceremony",
-    body: "From your dashboard, choose Add a cat. Each cat gets their own naming ceremony, so you can run several in parallel and return to any of them later.",
+    body: `From your dashboard, choose Add a cat. Each cat gets their own naming ceremony — you can run several in parallel (up to ${MAX_STANDARD_USER_CAT_CEREMONIES} per account in production) and return to any of them later. Deleting a ceremony does not restore a create.`,
   },
   {
     title: "Build a profile",
@@ -250,6 +251,15 @@ export function UserSupportHowto() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
+              <tr>
+                <th scope="row" className="px-4 py-3 font-medium">
+                  Ceremonies per account
+                </th>
+                <td className="px-4 py-3 text-muted-foreground">
+                  Up to {MAX_STANDARD_USER_CAT_CEREMONIES} naming ceremonies in
+                  production (lifetime creates — deleting does not free a slot)
+                </td>
+              </tr>
               <tr>
                 <th scope="row" className="px-4 py-3 font-medium">
                   Profile submissions

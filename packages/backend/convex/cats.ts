@@ -6,16 +6,34 @@
 import { ConvexError, v } from "convex/values"
 import { catCreateFieldsSchema } from "@workspace/shared/schemas/cat"
 import { DRAFT_CAT_DESCRIPTION_PLACEHOLDER } from "@workspace/shared/constants/cat-profile"
+import { MAX_STANDARD_USER_CAT_CEREMONIES } from "@workspace/shared/constants/cat-ceremony-limits"
 
 import {
   query,
   mutation,
   type QueryCtx,
 } from "./_generated/server"
+import { isAdminRole } from "./lib/admin"
+import {
+  consumeCatCeremonyCreateSlot,
+  ensureLifetimeCatCeremonyCreates,
+  isCatCeremonyLimitAllowedOnDeployment,
+  resolveLifetimeCatCeremonyCreates,
+} from "./lib/catCeremonyLimit"
 import { deleteCeremonyData } from "./lib/deleteCeremony"
 import { enforceRateLimit } from "./lib/rateLimiter"
 import { getCurrentUser, getCurrentUserOrThrow } from "./users"
 import type { Doc, Id } from "./_generated/dataModel"
+
+const catCeremonyEntitlementValidator = v.object({
+  enforced: v.boolean(),
+  isAdmin: v.boolean(),
+  unlimited: v.boolean(),
+  limit: v.union(v.number(), v.null()),
+  used: v.number(),
+  remaining: v.union(v.number(), v.null()),
+  canCreate: v.boolean(),
+})
 
 //resolve storage public URL
 async function resolveStoragePublicUrl(
@@ -166,6 +184,55 @@ export const getCatsForSidebar = query({
   },
 })
 
+/**
+ * Lifetime create quota for the signed-in user (dashboard CTAs / remaining copy).
+ * Returns null when unauthenticated. UI should key off `canCreate` / `remaining`.
+ */
+export const getMyCatCeremonyEntitlement = query({
+  args: {},
+  returns: v.union(catCeremonyEntitlementValidator, v.null()),
+  handler: async (ctx) => {
+    const currentUser = await getCurrentUser(ctx)
+    if (currentUser === null) {
+      return null
+    }
+
+    const enforced = isCatCeremonyLimitAllowedOnDeployment()
+    const isAdmin = isAdminRole(currentUser)
+    const unlimited = !enforced || isAdmin
+    const used = resolveLifetimeCatCeremonyCreates(currentUser)
+    const limit = unlimited ? null : MAX_STANDARD_USER_CAT_CEREMONIES
+    const remaining = unlimited
+      ? null
+      : Math.max(0, MAX_STANDARD_USER_CAT_CEREMONIES - used)
+    const canCreate = unlimited || (remaining !== null && remaining > 0)
+
+    return {
+      enforced,
+      isAdmin,
+      unlimited,
+      limit,
+      used,
+      remaining,
+      canCreate,
+    }
+  },
+})
+
+/**
+ * One-time durable baseline for `users.catsCreatedTotal` from owned cats.
+ * Safe to call repeatedly. Run in its own mutation before create so a later
+ * limit error cannot roll back the baseline (Convex transactions).
+ */
+export const ensureMyCatCeremonyQuotaBaseline = mutation({
+  args: {},
+  returns: v.number(),
+  handler: async (ctx) => {
+    const currentUser = await getCurrentUserOrThrow(ctx)
+    return await ensureLifetimeCatCeremonyCreates(ctx, currentUser)
+  },
+})
+
 //get recent cats
 // export const getRecentCats = query({
 //   args: {},
@@ -280,6 +347,7 @@ export const createCat = mutation({
     if (!parsed.success) {
       throw new ConvexError(parsed.error.flatten())
     }
+    await consumeCatCeremonyCreateSlot(ctx, currentUser)
     const now = Date.now()
     return await ctx.db.insert("cats", {
       userId: currentUser._id,
@@ -305,6 +373,7 @@ export const createDraftCat = mutation({
   handler: async (ctx): Promise<Doc<"cats">["_id"]> => {
     const currentUser = await getCurrentUserOrThrow(ctx)
     await enforceRateLimit(ctx, "createCat", currentUser._id)
+    await consumeCatCeremonyCreateSlot(ctx, currentUser)
     const now = Date.now()
     const siblings = await ctx.db
       .query("cats")

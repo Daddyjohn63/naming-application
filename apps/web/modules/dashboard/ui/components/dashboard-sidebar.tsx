@@ -15,6 +15,7 @@ import { useEffect } from "react"
 
 import { BetaBadge } from "@/components/beta-badge"
 import { Logo } from "@/components/logo"
+import { useCatCeremonyEntitlement } from "@/modules/cats/ui/hooks/use-cat-ceremony-entitlement"
 import { useCreateDraftCeremony } from "@/modules/cats/ui/hooks/use-create-draft-ceremony"
 import {
   Sidebar,
@@ -64,7 +65,17 @@ const dashboardSidebarGroupLabelClassName =
 type SidebarCat = FunctionReturnType<typeof api.cats.getCatsForSidebar>[number]
 
 function SidebarAddCatControl() {
-  const { execute, pending, error, clearError } = useCreateDraftCeremony()
+  const { canCreate, quotaMessage } = useCatCeremonyEntitlement()
+  const { execute, pending, error, clearError } = useCreateDraftCeremony({
+    enabled: canCreate,
+  })
+  const addDisabled = pending || !canCreate
+  const limitTooltip =
+    !canCreate && quotaMessage !== null
+      ? quotaMessage
+      : pending
+        ? undefined
+        : "Add a cat"
 
   useEffect(() => {
     if (error === null || error === "") {
@@ -80,7 +91,8 @@ function SidebarAddCatControl() {
       <Button
         type="button"
         variant="outline"
-        disabled={pending}
+        disabled={addDisabled}
+        title={limitTooltip}
         className="h-9 w-full gap-2 border-primary/30 group-data-[collapsible=icon]:hidden"
         onClick={() => {
           void execute()
@@ -93,8 +105,8 @@ function SidebarAddCatControl() {
       <SidebarMenu className="hidden group-data-[collapsible=icon]:flex">
         <SidebarMenuItem>
           <SidebarMenuButton
-            disabled={pending}
-            tooltip={pending === true ? undefined : "Add a cat"}
+            disabled={addDisabled}
+            tooltip={limitTooltip}
             onClick={() => {
               void execute()
             }}

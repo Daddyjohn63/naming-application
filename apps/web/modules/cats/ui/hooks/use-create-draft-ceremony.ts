@@ -7,13 +7,22 @@ import { useCallback, useRef, useState } from "react"
 import { api } from "@workspace/backend/_generated/api"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
 
+type UseCreateDraftCeremonyOptions = {
+  /** When false, `execute` is a no-op (caller should also disable the control). */
+  enabled?: boolean
+}
+
 /**
  * Creates a draft ceremony server-side and navigates to its editor page.
  * Exposes loading/error state for the UI and a synchronous guard against
  * overlapping calls (double-clicks, slow networks).
  */
-export function useCreateDraftCeremony() {
+export function useCreateDraftCeremony(
+  options: UseCreateDraftCeremonyOptions = {},
+) {
+  const { enabled = true } = options
   const router = useRouter()
+  const ensureBaseline = useMutation(api.cats.ensureMyCatCeremonyQuotaBaseline)
   const createDraftCat = useMutation(api.cats.createDraftCat)
 
   /**
@@ -36,6 +45,9 @@ export function useCreateDraftCeremony() {
   }, [])
 
   async function execute() {
+    if (!enabled) {
+      return
+    }
     // Bail out instantly if another invocation is still running (same tick or later).
     if (isExecutingRef.current) {
       return
@@ -44,6 +56,9 @@ export function useCreateDraftCeremony() {
     setError(null)
     setPending(true)
     try {
+      // Commit durable lifetime baseline before create (separate transaction)
+      // so a limit rejection cannot roll back the baseline.
+      await ensureBaseline()
       const id = await createDraftCat()
       router.push(`/cats/${id}`)
     } catch (err) {
