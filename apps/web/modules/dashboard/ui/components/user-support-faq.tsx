@@ -1,5 +1,6 @@
 import { dataComponent } from "@/lib/data-component"
 import { APP_NAME } from "@workspace/shared/constants/app"
+import { MAX_STANDARD_USER_CAT_CEREMONIES } from "@workspace/shared/constants/cat-ceremony-limits"
 import { MAX_CAT_PROFILE_SUBMIT_COUNT } from "@workspace/shared/constants/cat-profile"
 import { MAX_PHOTO_VALIDATION_ATTEMPTS } from "@workspace/shared/constants/cat-photo-validation"
 import {
@@ -66,8 +67,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "Can I name more than one cat?",
-    answer:
-      "Yes — as many as you like. Each cat has its own profile, summary, names, and certificate. Unlock is per cat, and during beta it’s free for every cat.",
+    answer: `Yes — each cat has its own profile, summary, names, and certificate. In production you can start up to ${MAX_STANDARD_USER_CAT_CEREMONIES} naming ceremonies per account. Deleting a ceremony does not restore a create. Unlock is per cat, and during beta it’s free for every cat.`,
   },
   {
     question: "Can I stop halfway and come back later?",
@@ -81,8 +81,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "I deleted a ceremony by mistake — can I recover it?",
-    answer:
-      "Deleted ceremonies can’t be restored. If you’re unsure, pause before confirming delete. You can always start a new ceremony for the same cat and begin again.",
+    answer: `Deleted ceremonies can’t be restored. If you’re unsure, pause before confirming delete. You can start a new ceremony for the same cat only if you still have creates left under the account limit of ${MAX_STANDARD_USER_CAT_CEREMONIES} — deleting does not free a create.`,
   },
 ] as const
 
