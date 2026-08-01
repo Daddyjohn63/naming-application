@@ -1,12 +1,13 @@
 /**
  * KB-004 AI prompts and Vercel AI SDK calls for photo validation and personality summary.
+ * All model calls go through `generateWithFailover` (OpenAI primary, Gemini on outage).
  * Prompt copy source of truth: ai-docs/prompts/FAMILY-SUMMARY-PROMPT.md (§0 + §1).
  */
 
-import { openai } from "@ai-sdk/openai"
-import { generateText, Output } from "ai"
+import { Output } from "ai"
 
 import { APP_NAME } from "@workspace/shared/constants/app"
+import { generateWithFailover } from "./generateWithFailover"
 import {
   formatCatSexLabel,
   type CatSex,
@@ -173,8 +174,7 @@ export type PhotoValidationResult = {
 export async function validateCatPhotoWithAi(args: {
   imageUrl: string
 }): Promise<PhotoValidationResult> {
-  const { output } = await generateText({
-    model: openai("gpt-4o-mini"),
+  const { output } = await generateWithFailover({
     system: PHOTO_VALIDATION_SYSTEM_PROMPT,
     output: Output.object({ schema: catPhotoValidationSchema }),
     messages: [
@@ -211,8 +211,7 @@ export async function generateCatSummaryWithAi(args: {
       ]
     : [{ type: "text", text: userText }]
 
-  const { text } = await generateText({
-    model: openai("gpt-4o-mini"),
+  const { text } = await generateWithFailover({
     system: SUMMARY_SYSTEM_PROMPT,
     messages: [{ role: "user", content: userContent }],
   })
@@ -281,8 +280,7 @@ export async function generateFamilyNamesWithAi(args: {
 }): Promise<FamilyNameBatch> {
   const userText = buildFamilyNamesUserText(args)
 
-  const { output } = await generateText({
-    model: openai("gpt-4o-mini"),
+  const { output } = await generateWithFailover({
     system: FAMILY_NAMES_SYSTEM_PROMPT,
     output: Output.object({ schema: familyNameBatchSchema }),
     messages: [{ role: "user", content: userText }],
@@ -372,8 +370,7 @@ export async function generateCatWorldNamesWithAi(args: {
 }): Promise<NameBatch> {
   const userText = buildCatWorldNamesUserText(args)
 
-  const { output } = await generateText({
-    model: openai("gpt-4o-mini"),
+  const { output } = await generateWithFailover({
     system: CAT_WORLD_NAMES_SYSTEM_PROMPT,
     output: Output.object({ schema: nameBatchSchema }),
     messages: [{ role: "user", content: userText }],
@@ -392,8 +389,7 @@ export async function generateIneffableNamesWithAi(args: {
 }): Promise<NameBatch> {
   const userText = buildIneffableNamesUserText(args)
 
-  const { output } = await generateText({
-    model: openai("gpt-4o-mini"),
+  const { output } = await generateWithFailover({
     system: INEFFABLE_NAMES_SYSTEM_PROMPT,
     output: Output.object({ schema: nameBatchSchema }),
     messages: [{ role: "user", content: userText }],
