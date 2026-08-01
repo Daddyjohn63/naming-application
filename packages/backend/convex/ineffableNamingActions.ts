@@ -1,5 +1,5 @@
 /**
- * KB-010 async AI work — generate ineffable near-name batches via OpenAI.
+ * KB-010 async AI work — generate ineffable near-name batches via the AI provider.
  *
  * Simpler than cat-world: no global collision filter. On success, patches step
  * to `naming_ineffable` via applyIneffableNameGenerationSuccess.

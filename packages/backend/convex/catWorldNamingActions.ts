@@ -1,5 +1,5 @@
 /**
- * KB-009 async AI work — generate cat-world name batches via OpenAI.
+ * KB-009 async AI work — generate cat-world name batches via the AI provider.
  *
  * Runs in `"use node"` (AI SDK). Never writes DB directly — always calls
  * internal mutations on success/failure so regen counters and ceremonyStep

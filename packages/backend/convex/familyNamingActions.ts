@@ -1,5 +1,5 @@
 /**
- * KB-006 async AI work — generate family name batches via OpenAI.
+ * KB-006 async AI work — generate family name batches via the AI provider.
  */
 
 "use node"

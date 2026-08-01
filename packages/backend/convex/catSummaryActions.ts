@@ -1,5 +1,5 @@
 /**
- * KB-004 async AI work — Node internalActions that call OpenAI and persist results.
+ * KB-004 async AI work — Node internalActions that call the AI provider and persist results.
  *
  * Mutations cannot run network/AI calls, so `catProfile.applyCatProfileSubmit` schedules
  * these actions via `ctx.scheduler.runAfter(0, …)`.
@@ -103,7 +103,7 @@ export const validateCatPhoto = internalAction({
         return
       }
 
-      // OpenAI / infra outage — keep step, show Retry, do not burn a photo check.
+      // AI provider / infra outage — keep step, show Retry, do not burn a photo check.
       await ctx.runMutation(internal.catSummary.applySummaryPipelineFailure, {
         catId,
         errorMessage: failure.userMessage,
@@ -114,7 +114,7 @@ export const validateCatPhoto = internalAction({
 })
 
 /**
- * Personality summary job: text-only or multimodal OpenAI call, then insert version row.
+ * Personality summary job: text-only or multimodal AI call, then insert version row.
  * Only runs while `ceremonyStep === "awaiting_summary"`.
  */
 export const generateCatSummary = internalAction({
