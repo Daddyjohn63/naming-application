@@ -148,7 +148,7 @@ importers:
   packages/backend:
     dependencies:
       '@ai-sdk/google':
-        specifier: ^3
+        specifier: ^3.0.103
         version: 3.0.103(zod@3.25.76)
       '@ai-sdk/openai':
         specifier: ^3.0.53

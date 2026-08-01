@@ -8,7 +8,9 @@
  * @module
  */
 
+import type * as ai_generateWithFailover from "../ai/generateWithFailover.js";
 import type * as ai_naming from "../ai/naming.js";
+import type * as ai_provider from "../ai/provider.js";
 import type * as betaReviews from "../betaReviews.js";
 import type * as catProfile from "../catProfile.js";
 import type * as catProfileActions from "../catProfileActions.js";
@@ -41,7 +43,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "ai/generateWithFailover": typeof ai_generateWithFailover;
   "ai/naming": typeof ai_naming;
+  "ai/provider": typeof ai_provider;
   betaReviews: typeof betaReviews;
   catProfile: typeof catProfile;
   catProfileActions: typeof catProfileActions;

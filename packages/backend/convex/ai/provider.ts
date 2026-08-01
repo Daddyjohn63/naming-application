@@ -11,9 +11,10 @@ export const PRIMARY_MODEL_ID = "gpt-4o-mini"
 
 /**
  * Fallback model — Flash-class multimodal peer via @ai-sdk/google.
+ * Prefer the current Gemini Flash GA id; `gemini-2.5-flash` rejects new API keys.
  * Env: GOOGLE_GENERATIVE_AI_API_KEY (read automatically by the provider).
  */
-export const FALLBACK_MODEL_ID = "gemini-2.5-flash"
+export const FALLBACK_MODEL_ID = "gemini-3.6-flash"
 
 export const GOOGLE_API_KEY_ENV = "GOOGLE_GENERATIVE_AI_API_KEY"
 
