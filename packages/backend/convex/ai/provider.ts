@@ -5,6 +5,7 @@
 
 import { google } from "@ai-sdk/google"
 import { openai } from "@ai-sdk/openai"
+import type { LanguageModel } from "ai"
 
 /** Primary model — vision + structured output (existing production choice). */
 export const PRIMARY_MODEL_ID = "gpt-4o-mini"
@@ -18,11 +19,12 @@ export const FALLBACK_MODEL_ID = "gemini-3.6-flash"
 
 export const GOOGLE_API_KEY_ENV = "GOOGLE_GENERATIVE_AI_API_KEY"
 
-export function getPrimaryModel() {
+/** Explicit `LanguageModel` avoids non-portable inference via `@ai-sdk/provider`. */
+export function getPrimaryModel(): LanguageModel {
   return openai(PRIMARY_MODEL_ID)
 }
 
-export function getFallbackModel() {
+export function getFallbackModel(): LanguageModel {
   return google(FALLBACK_MODEL_ID)
 }
 
