@@ -41,7 +41,7 @@ export const generateFamilyNames = internalAction({
     }
 
     try {
-      const batch = await generateFamilyNamesWithAi({
+      const batch = await generateFamilyNamesWithAi(ctx, {
         summaryText: pipeline.summaryText,
         styleIds,
         excludedNames: pipeline.excludedNames,

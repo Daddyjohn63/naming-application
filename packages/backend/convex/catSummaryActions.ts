@@ -64,7 +64,9 @@ export const validateCatPhoto = internalAction({
 
     try {
       const imageUrl = await loadPhotoUrl(ctx, cat.photoStorageId)
-      const { validation, outcome } = await validateCatPhotoWithAi({ imageUrl })
+      const { validation, outcome } = await validateCatPhotoWithAi(ctx, {
+        imageUrl,
+      })
 
       await ctx.runMutation(internal.catSummary.applyPhotoValidationResult, {
         catId,
@@ -133,7 +135,7 @@ export const generateCatSummary = internalAction({
         imageUrl = await loadPhotoUrl(ctx, cat.photoStorageId)
       }
 
-      const summaryText = await generateCatSummaryWithAi({
+      const summaryText = await generateCatSummaryWithAi(ctx, {
         profile: {
           title: cat.title,
           description: cat.description,

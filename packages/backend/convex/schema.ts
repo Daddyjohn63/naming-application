@@ -299,6 +299,17 @@ export default defineSchema({
   }).index("by_catId", ["catId"]),
 
   /**
+   * Running totals of AI provider HTTP attempts (OpenAI primary + Gemini failover).
+   * Singleton row keyed by scope `"global"` — view in the Convex Data tab.
+   */
+  ai_provider_usage: defineTable({
+    scope: v.literal("global"),
+    openaiCalls: v.number(),
+    geminiCalls: v.number(),
+    updatedAt: v.number(),
+  }).index("by_scope", ["scope"]),
+
+  /**
    * Lightweight funnel instrumentation (upload → summary → style → preview → payment → names → certificate).
    * Emit from mutations/workflows with stable step keys for dashboards.
    */

@@ -13,12 +13,16 @@
  *   4. If Gemini works → return that result (still transparent to the UI).
  *   5. If Gemini also fails (or no key) → rethrow so existing Retry UX runs.
  *
+ * Each HTTP attempt increments `ai_provider_usage` (openaiCalls / geminiCalls).
+ *
  * See ai-docs/production/AI-FAILOVER.md.
  */
 
 import { generateText } from "ai"
 import { isFailoverEligibleAiError } from "@workspace/shared/utils/is-failover-eligible-ai-error"
 
+import { internal } from "../_generated/api"
+import type { ActionCtx } from "../_generated/server"
 import {
   FALLBACK_MODEL_ID,
   PRIMARY_MODEL_ID,
@@ -42,6 +46,8 @@ type GenerateTextParams = Parameters<typeof generateText>[0]
  */
 export type GenerateWithFailoverArgs = Omit<GenerateTextParams, "model">
 
+type AiProvider = "openai" | "gemini"
+
 /**
  * Thin adapter: take caller args + a concrete model, then call the SDK.
  * Keeps the cast in one place so the main function stays readable.
@@ -53,21 +59,40 @@ function callGenerateText(
   return generateText({ ...args, model } as GenerateTextParams)
 }
 
+/** Best-effort counter bump — never fail the AI step because of usage logging. */
+async function recordProviderCall(ctx: ActionCtx, provider: AiProvider) {
+  try {
+    await ctx.runMutation(internal.aiProviderUsage.recordCall, { provider })
+  } catch (error) {
+    console.warn(
+      `AI usage counter failed for provider=${provider}:`,
+      error instanceof Error ? error.message : error
+    )
+  }
+}
+
 /**
  * Drop-in replacement for `generateText({ model, ... })` used by all five
- * naming AI helpers. Pass the same system/messages/output you would today;
- * do not pass `model`.
+ * naming AI helpers. Pass the action `ctx` so we can persist call counts.
+ * Do not pass `model`.
  */
-export async function generateWithFailover(args: GenerateWithFailoverArgs) {
+export async function generateWithFailover(
+  ctx: ActionCtx,
+  args: GenerateWithFailoverArgs
+) {
   try {
     // --- Attempt 1: OpenAI (primary) ---
     const result = await callGenerateText(args, getPrimaryModel())
+    await recordProviderCall(ctx, "openai")
     // Convex dashboard log: healthy path, no failover.
     console.log(
       `AI step ok provider=openai model=${PRIMARY_MODEL_ID} failover=false`
     )
     return result
   } catch (primaryError) {
+    // Count the OpenAI attempt even when it failed (quota / outage still billed).
+    await recordProviderCall(ctx, "openai")
+
     // Bad prompt / schema / photo policy → bubble up immediately (no Gemini).
     if (!isFailoverEligibleAiError(primaryError)) {
       throw primaryError
@@ -92,6 +117,7 @@ export async function generateWithFailover(args: GenerateWithFailoverArgs) {
     try {
       // --- Attempt 2: Gemini (fallback) — same prompts/args as attempt 1 ---
       const result = await callGenerateText(args, getFallbackModel())
+      await recordProviderCall(ctx, "gemini")
       // Convex dashboard log: failover succeeded (mixed providers in one
       // ceremony are OK for v1 availability).
       console.log(
@@ -99,6 +125,7 @@ export async function generateWithFailover(args: GenerateWithFailoverArgs) {
       )
       return result
     } catch (fallbackError) {
+      await recordProviderCall(ctx, "gemini")
       // Both providers failed → existing normalizeAiError / Retry paths handle UX.
       console.error(
         "AI failover (Gemini) also failed:",

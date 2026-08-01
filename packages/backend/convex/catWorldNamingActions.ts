@@ -77,7 +77,7 @@ export const generateCatWorldNames = internalAction({
 
     for (let attempt = 0; attempt < MAX_GENERATION_ATTEMPTS; attempt += 1) {
       try {
-        const batch = await generateCatWorldNamesWithAi({
+        const batch = await generateCatWorldNamesWithAi(ctx, {
           summaryText: pipeline.summaryText,
           everydayName: pipeline.everydayName,
           excludedNames: pipeline.excludedNames,
