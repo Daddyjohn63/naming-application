@@ -1,5 +1,5 @@
 /**
- * KB-006 async AI work — generate family name batches via OpenAI.
+ * KB-006 async AI work — generate family name batches via the AI provider.
  */
 
 "use node"
@@ -41,7 +41,7 @@ export const generateFamilyNames = internalAction({
     }
 
     try {
-      const batch = await generateFamilyNamesWithAi({
+      const batch = await generateFamilyNamesWithAi(ctx, {
         summaryText: pipeline.summaryText,
         styleIds,
         excludedNames: pipeline.excludedNames,

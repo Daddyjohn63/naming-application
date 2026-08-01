@@ -64,6 +64,31 @@ describe("classifySummaryPipelineError", () => {
     assert.equal(result.userMessage, AI_SERVICE_UNAVAILABLE_MESSAGE)
   })
 
+  it("returns AI-unavailable for Gemini / Google outage wording", () => {
+    const geminiCases = [
+      "Google Generative AI: 503 Service Unavailable",
+      "gemini-2.5-flash overloaded",
+      "generativelanguage.googleapis.com fetch failed",
+      "Resource exhausted on generative AI API",
+    ]
+    for (const message of geminiCases) {
+      const result = classifySummaryPipelineError({
+        error: new Error(message),
+        hasPhoto: true,
+      })
+      assert.equal(
+        result.kind,
+        "transient",
+        `expected AI-unavailable for: ${message}`
+      )
+      assert.equal(
+        result.userMessage,
+        AI_SERVICE_UNAVAILABLE_MESSAGE,
+        `expected AI-unavailable copy for: ${message}`
+      )
+    }
+  })
+
   it("returns generic transient for unknown non-photo errors", () => {
     const result = classifySummaryPipelineError({
       error: new Error("Unexpected zod parse failure"),

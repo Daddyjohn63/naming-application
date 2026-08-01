@@ -1,5 +1,6 @@
 /**
- * KB-010 async AI work — generate ineffable near-name batches via OpenAI.
+ * KB-010 async AI work — generate ineffable near-name batches via the AI provider
+ * (OpenAI primary, Gemini failover; usage counted in ai_provider_usage).
  *
  * Simpler than cat-world: no global collision filter. On success, patches step
  * to `naming_ineffable` via applyIneffableNameGenerationSuccess.
@@ -80,7 +81,7 @@ export const generateIneffableNames = internalAction({
     }
 
     try {
-      const batch = await generateIneffableNamesWithAi({
+      const batch = await generateIneffableNamesWithAi(ctx, {
         summaryText: pipeline.summaryText,
         everydayName: pipeline.everydayName,
         catWorldName: pipeline.catWorldName,

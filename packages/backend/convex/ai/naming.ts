@@ -1,12 +1,14 @@
 /**
  * KB-004 AI prompts and Vercel AI SDK calls for photo validation and personality summary.
+ * All model calls go through `generateWithFailover` (OpenAI primary, Gemini on outage).
  * Prompt copy source of truth: ai-docs/prompts/FAMILY-SUMMARY-PROMPT.md (§0 + §1).
  */
 
-import { openai } from "@ai-sdk/openai"
-import { generateText, Output } from "ai"
+import { Output } from "ai"
 
 import { APP_NAME } from "@workspace/shared/constants/app"
+import type { ActionCtx } from "../_generated/server"
+import { generateWithFailover } from "./generateWithFailover"
 import {
   formatCatSexLabel,
   type CatSex,
@@ -170,11 +172,13 @@ export type PhotoValidationResult = {
 }
 
 /** Call vision model; structured output validated by `catPhotoValidationSchema`. */
-export async function validateCatPhotoWithAi(args: {
-  imageUrl: string
-}): Promise<PhotoValidationResult> {
-  const { output } = await generateText({
-    model: openai("gpt-4o-mini"),
+export async function validateCatPhotoWithAi(
+  ctx: ActionCtx,
+  args: {
+    imageUrl: string
+  }
+): Promise<PhotoValidationResult> {
+  const { output } = await generateWithFailover(ctx, {
     system: PHOTO_VALIDATION_SYSTEM_PROMPT,
     output: Output.object({ schema: catPhotoValidationSchema }),
     messages: [
@@ -195,10 +199,13 @@ export async function validateCatPhotoWithAi(args: {
 }
 
 /** Generate 120–220 word personality summary; attaches photo URL when provided. */
-export async function generateCatSummaryWithAi(args: {
-  profile: CatProfileForSummary
-  imageUrl?: string
-}): Promise<string> {
+export async function generateCatSummaryWithAi(
+  ctx: ActionCtx,
+  args: {
+    profile: CatProfileForSummary
+    imageUrl?: string
+  }
+): Promise<string> {
   const hasPhoto = args.imageUrl !== undefined && args.imageUrl.length > 0
   const userText = buildSummaryUserText(args.profile, hasPhoto)
 
@@ -211,8 +218,7 @@ export async function generateCatSummaryWithAi(args: {
       ]
     : [{ type: "text", text: userText }]
 
-  const { text } = await generateText({
-    model: openai("gpt-4o-mini"),
+  const { text } = await generateWithFailover(ctx, {
     system: SUMMARY_SYSTEM_PROMPT,
     messages: [{ role: "user", content: userContent }],
   })
@@ -273,16 +279,18 @@ Generate 10 family name options with rationales.`
 }
 
 /** Generate a batch of 10 family names + rationales (KB-006 §2). */
-export async function generateFamilyNamesWithAi(args: {
-  summaryText: string
-  styleIds: readonly FamilyNameStyleId[]
-  excludedNames: readonly string[]
-  generationIndex: number
-}): Promise<FamilyNameBatch> {
+export async function generateFamilyNamesWithAi(
+  ctx: ActionCtx,
+  args: {
+    summaryText: string
+    styleIds: readonly FamilyNameStyleId[]
+    excludedNames: readonly string[]
+    generationIndex: number
+  }
+): Promise<FamilyNameBatch> {
   const userText = buildFamilyNamesUserText(args)
 
-  const { output } = await generateText({
-    model: openai("gpt-4o-mini"),
+  const { output } = await generateWithFailover(ctx, {
     system: FAMILY_NAMES_SYSTEM_PROMPT,
     output: Output.object({ schema: familyNameBatchSchema }),
     messages: [{ role: "user", content: userText }],
@@ -364,16 +372,18 @@ Generate 10 ineffable near-name options with short poetic rationales.`
 }
 
 /** Generate a batch of 10 cat-world names + rationales (KB-009). Uses `system:` option per AI SDK guidance. */
-export async function generateCatWorldNamesWithAi(args: {
-  summaryText: string
-  everydayName: string
-  excludedNames: readonly string[]
-  generationIndex: number
-}): Promise<NameBatch> {
+export async function generateCatWorldNamesWithAi(
+  ctx: ActionCtx,
+  args: {
+    summaryText: string
+    everydayName: string
+    excludedNames: readonly string[]
+    generationIndex: number
+  }
+): Promise<NameBatch> {
   const userText = buildCatWorldNamesUserText(args)
 
-  const { output } = await generateText({
-    model: openai("gpt-4o-mini"),
+  const { output } = await generateWithFailover(ctx, {
     system: CAT_WORLD_NAMES_SYSTEM_PROMPT,
     output: Output.object({ schema: nameBatchSchema }),
     messages: [{ role: "user", content: userText }],
@@ -383,17 +393,19 @@ export async function generateCatWorldNamesWithAi(args: {
 }
 
 /** Generate a batch of 10 ineffable near-names + rationales (KB-010). Uses `system:` option per AI SDK guidance. */
-export async function generateIneffableNamesWithAi(args: {
-  summaryText: string
-  everydayName: string
-  catWorldName: string
-  excludedNames: readonly string[]
-  generationIndex: number
-}): Promise<NameBatch> {
+export async function generateIneffableNamesWithAi(
+  ctx: ActionCtx,
+  args: {
+    summaryText: string
+    everydayName: string
+    catWorldName: string
+    excludedNames: readonly string[]
+    generationIndex: number
+  }
+): Promise<NameBatch> {
   const userText = buildIneffableNamesUserText(args)
 
-  const { output } = await generateText({
-    model: openai("gpt-4o-mini"),
+  const { output } = await generateWithFailover(ctx, {
     system: INEFFABLE_NAMES_SYSTEM_PROMPT,
     output: Output.object({ schema: nameBatchSchema }),
     messages: [{ role: "user", content: userText }],
