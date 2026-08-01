@@ -18,7 +18,7 @@ export const CAT_PHOTO_SUMMARY_FAILED_MESSAGE =
 export const SUMMARY_PIPELINE_TRANSIENT_ERROR_MESSAGE =
   "We couldn't complete that step. Please try again."
 
-/** OpenAI / provider outage — apologize and invite a later retry (does not blame the photo). */
+/** AI provider outage — apologize and invite a later retry (does not blame the photo). */
 export const AI_SERVICE_UNAVAILABLE_MESSAGE =
   "Sorry — our naming assistant is temporarily unavailable. Please try again in a little while."
 
@@ -34,9 +34,12 @@ const EMPTY_SUMMARY_PATTERN = /summary came back empty/i
 const PHOTO_RELATED_ERROR_PATTERN =
   /\b(image|photo|vision|content.?policy|invalid.?image|unsupported.?format|not.?supported)\b/i
 
-/** Provider / infra failures that should not burn a photo-check attempt. */
+/**
+ * Provider / infra failures that should not burn a photo-check attempt.
+ * Includes OpenAI and Gemini/Google wording after silent failover.
+ */
 const AI_UNAVAILABLE_ERROR_PATTERN =
-  /\b(503|502|500|529|overloaded|service unavailable|temporarily unavailable|timeout|timed out|econnreset|enotfound|network|fetch failed|api.?connection|rate limit|too many requests|internal server error|bad gateway|gateway timeout|openai)\b/i
+  /\b(503|502|500|529|overloaded|service unavailable|temporarily unavailable|timeout|timed out|econnreset|enotfound|network|fetch failed|api.?connection|rate limit|too many requests|internal server error|bad gateway|gateway timeout|openai|google|gemini|generative.?ai|generativelanguage)\b/i
 
 function errorMessage(error: unknown): string {
   if (error instanceof Error) {
