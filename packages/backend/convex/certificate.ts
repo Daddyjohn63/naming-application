@@ -121,9 +121,9 @@ export const updateEverydayName = mutation({
 })
 
 /**
- * Marks the ceremony complete after the client generated + downloaded the PDF
- * and uploaded it to storage. Idempotent: a repeat call on a completed ceremony
- * is a no-op so retries never create duplicate snapshots.
+ * Marks the ceremony complete after the client generated the PDF and uploaded
+ * it to storage. Idempotent: a repeat call on a completed ceremony is a no-op
+ * so retries never create duplicate snapshots.
  */
 export const completeCeremony = mutation({
   args: {

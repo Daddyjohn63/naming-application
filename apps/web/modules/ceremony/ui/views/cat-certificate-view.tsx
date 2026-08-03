@@ -5,8 +5,8 @@
  *
  * Guards: redirects back to the ceremony when the three names aren't chosen
  * yet (KB-012 illegal-skip recovery). Pre-completion the user can free-text
- * edit the family name; generating downloads the PDF, stores it, and marks
- * the ceremony complete (final — name editing locks).
+ * edit the family name; generating stores the PDF and marks the ceremony
+ * complete (final — name editing locks), then reveals share + download links.
  */
 
 import * as React from "react"
@@ -189,7 +189,7 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
                 ? "Preparing…"
                 : complete
                   ? "Download PDF"
-                  : "Generate certificate & download PDF"}
+                  : "Generate certificate"}
             </Button>
             {complete ? (
               <Button
