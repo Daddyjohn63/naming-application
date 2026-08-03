@@ -3,9 +3,10 @@
 /**
  * KB-011 — client-side certificate PDF/PNG pipeline.
  *
- * Order matters for first generate (AC: `ceremony_complete` only after the PDF
- * path succeeded): capture HTML → build PDF → trigger local download → upload
- * blob to Convex storage → `completeCeremony`. Re-downloads skip the
+ * First generate (AC: `ceremony_complete` only after the PDF path succeeded):
+ * capture HTML → build PDF → upload blob to Convex storage → `completeCeremony`.
+ * No browser download on first generate — the page then reveals Share with
+ * friends plus Download PDF / Download PNG. Re-downloads skip the
  * upload/mutation. PNG download never marks the ceremony complete.
  */
 
@@ -142,13 +143,16 @@ export function useCertificateDownload({
         hotfixes: ["px_scaling"],
       })
       pdf.addImage(imageDataUrl, "PNG", 0, 0, width, height)
-      pdf.save(certificateFileName(everydayName, "pdf"))
 
+      // Re-download after ceremony is already complete — save to disk only.
       if (alreadyComplete) {
+        pdf.save(certificateFileName(everydayName, "pdf"))
         toast.success("Certificate downloaded.")
         return
       }
 
+      // First generate: persist + complete the ceremony before any download.
+      // The UI then shows Share with friends and Download PDF / PNG.
       const pdfBlob = pdf.output("blob")
       const uploadUrl = await generateUploadUrl({})
       const uploadResponse = await fetch(uploadUrl, {
