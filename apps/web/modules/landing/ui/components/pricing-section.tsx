@@ -32,7 +32,7 @@ const UNLOCK_FEATURES = [
   "Ineffable near-name — a poetic guess at their secret name",
   "One free regeneration at each unlocked stage",
   "Keepsake certificate with all three names",
-  "PDF download to print, share, or frame",
+  "PDF or PNG download, plus an optional private share link",
 ] as const
 
 /** Free-vs-unlock pricing cards — unlock is free during the public beta. */

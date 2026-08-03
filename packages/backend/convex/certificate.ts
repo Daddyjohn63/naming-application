@@ -5,6 +5,8 @@
  * uploads the final PDF to Convex storage, then calls `completeCeremony` with the
  * storage id. Completion is final: name mutations across all stages already refuse
  * `ceremony_complete`.
+ *
+ * Opt-in public sharing uses an unguessable `certificateShareId` (never the catId).
  */
 
 import { ConvexError, v } from "convex/values"
@@ -17,8 +19,8 @@ import { STAGED_NAMING_ERROR_CODE } from "@workspace/shared/constants/staged-nam
 import { setFamilyFavouriteSchema } from "@workspace/shared/schemas/family-naming"
 
 import type { Doc, Id } from "./_generated/dataModel"
-import type { MutationCtx } from "./_generated/server"
-import { mutation } from "./_generated/server"
+import type { MutationCtx, QueryCtx } from "./_generated/server"
+import { mutation, query } from "./_generated/server"
 import { allThreeNamesChosen } from "./lib/namingStage"
 import { getCurrentUser } from "./users"
 
@@ -42,6 +44,35 @@ function assertUnlocked(cat: Doc<"cats">): void {
     throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NOT_UNLOCKED })
   }
 }
+
+/** ~24-char unguessable share token (base64url alphabet). */
+function generateCertificateShareId(): string {
+  const bytes = new Uint8Array(18)
+  crypto.getRandomValues(bytes)
+  const alphabet =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+  let out = ""
+  for (let i = 0; i < bytes.length; i++) {
+    const byte = bytes[i]
+    if (byte === undefined) {
+      continue
+    }
+    out += alphabet[byte & 63]
+  }
+  return out
+}
+
+const publicCertificateValidator = v.object({
+  everydayName: v.string(),
+  catWorldName: v.string(),
+  ineffableName: v.string(),
+  everydayNameRationale: v.string(),
+  catWorldNameRationale: v.string(),
+  ineffableNameRationale: v.string(),
+  summaryText: v.union(v.string(), v.null()),
+  photoUrl: v.union(v.string(), v.null()),
+  ceremonyCompletedAt: v.union(v.number(), v.null()),
+})
 
 /**
  * Free-text rename of the everyday (family) name before certificate generation.
@@ -151,5 +182,130 @@ export const completeCeremony = mutation({
     })
 
     return null
+  },
+})
+
+/**
+ * Owner toggle for the public share page. Generates a stable share id on first
+ * enable; disabling only clears the flag so the same link works again later.
+ */
+export const setCertificateSharing = mutation({
+  args: {
+    catId: v.string(),
+    enabled: v.boolean(),
+  },
+  returns: v.object({
+    shareId: v.string(),
+    enabled: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const currentUser = await getCurrentUser(ctx)
+    if (currentUser === null) {
+      throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NOT_AUTHENTICATED })
+    }
+    const id = ctx.db.normalizeId("cats", args.catId)
+    if (id === null) {
+      throw new ConvexError({ code: STAGED_NAMING_ERROR_CODE.NOT_FOUND })
+    }
+    const cat = await getOwnedCatOrThrow(ctx, id, currentUser._id)
+    if (cat.ceremonyStep !== "ceremony_complete") {
+      throw new ConvexError({
+        code: STAGED_NAMING_ERROR_CODE.CEREMONY_NOT_COMPLETE,
+      })
+    }
+
+    const shareId = cat.certificateShareId ?? generateCertificateShareId()
+    const now = Date.now()
+    await ctx.db.patch(id, {
+      certificateShareId: shareId,
+      certificateShareEnabled: args.enabled,
+      updatedAt: now,
+    })
+
+    return { shareId, enabled: args.enabled }
+  },
+})
+
+async function resolvePhotoUrl(
+  ctx: QueryCtx,
+  storageId: Id<"_storage"> | undefined,
+): Promise<string | null> {
+  if (storageId === undefined) {
+    return null
+  }
+  const url = (await ctx.storage.getUrl(storageId)) ?? ""
+  return url === "" ? null : url
+}
+
+/**
+ * Public (unauthenticated) certificate payload for `/c/[shareId]`.
+ * Returns null when the token is unknown or sharing is off — same empty result
+ * either way so callers cannot probe which tokens exist.
+ */
+export const getPublicCertificate = query({
+  args: { shareId: v.string() },
+  returns: v.union(publicCertificateValidator, v.null()),
+  handler: async (ctx, args) => {
+    const trimmed = args.shareId.trim()
+    if (trimmed.length === 0) {
+      return null
+    }
+
+    const cat = await ctx.db
+      .query("cats")
+      .withIndex("by_certificateShareId", (q) =>
+        q.eq("certificateShareId", trimmed),
+      )
+      .unique()
+
+    if (cat === null || cat.certificateShareEnabled !== true) {
+      return null
+    }
+
+    const certificate = await ctx.db
+      .query("certificates")
+      .withIndex("by_catId", (q) => q.eq("catId", cat._id))
+      .first()
+
+    const snapshot = certificate?.snapshot
+    const everydayName =
+      snapshot?.familyName ?? cat.selectedFamilyName ?? ""
+    const catWorldName =
+      snapshot?.catWorldName ?? cat.selectedCatWorldName ?? ""
+    const ineffableName =
+      snapshot?.ineffableName ?? cat.selectedIneffableName ?? ""
+
+    if (
+      everydayName.length === 0 ||
+      catWorldName.length === 0 ||
+      ineffableName.length === 0
+    ) {
+      return null
+    }
+
+    let summaryText: string | null = null
+    if (cat.acceptedSummaryVersionId !== undefined) {
+      const version = await ctx.db.get(cat.acceptedSummaryVersionId)
+      if (version !== null) {
+        summaryText = version.summaryText
+      }
+    }
+
+    const photoUrl = await resolvePhotoUrl(ctx, cat.photoStorageId)
+
+    return {
+      everydayName,
+      catWorldName,
+      ineffableName,
+      everydayNameRationale:
+        snapshot?.familyRationale ?? cat.selectedFamilyRationale ?? "",
+      catWorldNameRationale:
+        snapshot?.catWorldRationale ?? cat.selectedCatWorldRationale ?? "",
+      ineffableNameRationale:
+        snapshot?.ineffableRationale ?? cat.selectedIneffableRationale ?? "",
+      summaryText,
+      photoUrl,
+      ceremonyCompletedAt: cat.ceremonyCompletedAt ?? null,
+    }
   },
 })

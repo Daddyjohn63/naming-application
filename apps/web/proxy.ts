@@ -9,6 +9,8 @@ const isPublicRoute = createRouteMatcher([
   "/examples(.*)",
   "/privacy(.*)",
   "/terms(.*)",
+  // Opt-in shared certificates (unguessable token; no auth)
+  "/c(.*)",
   // SEO / PWA discovery endpoints must stay crawlable without auth
   "/robots.txt",
   "/sitemap.xml",

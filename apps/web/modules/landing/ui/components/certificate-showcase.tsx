@@ -8,7 +8,8 @@ const CERTIFICATE_FEATURES = [
   "The personality summary, written from your words and their photo",
   "All three names — family, cat-world, and ineffable — with their meanings",
   "The date of the ceremony, sealed for posterity",
-  "A PDF download to print, share, or frame",
+  "Download as PDF to print or frame, or PNG for easy sharing",
+  "An optional private link you can share with friends",
   "Reopen it from your dashboard whenever you miss it",
 ] as const
 

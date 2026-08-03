@@ -14,7 +14,7 @@ import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { useMutation, useQuery } from "convex/react"
 import { format } from "date-fns"
-import { ArrowLeft, BadgeCheck, Download, PencilLine } from "lucide-react"
+import { ArrowLeft, BadgeCheck, Download, ImageIcon, PencilLine } from "lucide-react"
 
 import { api } from "@workspace/backend/_generated/api"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
@@ -40,6 +40,7 @@ import {
   useCertificateDownload,
   useCertificatePhotoDataUrl,
 } from "@/modules/ceremony/lib/use-certificate-download"
+import { CertificateSharePanel } from "@/modules/ceremony/ui/components/certificate-share-panel"
 import type { CeremonyCertificateData } from "@/modules/ceremony/ui/components/ceremony-certificate-document"
 import { CeremonyCertificateDocument } from "@/modules/ceremony/ui/components/ceremony-certificate-document"
 import { CertificateFeedbackBanner, CertificateFeedbackDialog, useCertificateFeedbackState } from "@/modules/feedback/ui/components/certificate-feedback-prompt"
@@ -83,7 +84,7 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
 
   const captureRef = React.useRef<HTMLDivElement | null>(null)
   const everydayName = cat.selectedFamilyName ?? ""
-  const { working, download } = useCertificateDownload({
+  const { working, downloadPdf, downloadPng } = useCertificateDownload({
     catId: cat._id,
     everydayName,
     alreadyComplete: complete,
@@ -144,7 +145,7 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
         </h1>
         <p className="text-sm text-muted-foreground">
           {complete
-            ? "Your ceremony is complete. Download your certificate again any time."
+            ? "Your ceremony is complete. Download as PDF or PNG, or share a private link with friends."
             : "Review your cat's completed profile below. You can still adjust the family name before generating."}
         </p>
       </div>
@@ -160,6 +161,15 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
 
       <CeremonyCertificateDocument data={certificateData} />
 
+      {complete ? (
+        <CertificateSharePanel
+          catId={cat._id}
+          everydayName={everydayName}
+          shareEnabled={cat.certificateShareEnabled === true}
+          shareId={cat.certificateShareId}
+        />
+      ) : null}
+
       <Card className="ceremony-highlight-panel border-primary/30">
         <div className="flex flex-col gap-3 px-4 py-5">
           {!complete ? (
@@ -172,15 +182,27 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
             <Button
               type="button"
               disabled={working || (latestSummary === undefined && !complete)}
-              onClick={() => void download()}
+              onClick={() => void downloadPdf()}
             >
               <Download className="size-4" aria-hidden />
               {working
-                ? "Preparing your PDF…"
+                ? "Preparing…"
                 : complete
                   ? "Download PDF"
                   : "Generate certificate & download PDF"}
             </Button>
+            {complete ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="border-primary/30"
+                disabled={working}
+                onClick={() => void downloadPng()}
+              >
+                <ImageIcon className="size-4" aria-hidden />
+                Download PNG
+              </Button>
+            ) : null}
             {feedback.canLeaveFeedback ? (
               <Button
                 type="button"
