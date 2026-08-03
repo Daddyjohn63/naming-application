@@ -197,11 +197,18 @@ export default defineSchema({
     /** Rendered certificate asset (PDF/PNG) after ceremony completes. */
     certificateStorageId: v.optional(v.id("_storage")),
     ceremonyCompletedAt: v.optional(v.number()),
+    /**
+     * Opt-in public share. Default off/undefined. When true, `/c/[certificateShareId]`
+     * is readable without auth. Token is unguessable and stable once created.
+     */
+    certificateShareEnabled: v.optional(v.boolean()),
+    certificateShareId: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_userId_createdAt", ["userId", "createdAt"])
-    .index("by_userId_slug", ["userId", "slug"]),
+    .index("by_userId_slug", ["userId", "slug"])
+    .index("by_certificateShareId", ["certificateShareId"]),
 
   /**
    * Version history for the editable AI personality summary (KB-004).

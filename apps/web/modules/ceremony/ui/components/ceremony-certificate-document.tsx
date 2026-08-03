@@ -11,6 +11,7 @@
 
 import { Crown, Feather, PawPrint, Shield, Sparkles } from "lucide-react"
 
+import { SITE_WWW_HOST } from "@workspace/shared/constants/site"
 import { cn } from "@workspace/ui/lib/utils"
 
 import { dataComponent } from "@/lib/data-component"
@@ -225,9 +226,12 @@ export function CeremonyCertificateDocument({
         </div>
       </div>
 
-      {/* Date */}
+      {/* Date + brand attribution (captured into PDF/PNG) */}
       <p className="mt-5 text-center text-xs font-medium tracking-wide text-[#8a7658]">
         {data.dateLabel}
+      </p>
+      <p className="mt-2 text-center text-[11px] tracking-wide text-[#a89474]">
+        Created by {SITE_WWW_HOST}
       </p>
     </div>
   )

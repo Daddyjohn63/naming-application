@@ -3,6 +3,9 @@ import { APP_NAME } from "./app"
 /** Canonical production hostname (no protocol, no www). */
 export const SITE_DOMAIN = "purrfectlynamed.com"
 
+/** www host for display copy (certificate footer, marketing). */
+export const SITE_WWW_HOST = `www.${SITE_DOMAIN}`
+
 /** Absolute origin used for canonical URLs, Open Graph, and sitemap. */
 export const SITE_URL = `https://${SITE_DOMAIN}`
 

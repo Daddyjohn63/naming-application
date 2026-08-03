@@ -1,12 +1,12 @@
 "use client"
 
 /**
- * KB-011 — client-side certificate PDF pipeline.
+ * KB-011 — client-side certificate PDF/PNG pipeline.
  *
- * Order matters (AC: `ceremony_complete` only after the PDF path succeeded):
- * capture HTML → build PDF → trigger local download → upload blob to Convex
- * storage → `completeCeremony`. Re-downloads on completed ceremonies skip the
- * upload/mutation (the mutation is idempotent anyway).
+ * Order matters for first generate (AC: `ceremony_complete` only after the PDF
+ * path succeeded): capture HTML → build PDF → trigger local download → upload
+ * blob to Convex storage → `completeCeremony`. Re-downloads skip the
+ * upload/mutation. PNG download never marks the ceremony complete.
  */
 
 import * as React from "react"
@@ -63,12 +63,26 @@ export function useCertificatePhotoDataUrl(
   return src
 }
 
-function certificateFileName(everydayName: string): string {
+function certificateSlug(everydayName: string): string {
   const slug = everydayName
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
-  return `${slug.length > 0 ? slug : "cat"}-naming-certificate.pdf`
+  return slug.length > 0 ? slug : "cat"
+}
+
+function certificateFileName(everydayName: string, extension: "pdf" | "png"): string {
+  return `${certificateSlug(everydayName)}-naming-certificate.${extension}`
+}
+
+function triggerBrowserDownload(dataUrl: string, fileName: string): void {
+  const anchor = document.createElement("a")
+  anchor.href = dataUrl
+  anchor.download = fileName
+  anchor.rel = "noopener"
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
 }
 
 type UseCertificateDownloadArgs = {
@@ -92,26 +106,35 @@ export function useCertificateDownload({
   const completeCeremony = useMutation(api.certificate.completeCeremony)
   const [working, setWorking] = React.useState(false)
 
-  const download = React.useCallback(async () => {
+  const capturePng = React.useCallback(async () => {
     const node = captureRef.current
-    if (node === null || working) {
+    if (node === null) {
+      throw new Error("Certificate is not ready to capture yet.")
+    }
+    const { toPng } = await import("html-to-image")
+    return {
+      width: node.offsetWidth,
+      height: node.offsetHeight,
+      imageDataUrl: await toPng(node, {
+        pixelRatio: 2,
+        cacheBust: true,
+        backgroundColor: "#fdf9f0",
+      }),
+    }
+  }, [captureRef])
+
+  const downloadPdf = React.useCallback(async () => {
+    if (working) {
       return
     }
     setWorking(true)
     try {
-      const [{ toPng }, { jsPDF }] = await Promise.all([
-        import("html-to-image"),
+      const [{ jsPDF }, captured] = await Promise.all([
         import("jspdf"),
+        capturePng(),
       ])
 
-      const width = node.offsetWidth
-      const height = node.offsetHeight
-      const imageDataUrl = await toPng(node, {
-        pixelRatio: 2,
-        cacheBust: true,
-        backgroundColor: "#fdf9f0",
-      })
-
+      const { width, height, imageDataUrl } = captured
       const pdf = new jsPDF({
         orientation: height >= width ? "portrait" : "landscape",
         unit: "px",
@@ -119,7 +142,7 @@ export function useCertificateDownload({
         hotfixes: ["px_scaling"],
       })
       pdf.addImage(imageDataUrl, "PNG", 0, 0, width, height)
-      pdf.save(certificateFileName(everydayName))
+      pdf.save(certificateFileName(everydayName, "pdf"))
 
       if (alreadyComplete) {
         toast.success("Certificate downloaded.")
@@ -151,7 +174,7 @@ export function useCertificateDownload({
     }
   }, [
     alreadyComplete,
-    captureRef,
+    capturePng,
     catId,
     completeCeremony,
     everydayName,
@@ -160,5 +183,25 @@ export function useCertificateDownload({
     working,
   ])
 
-  return { working, download }
+  const downloadPng = React.useCallback(async () => {
+    if (working) {
+      return
+    }
+    setWorking(true)
+    try {
+      const { imageDataUrl } = await capturePng()
+      triggerBrowserDownload(
+        imageDataUrl,
+        certificateFileName(everydayName, "png"),
+      )
+      toast.success("Certificate image downloaded.")
+    } catch (error) {
+      console.error("Certificate PNG download failed", error)
+      toast.error(getConvexErrorMessage(error))
+    } finally {
+      setWorking(false)
+    }
+  }, [capturePng, everydayName, working])
+
+  return { working, downloadPdf, downloadPng }
 }

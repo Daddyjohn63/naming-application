@@ -49,7 +49,7 @@ const CEREMONY_STEPS: readonly CeremonyStep[] = [
   {
     title: "Download the certificate",
     description:
-      "All three names on a storybook keepsake certificate, with their photo and the ceremony date. Download it as a PDF and reopen it from your dashboard any time.",
+      "All three names on a storybook keepsake certificate, with their photo and the ceremony date. Download as PDF or PNG, share a private link if you like, and reopen it from your dashboard any time.",
     phase: "Unlock",
   },
 ] as const
