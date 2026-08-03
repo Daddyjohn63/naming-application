@@ -21,7 +21,16 @@ export async function fetchPublicCertificate(
 ): Promise<PublicCertificate | null> {
   const client = createConvexHttpClient()
   if (client === null) {
+    console.warn(
+      "fetchPublicCertificate: NEXT_PUBLIC_CONVEX_URL is missing; returning null.",
+    )
     return null
   }
-  return await client.query(api.certificate.getPublicCertificate, { shareId })
+
+  try {
+    return await client.query(api.certificate.getPublicCertificate, { shareId })
+  } catch (error) {
+    console.error("fetchPublicCertificate: query failed", error)
+    return null
+  }
 }
