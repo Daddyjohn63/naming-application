@@ -3,7 +3,7 @@ import { Mail } from "lucide-react"
 import { dataComponent } from "@/lib/data-component"
 
 /** Placeholder support inbox until a real address is configured. */
-export const USER_SUPPORT_EMAIL = "purrfectlynamed@gmail.com"
+export const USER_SUPPORT_EMAIL = "purrcival@purrfectlynamed.com"
 
 /** Contact block with dummy support email for the dashboard help page. */
 export function UserSupportContact() {
