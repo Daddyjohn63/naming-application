@@ -352,4 +352,35 @@ export default defineSchema({
   })
     .index("by_userId", ["userId"])
     .index("by_createdAt", ["createdAt"]),
+
+  /**
+   * Append-only beta error log (no third-party APM).
+   * Unexpected failures only — expected ConvexError codes stay out of this table.
+   * Review via Convex Data tab or admin list query; prune with a later TTL cron.
+   */
+  error_events: defineTable({
+    createdAt: v.number(),
+    source: v.union(
+      v.literal("convex"),
+      v.literal("web-client"),
+      v.literal("web-server"),
+    ),
+    severity: v.union(v.literal("error"), v.literal("warn")),
+    /** Stable area key, e.g. "familyNaming", "clerkWebhook", "react". */
+    area: v.string(),
+    message: v.string(),
+    /** Optional ConvexError / app error code when present. */
+    code: v.optional(v.string()),
+    userId: v.optional(v.id("users")),
+    catId: v.optional(v.id("cats")),
+    /** Route path or Convex function name. */
+    path: v.optional(v.string()),
+    /** Truncated stack trace for debugging. */
+    stack: v.optional(v.string()),
+    /** Small string map for extra context (never secrets / prompts / photos). */
+    meta: v.optional(v.record(v.string(), v.string())),
+  })
+    .index("by_createdAt", ["createdAt"])
+    .index("by_area_createdAt", ["area", "createdAt"])
+    .index("by_source_createdAt", ["source", "createdAt"]),
 })

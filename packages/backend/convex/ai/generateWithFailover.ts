@@ -30,6 +30,10 @@ import { isFailoverEligibleAiError } from "@workspace/shared/utils/is-failover-e
 import { internal } from "../_generated/api"
 import type { ActionCtx } from "../_generated/server"
 import {
+  describeUnknownError,
+  persistErrorEvent,
+} from "../errorEvents"
+import {
   FALLBACK_MODEL_ID,
   PRIMARY_MODEL_ID,
   getFallbackModel,
@@ -147,10 +151,23 @@ export async function generateWithFailover<
     // Eligible outage, but no Gemini key on this Convex deployment → behave
     // like today (OpenAI-only failure). Do not crash at import time.
     if (!hasFallbackApiKey()) {
+      const described = describeUnknownError(primaryError)
       console.warn(
         "AI primary failed; Gemini failover skipped (GOOGLE_GENERATIVE_AI_API_KEY unset):",
-        primaryError instanceof Error ? primaryError.message : primaryError
+        described.message
       )
+      await persistErrorEvent(ctx, {
+        source: "convex",
+        severity: "warn",
+        area: "ai.failover",
+        message: described.message,
+        stack: described.stack,
+        path: "generateWithFailover",
+        meta: {
+          stage: "primary_failed_no_fallback_key",
+          primaryModel: PRIMARY_MODEL_ID,
+        },
+      })
       throw primaryError
     }
 
@@ -169,14 +186,40 @@ export async function generateWithFailover<
       console.log(
         `AI step ok provider=gemini model=${FALLBACK_MODEL_ID} failover=true`
       )
+      const primaryDescribed = describeUnknownError(primaryError)
+      await persistErrorEvent(ctx, {
+        source: "convex",
+        severity: "warn",
+        area: "ai.failover",
+        message: `Primary failed; Gemini succeeded: ${primaryDescribed.message}`,
+        stack: primaryDescribed.stack,
+        path: "generateWithFailover",
+        meta: {
+          stage: "failover_succeeded",
+          primaryModel: PRIMARY_MODEL_ID,
+          fallbackModel: FALLBACK_MODEL_ID,
+        },
+      })
       return result
     } catch (fallbackError) {
       recordProviderCall(ctx, "gemini")
       // Both providers failed → existing normalizeAiError / Retry paths handle UX.
-      console.error(
-        "AI failover (Gemini) also failed:",
-        fallbackError instanceof Error ? fallbackError.message : fallbackError
-      )
+      const described = describeUnknownError(fallbackError)
+      console.error("AI failover (Gemini) also failed:", described.message)
+      await persistErrorEvent(ctx, {
+        source: "convex",
+        severity: "error",
+        area: "ai.failover",
+        message: described.message,
+        stack: described.stack,
+        path: "generateWithFailover",
+        meta: {
+          stage: "both_providers_failed",
+          primaryModel: PRIMARY_MODEL_ID,
+          fallbackModel: FALLBACK_MODEL_ID,
+          primaryError: describeUnknownError(primaryError).message,
+        },
+      })
       throw fallbackError
     }
   }

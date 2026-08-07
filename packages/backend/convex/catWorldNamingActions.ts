@@ -23,6 +23,7 @@ import {
   generateCatWorldNamesWithAi,
   normalizeAiError,
 } from "./ai/naming"
+import { describeUnknownError, persistErrorEvent } from "./errorEvents"
 import { internal } from "./_generated/api"
 import { internalAction } from "./_generated/server"
 
@@ -93,6 +94,20 @@ export const generateCatWorldNames = internalAction({
           if (attempt < MAX_GENERATION_ATTEMPTS - 1) {
             continue
           }
+          await persistErrorEvent(ctx, {
+            source: "convex",
+            severity: "error",
+            area: "catWorldNaming.generateCatWorldNames",
+            message:
+              "Could not find enough unique cat-world names after retries",
+            catId,
+            path: "catWorldNamingActions.generateCatWorldNames",
+            meta: {
+              generationIndex: String(generationIndex),
+              availableCount: String(available.length),
+              reason: "global_collision",
+            },
+          })
           await ctx.runMutation(
             internal.catWorldNaming.applyCatWorldNameGenerationFailure,
             {
@@ -118,6 +133,20 @@ export const generateCatWorldNames = internalAction({
       }
     }
 
+    const described = describeUnknownError(lastError)
+    await persistErrorEvent(ctx, {
+      source: "convex",
+      severity: "error",
+      area: "catWorldNaming.generateCatWorldNames",
+      message: described.message,
+      catId,
+      stack: described.stack,
+      path: "catWorldNamingActions.generateCatWorldNames",
+      meta: {
+        generationIndex: String(generationIndex),
+        reason: "ai_failed",
+      },
+    })
     await ctx.runMutation(internal.catWorldNaming.applyCatWorldNameGenerationFailure, {
       catId,
       errorMessage: normalizeAiError(lastError),

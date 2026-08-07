@@ -17,6 +17,7 @@ import { useMutation, useQuery } from "convex/react"
 import { useParams } from "next/navigation"
 
 import { api } from "@workspace/backend/_generated/api"
+import { useReportClientError } from "@/lib/use-report-client-error"
 import { toastCatCeremonyMutationError } from "@/modules/cats/lib/cat-ceremony-errors"
 import {
   deriveCatCeremonyPanelFlags,
@@ -91,6 +92,7 @@ export function useCatCeremonyPage(): UseCatCeremonyPageResult {
   const returnToProfile = useMutation(
     api.catSummary.returnToProfileForPhotoReplace,
   )
+  const reportClientError = useReportClientError()
 
   const [retrying, setRetrying] = React.useState(false)
   const [returningToProfile, setReturningToProfile] = React.useState(false)
@@ -121,10 +123,15 @@ export function useCatCeremonyPage(): UseCatCeremonyPageResult {
       try {
         await returnToProfile({ catId })
       } catch (err) {
-        toastCatCeremonyMutationError("Could not return to profile", err)
+        toastCatCeremonyMutationError(
+          "Could not return to profile",
+          err,
+          reportClientError,
+          { area: "catCeremony.returnToProfile", catId },
+        )
       }
     })()
-  }, [cat?._id, cat?.ceremonyStep, returnToProfile])
+  }, [cat?._id, cat?.ceremonyStep, reportClientError, returnToProfile])
 
   // Panel flags and photo block only apply once we have a loaded cat document.
   const loadedCat = cat ?? null
@@ -149,11 +156,16 @@ export function useCatCeremonyPage(): UseCatCeremonyPageResult {
       toastCatCeremonyMutationError(
         "Failed to retry family name generation",
         err,
+        reportClientError,
+        {
+          area: "catCeremony.retryFamilyNames",
+          catId: loadedCat._id,
+        },
       )
     } finally {
       setRetryingFamilyNames(false)
     }
-  }, [loadedCat, retryFamilyNames])
+  }, [loadedCat, reportClientError, retryFamilyNames])
 
   const onRetryCatWorldNames = React.useCallback(async () => {
     if (loadedCat === null) {
@@ -166,11 +178,16 @@ export function useCatCeremonyPage(): UseCatCeremonyPageResult {
       toastCatCeremonyMutationError(
         "Failed to retry cat-world name generation",
         err,
+        reportClientError,
+        {
+          area: "catCeremony.retryCatWorldNames",
+          catId: loadedCat._id,
+        },
       )
     } finally {
       setRetryingCatWorldNames(false)
     }
-  }, [loadedCat, retryCatWorldNames])
+  }, [loadedCat, reportClientError, retryCatWorldNames])
 
   const onRetryIneffableNames = React.useCallback(async () => {
     if (loadedCat === null) {
@@ -183,11 +200,16 @@ export function useCatCeremonyPage(): UseCatCeremonyPageResult {
       toastCatCeremonyMutationError(
         "Failed to retry ineffable name generation",
         err,
+        reportClientError,
+        {
+          area: "catCeremony.retryIneffableNames",
+          catId: loadedCat._id,
+        },
       )
     } finally {
       setRetryingIneffableNames(false)
     }
-  }, [loadedCat, retryIneffableNames])
+  }, [loadedCat, reportClientError, retryIneffableNames])
 
   const onRetryPipeline = React.useCallback(async () => {
     if (loadedCat === null) {
@@ -197,11 +219,19 @@ export function useCatCeremonyPage(): UseCatCeremonyPageResult {
     try {
       await retryPipeline({ catId: loadedCat._id })
     } catch (err) {
-      toastCatCeremonyMutationError("Failed to retry summary pipeline", err)
+      toastCatCeremonyMutationError(
+        "Failed to retry summary pipeline",
+        err,
+        reportClientError,
+        {
+          area: "catCeremony.retrySummaryPipeline",
+          catId: loadedCat._id,
+        },
+      )
     } finally {
       setRetrying(false)
     }
-  }, [loadedCat, retryPipeline])
+  }, [loadedCat, reportClientError, retryPipeline])
 
   const onBackToProfile = React.useCallback(async () => {
     if (loadedCat === null || loadedCat.ceremonyStep === "draft") {
@@ -211,11 +241,19 @@ export function useCatCeremonyPage(): UseCatCeremonyPageResult {
     try {
       await returnToProfile({ catId: loadedCat._id })
     } catch (err) {
-      toastCatCeremonyMutationError("Could not return to profile", err)
+      toastCatCeremonyMutationError(
+        "Could not return to profile",
+        err,
+        reportClientError,
+        {
+          area: "catCeremony.returnToProfile",
+          catId: loadedCat._id,
+        },
+      )
     } finally {
       setReturningToProfile(false)
     }
-  }, [loadedCat, returnToProfile])
+  }, [loadedCat, reportClientError, returnToProfile])
 
   return {
     catIdParam,

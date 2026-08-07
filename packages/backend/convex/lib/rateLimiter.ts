@@ -35,6 +35,8 @@ const rateLimits = {
   completeStubUnlock: { kind: "fixed window" as const, rate: 10, period: HOUR },
   /** Beta review submit / upsert — keep spam low; one review per user anyway. */
   submitBetaReview: { kind: "fixed window" as const, rate: 5, period: HOUR },
+  /** Client/server error reports into error_events (keyed by user or "anonymous"). */
+  reportClientError: { kind: "fixed window" as const, rate: 30, period: HOUR },
 }
 
 export const rateLimiter = new RateLimiter(components.rateLimiter, rateLimits)
@@ -48,13 +50,13 @@ type RateLimitStatus =
   | { ok: false; retryAfter: number }
 
 /**
- * Consume one token for `name`, keyed by Convex `users._id`.
+ * Consume one token for `name`, keyed by a string (usually `users._id`).
  * Throws `ConvexError({ code: too_many_attempts })` when exceeded.
  */
 export async function enforceRateLimit(
   ctx: RateLimitCtx,
   name: RateLimitName,
-  userId: Id<"users">,
+  key: Id<"users"> | string,
 ): Promise<void> {
   // RateLimiter's option tuple types don't distribute over a name union.
   const limit = rateLimiter.limit.bind(rateLimiter) as (
@@ -63,7 +65,7 @@ export async function enforceRateLimit(
     options: { key: string },
   ) => Promise<RateLimitStatus>
 
-  const status = await limit(ctx, name, { key: userId })
+  const status = await limit(ctx, name, { key })
 
   if (!status.ok) {
     throw new ConvexError({ code: RATE_LIMIT_ERROR_CODE.TOO_MANY_ATTEMPTS })
