@@ -6,7 +6,8 @@
 import { getConvexErrorData } from "@workspace/shared/utils/convex-error"
 
 export type ReportClientErrorArgs = {
-  source: "web-client" | "web-server"
+  /** Browser reports are always web-client; server assigns web-server internally. */
+  source: "web-client"
   severity?: "error" | "warn"
   area: string
   message: string
@@ -15,9 +16,34 @@ export type ReportClientErrorArgs = {
   path?: string
   stack?: string
   meta?: Record<string, string>
+  /** Opaque per-browser session key for unauthenticated rate limiting. */
+  sessionKey?: string
 }
 
 type ReportClientErrorFn = (args: ReportClientErrorArgs) => Promise<unknown>
+
+const SESSION_STORAGE_KEY = "nb_error_report_session"
+
+/** Stable browser session id for anonymous rate limiting (sessionStorage). */
+export function getErrorReportSessionKey(): string {
+  if (typeof window === "undefined") {
+    return "ssr"
+  }
+  try {
+    const existing = window.sessionStorage.getItem(SESSION_STORAGE_KEY)
+    if (existing !== null && existing.length >= 8) {
+      return existing
+    }
+    const created =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `s_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`
+    window.sessionStorage.setItem(SESSION_STORAGE_KEY, created)
+    return created
+  } catch {
+    return `mem_${Date.now().toString(36)}`
+  }
+}
 
 /** True when the error already carries a structured ConvexError code (expected UX path). */
 export function isExpectedConvexError(error: unknown): boolean {
@@ -36,7 +62,11 @@ function describeError(error: unknown): { message: string; stack?: string } {
     return { message: error }
   }
   try {
-    return { message: JSON.stringify(error) }
+    const serialized = JSON.stringify(error)
+    if (typeof serialized === "string") {
+      return { message: serialized }
+    }
+    return { message: "Unknown error" }
   } catch {
     return { message: "Unknown error" }
   }
@@ -44,6 +74,7 @@ function describeError(error: unknown): { message: string; stack?: string } {
 
 /**
  * Fire-and-forget report. Never throws. Skips expected ConvexError codes.
+ * Always reports as `web-client`.
  */
 export function reportUnexpectedClientError(
   report: ReportClientErrorFn,
@@ -54,7 +85,6 @@ export function reportUnexpectedClientError(
     catId?: string
     meta?: Record<string, string>
     severity?: "error" | "warn"
-    source?: "web-client" | "web-server"
   },
 ): void {
   if (isExpectedConvexError(options.error)) {
@@ -65,7 +95,7 @@ export function reportUnexpectedClientError(
   const code = getConvexErrorData(options.error)?.code
 
   void report({
-    source: options.source ?? "web-client",
+    source: "web-client",
     severity: options.severity ?? "error",
     area: options.area,
     message: described.message,
@@ -74,6 +104,7 @@ export function reportUnexpectedClientError(
     path: options.path,
     stack: described.stack,
     meta: options.meta,
+    sessionKey: getErrorReportSessionKey(),
   }).catch((reportError: unknown) => {
     console.error("Failed to report client error", reportError)
   })

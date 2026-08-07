@@ -183,23 +183,11 @@ export async function generateWithFailover<
       recordProviderCall(ctx, "gemini")
       // Convex dashboard log: failover succeeded (mixed providers in one
       // ceremony are OK for v1 availability).
+      // Successful failover: console + gemini usage counter only (no error_events
+      // row per call — avoids flooding during a sustained primary outage).
       console.log(
         `AI step ok provider=gemini model=${FALLBACK_MODEL_ID} failover=true`
       )
-      const primaryDescribed = describeUnknownError(primaryError)
-      await persistErrorEvent(ctx, {
-        source: "convex",
-        severity: "warn",
-        area: "ai.failover",
-        message: `Primary failed; Gemini succeeded: ${primaryDescribed.message}`,
-        stack: primaryDescribed.stack,
-        path: "generateWithFailover",
-        meta: {
-          stage: "failover_succeeded",
-          primaryModel: PRIMARY_MODEL_ID,
-          fallbackModel: FALLBACK_MODEL_ID,
-        },
-      })
       return result
     } catch (fallbackError) {
       recordProviderCall(ctx, "gemini")

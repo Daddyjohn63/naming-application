@@ -11,8 +11,9 @@ import {
 } from "@/lib/report-client-error"
 
 /**
- * Returns a stable reporter that posts unexpected errors to Convex.
+ * Returns a stable reporter that posts unexpected browser errors to Convex.
  * Safe to call from catch blocks — never throws to the caller.
+ * Source is always `web-client` (server paths assign `web-server` internally).
  */
 export function useReportClientError() {
   const report = useMutation(api.errorEvents.reportClientError)
@@ -24,14 +25,21 @@ export function useReportClientError() {
     catId?: Id<"cats"> | string
     meta?: Record<string, string>
     severity?: "error" | "warn"
-    source?: "web-client" | "web-server"
   }) => {
     reportUnexpectedClientError(
-      (args: ReportClientErrorArgs) =>
-        report({
-          ...args,
+      async (args: ReportClientErrorArgs) => {
+        await report({
+          severity: args.severity,
+          area: args.area,
+          message: args.message,
+          code: args.code,
           catId: args.catId as Id<"cats"> | undefined,
-        }),
+          path: args.path,
+          stack: args.stack,
+          meta: args.meta,
+          sessionKey: args.sessionKey,
+        })
+      },
       options,
     )
   }

@@ -180,7 +180,7 @@ export function useCertificateDownload({
         area: "certificate.downloadPdf",
         error,
         catId,
-        path: "useCertificateDownload.downloadPdf",
+        meta: { operation: "useCertificateDownload.downloadPdf" },
       })
     } finally {
       setWorking(false)
@@ -216,7 +216,7 @@ export function useCertificateDownload({
         area: "certificate.downloadPng",
         error,
         catId,
-        path: "useCertificateDownload.downloadPng",
+        meta: { operation: "useCertificateDownload.downloadPng" },
       })
     } finally {
       setWorking(false)

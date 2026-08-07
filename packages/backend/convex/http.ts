@@ -15,6 +15,7 @@ import type { WebhookEvent } from "@clerk/backend"
 import { Webhook } from "svix"
 
 import { describeUnknownError, persistErrorEvent } from "./errorEvents"
+import { tryRateLimit } from "./lib/rateLimiter"
 
 const http = httpRouter()
 
@@ -48,7 +49,7 @@ http.route({
 })
 
 async function validateRequest(
-  ctx: Pick<ActionCtx, "runMutation">,
+  ctx: ActionCtx,
   req: Request,
 ): Promise<WebhookEvent | null> {
   const payloadString = await req.text()
@@ -63,15 +64,27 @@ async function validateRequest(
   } catch (error) {
     const described = describeUnknownError(error)
     console.error("Error verifying webhook event", described.message)
-    await persistErrorEvent(ctx, {
-      source: "convex",
-      severity: "error",
-      area: "clerkWebhook",
-      message: described.message,
-      stack: described.stack,
-      path: "/clerk-users-webhook",
-      meta: { stage: "svix_verify_failed" },
-    })
+    const rateLimitKey =
+      typeof svixHeaders["svix-id"] === "string" &&
+      svixHeaders["svix-id"].length > 0
+        ? svixHeaders["svix-id"]
+        : "missing-svix-id"
+    const allowed = await tryRateLimit(
+      ctx,
+      "clerkWebhookVerifyFailed",
+      rateLimitKey,
+    )
+    if (allowed) {
+      await persistErrorEvent(ctx, {
+        source: "convex",
+        severity: "error",
+        area: "clerkWebhook",
+        message: described.message,
+        stack: described.stack,
+        path: "/clerk-users-webhook",
+        meta: { stage: "svix_verify_failed" },
+      })
+    }
     return null
   }
 }

@@ -9,6 +9,7 @@ import type { Id } from "@workspace/backend/_generated/dataModel"
 import { Button } from "@workspace/ui/components/button"
 
 import {
+  getErrorReportSessionKey,
   reportUnexpectedClientError,
   type ReportClientErrorArgs,
 } from "@/lib/report-client-error"
@@ -24,15 +25,28 @@ type ErrorPageProps = {
  */
 export default function ErrorPage({ error, reset }: ErrorPageProps) {
   const report = useMutation(api.errorEvents.reportClientError)
+  const lastReportedErrorRef = React.useRef<Error | null>(null)
 
   React.useEffect(() => {
     console.error("App route error", error)
+    if (lastReportedErrorRef.current === error) {
+      return
+    }
+    lastReportedErrorRef.current = error
     reportUnexpectedClientError(
-      (args: ReportClientErrorArgs) =>
-        report({
-          ...args,
+      async (args: ReportClientErrorArgs) => {
+        await report({
+          severity: args.severity,
+          area: args.area,
+          message: args.message,
+          code: args.code,
           catId: args.catId as Id<"cats"> | undefined,
-        }),
+          path: args.path,
+          stack: args.stack,
+          meta: args.meta,
+          sessionKey: args.sessionKey ?? getErrorReportSessionKey(),
+        })
+      },
       {
         area: "react",
         error,

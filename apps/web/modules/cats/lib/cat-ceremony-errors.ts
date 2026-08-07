@@ -39,7 +39,7 @@ export function toastCatCeremonyMutationError(
   report?.({
     area: context?.area ?? "catCeremony",
     error: err,
-    path: label,
     catId: context?.catId,
+    meta: { operation: label },
   })
 }

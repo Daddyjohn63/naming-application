@@ -356,7 +356,8 @@ export default defineSchema({
   /**
    * Append-only beta error log (no third-party APM).
    * Unexpected failures only — expected ConvexError codes stay out of this table.
-   * Review via Convex Data tab or admin list query; prune with a later TTL cron.
+   * Review via Convex Data tab or admin list query.
+   * Retention: cron purges rows older than 30 days (`errorEvents.purgeExpiredErrorEvents`).
    */
   error_events: defineTable({
     createdAt: v.number(),

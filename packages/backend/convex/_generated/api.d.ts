@@ -22,6 +22,7 @@ import type * as catWorldNamingActions from "../catWorldNamingActions.js";
 import type * as cats from "../cats.js";
 import type * as ceremonyUnlock from "../ceremonyUnlock.js";
 import type * as certificate from "../certificate.js";
+import type * as crons from "../crons.js";
 import type * as errorEvents from "../errorEvents.js";
 import type * as familyNaming from "../familyNaming.js";
 import type * as familyNamingActions from "../familyNamingActions.js";
@@ -59,6 +60,7 @@ declare const fullApi: ApiFromModules<{
   cats: typeof cats;
   ceremonyUnlock: typeof ceremonyUnlock;
   certificate: typeof certificate;
+  crons: typeof crons;
   errorEvents: typeof errorEvents;
   familyNaming: typeof familyNaming;
   familyNamingActions: typeof familyNamingActions;

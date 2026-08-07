@@ -3,6 +3,9 @@
  *
  * Mutations should call `insertErrorEvent` in-process (same transaction).
  * Actions / HTTP should call `logError` via `ctx.runMutation(internal.errorEvents.logError, …)`.
+ *
+ * Retention: `purgeExpiredErrorEvents` (cron) deletes rows older than 30 days.
+ * Client reports are size-capped and never trust client-supplied userId/source.
  */
 
 import { paginationOptsValidator } from "convex/server"
@@ -18,7 +21,7 @@ import {
   type MutationCtx,
 } from "./_generated/server"
 import { requireAdmin } from "./lib/admin"
-import { enforceRateLimit } from "./lib/rateLimiter"
+import { tryRateLimit } from "./lib/rateLimiter"
 import { getCurrentUser } from "./users"
 
 const MAX_MESSAGE_LENGTH = 2000
@@ -28,6 +31,12 @@ const MAX_PATH_LENGTH = 300
 const MAX_CODE_LENGTH = 120
 const MAX_META_ENTRIES = 20
 const MAX_META_VALUE_LENGTH = 500
+const MAX_SESSION_KEY_LENGTH = 64
+const MIN_SESSION_KEY_LENGTH = 8
+/** Client-reported stacks are capped tighter than internal rows. */
+const MAX_CLIENT_STACK_LENGTH = 2000
+const ERROR_EVENT_RETENTION_MS = 30 * 24 * 60 * 60 * 1000
+const PURGE_BATCH_SIZE = 100
 
 const sourceValidator = v.union(
   v.literal("convex"),
@@ -87,6 +96,62 @@ function sanitizeMeta(
   return out
 }
 
+function normalizeSessionKey(sessionKey: string | undefined): string | null {
+  if (sessionKey === undefined) {
+    return null
+  }
+  const trimmed = sessionKey.trim()
+  if (
+    trimmed.length < MIN_SESSION_KEY_LENGTH ||
+    trimmed.length > MAX_SESSION_KEY_LENGTH
+  ) {
+    return null
+  }
+  if (!/^[A-Za-z0-9_-]+$/.test(trimmed)) {
+    return null
+  }
+  return trimmed
+}
+
+/**
+ * Extra redaction for untrusted client payloads before insertErrorEvent.
+ * Caps stack tighter; drops blank path; normalizes empty message fallback.
+ */
+function sanitizeClientReport(args: {
+  message: string
+  path?: string
+  stack?: string
+  meta?: Record<string, string>
+  code?: string
+}): {
+  message: string
+  path?: string
+  stack?: string
+  meta?: Record<string, string>
+  code?: string
+} {
+  const message = args.message.trim() || "Unknown client error"
+  const path =
+    args.path !== undefined && args.path.trim().length > 0
+      ? truncate(args.path.trim(), MAX_PATH_LENGTH)
+      : undefined
+  const stack =
+    args.stack !== undefined && args.stack.trim().length > 0
+      ? truncate(args.stack, MAX_CLIENT_STACK_LENGTH)
+      : undefined
+  const code =
+    args.code !== undefined && args.code.trim().length > 0
+      ? truncate(args.code.trim(), MAX_CODE_LENGTH)
+      : undefined
+  return {
+    message,
+    path,
+    stack,
+    code,
+    meta: sanitizeMeta(args.meta),
+  }
+}
+
 /** Normalize an unknown catch value into message + optional stack. */
 export function describeUnknownError(error: unknown): {
   message: string
@@ -102,7 +167,11 @@ export function describeUnknownError(error: unknown): {
     return { message: error }
   }
   try {
-    return { message: JSON.stringify(error) }
+    const serialized = JSON.stringify(error)
+    if (typeof serialized === "string") {
+      return { message: serialized }
+    }
+    return { message: "Unknown error" }
   } catch {
     return { message: "Unknown error" }
   }
@@ -172,11 +241,6 @@ export async function persistErrorEvent(
   }
 }
 
-const clientSourceValidator = v.union(
-  v.literal("web-client"),
-  v.literal("web-server"),
-)
-
 const errorEventAdminDto = v.object({
   _id: v.id("error_events"),
   createdAt: v.number(),
@@ -193,13 +257,13 @@ const errorEventAdminDto = v.object({
 })
 
 /**
- * Public reporter for web client/server unexpected errors.
- * Auth optional — anonymous reports use a shared rate-limit key.
- * Never trusts client-supplied userId.
+ * Public reporter for browser unexpected errors.
+ * Always stores `source: "web-client"` (never trusts client-supplied source).
+ * Auth optional — unauthenticated callers must send a sessionKey for rate limiting.
+ * Rate-limit rejects return null (do not throw ConvexError to the client).
  */
 export const reportClientError = mutation({
   args: {
-    source: clientSourceValidator,
     severity: v.optional(severityValidator),
     area: v.string(),
     message: v.string(),
@@ -208,28 +272,71 @@ export const reportClientError = mutation({
     path: v.optional(v.string()),
     stack: v.optional(v.string()),
     meta: v.optional(v.record(v.string(), v.string())),
+    sessionKey: v.optional(v.string()),
   },
-  returns: v.id("error_events"),
+  returns: v.union(v.id("error_events"), v.null()),
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx)
-    await enforceRateLimit(
-      ctx,
-      "reportClientError",
-      user?._id ?? "anonymous",
-    )
+    const sessionKey = normalizeSessionKey(args.sessionKey)
+    const rateLimitKey = user?._id ?? sessionKey
+    if (rateLimitKey === null || rateLimitKey === undefined) {
+      return null
+    }
 
-    return await insertErrorEvent(ctx, {
-      source: args.source,
-      severity: args.severity ?? "error",
-      area: args.area,
+    const allowed = await tryRateLimit(ctx, "reportClientError", rateLimitKey)
+    if (!allowed) {
+      return null
+    }
+
+    const sanitized = sanitizeClientReport({
       message: args.message,
-      code: args.code,
-      userId: user?._id,
-      catId: args.catId,
       path: args.path,
       stack: args.stack,
       meta: args.meta,
+      code: args.code,
     })
+
+    return await insertErrorEvent(ctx, {
+      source: "web-client",
+      severity: args.severity ?? "error",
+      area: args.area,
+      message: sanitized.message,
+      code: sanitized.code,
+      userId: user?._id,
+      catId: args.catId,
+      path: sanitized.path,
+      stack: sanitized.stack,
+      meta: sanitized.meta,
+    })
+  },
+})
+
+/**
+ * Delete error_events older than retention. Batched; reschedules when full.
+ */
+export const purgeExpiredErrorEvents = internalMutation({
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
+    const cutoff = Date.now() - ERROR_EVENT_RETENTION_MS
+    const expired = await ctx.db
+      .query("error_events")
+      .withIndex("by_createdAt", (q) => q.lt("createdAt", cutoff))
+      .take(PURGE_BATCH_SIZE)
+
+    for (const row of expired) {
+      await ctx.db.delete(row._id)
+    }
+
+    if (expired.length >= PURGE_BATCH_SIZE) {
+      await ctx.scheduler.runAfter(
+        0,
+        internal.errorEvents.purgeExpiredErrorEvents,
+        {},
+      )
+    }
+
+    return null
   },
 })
 
