@@ -14,12 +14,12 @@ export const LANDING_FAQ_ITEMS = [
   },
   {
     question: "Is the cat-world name really unique?",
-    answer: `Yes. In Eliot's telling, a cat's second name is theirs and theirs alone — so ours are too. When you confirm your favourite, it's claimed globally across every cat named with ${APP_NAME}, and no other cat can ever take it. If a name has already been claimed, you'll simply pick another from your shortlist.`,
+    answer: `Yes. In Eliot's telling, a cat's second name is theirs and theirs alone — so ours are too. When you confirm your favourite, it's claimed globally across every cat named with ${APP_NAME}, and no other cat can ever take it.`,
   },
   {
     question: "What if I don't like the names the app suggests?",
     answer:
-      "Each naming stage gives you 10 suggestions with a short rationale for each. You can shortlist up to six names from those suggestions, regenerate once for 10 completely fresh names (and keep choosing across both batches), and for the family name you can even add one of your own.",
+      "Each naming stage gives you the ability to create 20 suggestions with a short rationale for each. You can shortlist up to six names from those suggestions, and for the family name you can even add one of your own. You can change your mind on your favourite names right up to the point of generating your certificate.",
   },
   {
     question: "Can I edit the personality summary of my cat?",
