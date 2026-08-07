@@ -47,7 +47,7 @@ function slotState(
   name: string | undefined,
   rationale: string | undefined,
   lockedAfterUnlock: boolean,
-  unlocked: boolean,
+  unlocked: boolean
 ): CeremonyNameSlotState {
   if (name !== undefined && rationale !== undefined) {
     return lockedAfterUnlock && unlocked ? "locked" : "filled"
@@ -76,8 +76,8 @@ function CeremonyShortlistUnderCard({
         className={cn(
           "flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-left text-sm font-medium",
           "bg-muted/10 transition-colors hover:bg-muted/20",
-          "focus-visible:ring-ring outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-          "sm:hidden",
+          "outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          "sm:hidden"
         )}
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
@@ -86,21 +86,16 @@ function CeremonyShortlistUnderCard({
         <ChevronDown
           aria-hidden
           className={cn(
-            "text-muted-foreground size-4 shrink-0 transition-transform duration-200",
-            open && "rotate-180",
+            "size-4 shrink-0 text-muted-foreground transition-transform duration-200",
+            open && "rotate-180"
           )}
         />
       </button>
       <p className="hidden text-sm font-medium sm:block">{title}</p>
-      <div
-        className={cn(
-          "flex-col gap-2",
-          open ? "flex" : "hidden sm:flex",
-        )}
-      >
+      <div className={cn("flex-col gap-2", open ? "flex" : "hidden sm:flex")}>
         {children}
         {hint !== undefined ? (
-          <p className="text-muted-foreground text-xs">{hint}</p>
+          <p className="text-xs text-muted-foreground">{hint}</p>
         ) : null}
       </div>
     </div>
@@ -140,8 +135,8 @@ function ShortlistChipList({
               className={cn(
                 "inline-flex rounded-full border px-3 py-1 text-sm font-medium",
                 chip.isFavourite
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-secondary text-secondary-foreground",
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "bg-secondary text-secondary-foreground"
               )}
             >
               {chip.label}
@@ -168,18 +163,25 @@ export function CeremonyThreeNamesView({
   const namingState = useQuery(api.familyNaming.getFamilyNamingStateForOwner, {
     catId: cat._id,
   })
-  const catWorldNamingState = useQuery(api.catWorldNaming.getCatWorldNamingStateForOwner, {
-    catId: cat._id,
-  })
+  const catWorldNamingState = useQuery(
+    api.catWorldNaming.getCatWorldNamingStateForOwner,
+    {
+      catId: cat._id,
+    }
+  )
   const ineffableNamingState = useQuery(
     api.ineffableNaming.getIneffableNamingStateForOwner,
-    { catId: cat._id },
+    { catId: cat._id }
   )
   const setFavourite = useMutation(api.familyNaming.setFamilyFavourite)
-  const setCatWorldFavourite = useMutation(api.catWorldNaming.setCatWorldFavourite)
-  const setIneffableFavourite = useMutation(api.ineffableNaming.setIneffableFavourite)
+  const setCatWorldFavourite = useMutation(
+    api.catWorldNaming.setCatWorldFavourite
+  )
+  const setIneffableFavourite = useMutation(
+    api.ineffableNaming.setIneffableFavourite
+  )
   const [settingFavourite, setSettingFavourite] = React.useState<string | null>(
-    null,
+    null
   )
   const [settingStage, setSettingStage] = React.useState<
     "family" | "cat_world" | "ineffable" | null
@@ -199,19 +201,19 @@ export function CeremonyThreeNamesView({
     cat.selectedFamilyName,
     cat.selectedFamilyRationale,
     false,
-    unlocked,
+    unlocked
   )
   const catWorldSlotState = slotState(
     cat.selectedCatWorldName,
     cat.selectedCatWorldRationale,
     false,
-    unlocked,
+    unlocked
   )
   const ineffableSlotState = slotState(
     cat.selectedIneffableName,
     cat.selectedIneffableRationale,
     false,
-    unlocked,
+    unlocked
   )
 
   const onSetFavourite = async (name: string) => {
@@ -277,8 +279,8 @@ export function CeremonyThreeNamesView({
   const subtitle = unlocked
     ? "Your three names will appear here as you complete each stage."
     : cat.ceremonyStep === "awaiting_payment"
-      ? "Your family name is chosen — complete unlock for the rest of the ceremony."
-      : "Your family name is chosen — unlock for the rest of the ceremony."
+      ? "Your family name is chosen — complete unlock to complete the rest of the ceremony."
+      : "Your family name is chosen — unlock to complete the rest of the ceremony."
 
   const scrollLockedNameToUnlock = () => {
     scrollToCeremonyUnlockOnMobile()
@@ -328,7 +330,7 @@ export function CeremonyThreeNamesView({
         <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
           Your cat&apos;s three names
         </h2>
-        <p className="text-muted-foreground text-sm leading-relaxed sm:text-base">
+        <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
           {subtitle}
         </p>
       </header>
@@ -412,7 +414,9 @@ export function CeremonyThreeNamesView({
             name={cat.selectedIneffableName}
             rationale={cat.selectedIneffableRationale}
             state={ineffableSlotState}
-            badge={ineffableSlotState === "filled" ? "★ Your choice" : undefined}
+            badge={
+              ineffableSlotState === "filled" ? "★ Your choice" : undefined
+            }
             className="min-w-0"
             placeholderHint={
               unlocked && ineffableSlotState === "placeholder"

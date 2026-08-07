@@ -118,7 +118,7 @@ export function CatProfileForm({
   const submitsUsed = cat.profileSubmitsUsed ?? 0
   const submitsRemaining = Math.max(
     0,
-    MAX_CAT_PROFILE_SUBMIT_COUNT - submitsUsed,
+    MAX_CAT_PROFILE_SUBMIT_COUNT - submitsUsed
   )
   const photoAttemptsUsed = photoValidationAttemptsUsed(cat)
   const photoAttemptsRemaining =
@@ -127,7 +127,9 @@ export function CatProfileForm({
   const hasPhotoSelected =
     photoFile !== null ||
     storedPhotoId !== undefined ||
-    (cat.photoStorageId !== undefined && photoFile === null && previewUrl === null)
+    (cat.photoStorageId !== undefined &&
+      photoFile === null &&
+      previewUrl === null)
   const photoSubmitBlocked = photoChecksExhausted
 
   const form = useForm<SubmitCatProfileFieldsInput>({
@@ -235,13 +237,13 @@ export function CatProfileForm({
       toast.success(
         cat.ceremonyStep === "draft"
           ? "Profile saved — generating your summary."
-          : "Profile updated — we'll refresh your summary next.",
+          : "Profile updated — we'll refresh your summary next."
       )
     } catch (error) {
       const data = getConvexErrorData(error)
       if (data?.fieldErrors !== undefined) {
         setServerFieldErrors(
-          data.fieldErrors as Partial<Record<FieldName, string>>,
+          data.fieldErrors as Partial<Record<FieldName, string>>
         )
       }
       const message = getConvexErrorMessage(error)
@@ -268,7 +270,10 @@ export function CatProfileForm({
       const fieldErrors: Partial<Record<FieldName, string>> = {}
       for (const issue of parsed.error.issues) {
         const key = issue.path[0]
-        if (typeof key === "string" && fieldErrors[key as FieldName] === undefined) {
+        if (
+          typeof key === "string" &&
+          fieldErrors[key as FieldName] === undefined
+        ) {
           fieldErrors[key as FieldName] = issue.message
         }
       }
@@ -308,7 +313,7 @@ export function CatProfileForm({
       const data = getConvexErrorData(error)
       if (data?.fieldErrors !== undefined) {
         setServerFieldErrors(
-          data.fieldErrors as Partial<Record<FieldName, string>>,
+          data.fieldErrors as Partial<Record<FieldName, string>>
         )
       }
       const message = getConvexErrorMessage(error)
@@ -322,8 +327,7 @@ export function CatProfileForm({
     }
   }
 
-  const photoError =
-    serverFieldErrors.photo ?? uploadHookError ?? undefined
+  const photoError = serverFieldErrors.photo ?? uploadHookError ?? undefined
 
   const busy = submitting || uploadPending || savingDraft
 
@@ -359,7 +363,10 @@ export function CatProfileForm({
         ) : null}
         <FieldGroup>
           <Field data-invalid={photoError !== undefined}>
-            <FieldLabel htmlFor="cat-photo" className={ceremonyFieldLabelClassName}>
+            <FieldLabel
+              htmlFor="cat-photo"
+              className={ceremonyFieldLabelClassName}
+            >
               Cat photo
             </FieldLabel>
             <FieldDescription>
@@ -394,8 +401,15 @@ export function CatProfileForm({
             <FieldError>{photoError}</FieldError>
           </Field>
 
-          <Field data-invalid={!!form.formState.errors.title || !!serverFieldErrors.title}>
-            <FieldLabel htmlFor="cat-title" className={ceremonyFieldLabelClassName}>
+          <Field
+            data-invalid={
+              !!form.formState.errors.title || !!serverFieldErrors.title
+            }
+          >
+            <FieldLabel
+              htmlFor="cat-title"
+              className={ceremonyFieldLabelClassName}
+            >
               Ceremony title
             </FieldLabel>
             <Input
@@ -423,7 +437,10 @@ export function CatProfileForm({
               !!serverFieldErrors.description
             }
           >
-            <FieldLabel htmlFor="cat-description" className={ceremonyFieldLabelClassName}>
+            <FieldLabel
+              htmlFor="cat-description"
+              className={ceremonyFieldLabelClassName}
+            >
               Your cat&apos;s story
             </FieldLabel>
             <Textarea
@@ -450,7 +467,9 @@ export function CatProfileForm({
           </Field>
 
           <div className="flex flex-col gap-5 border-t border-border/60 pt-6">
-            <p className="text-sm font-medium text-foreground">Optional details</p>
+            <p className="text-sm font-medium text-foreground">
+              Optional details
+            </p>
 
             <Field data-invalid={!!serverFieldErrors.existingName}>
               <FieldLabel
@@ -459,102 +478,115 @@ export function CatProfileForm({
               >
                 Current name
               </FieldLabel>
-              <FieldDescription>If your cat already has a name we should know about.</FieldDescription>
+              <FieldDescription>
+                If your cat already has a name we should know about.
+              </FieldDescription>
               <Input
                 id="cat-existing-name"
                 disabled={busy}
                 maxLength={MAX_CAT_OPTIONAL_FIELD_LENGTH}
                 className={ceremonyInputClassName}
-              {...form.register("existingName", {
-                onChange: () => clearFieldError("existingName"),
-              })}
-              onFocus={() => clearFieldError("existingName")}
-            />
-            <FieldError>{serverFieldErrors.existingName}</FieldError>
-          </Field>
+                {...form.register("existingName", {
+                  onChange: () => clearFieldError("existingName"),
+                })}
+                onFocus={() => clearFieldError("existingName")}
+              />
+              <FieldError>{serverFieldErrors.existingName}</FieldError>
+            </Field>
 
-          <Field data-invalid={!!serverFieldErrors.sex}>
-            <FieldLabel className={ceremonyFieldLabelClassName}>Sex</FieldLabel>
-            <FieldDescription>
-              Optional. Helps us use the right pronouns in your cat&apos;s summary.
-            </FieldDescription>
-            <div
-              className="flex flex-wrap gap-2"
-              role="radiogroup"
-              aria-label="Cat sex"
-            >
-              {CAT_SEX_VALUES.map((value) => {
-                const selected = sexValue === value
-                return (
-                  <button
-                    key={value}
-                    type="button"
-                    role="radio"
-                    aria-checked={selected}
-                    disabled={busy}
-                    onClick={() => {
-                      form.setValue("sex", selected ? "" : value, {
-                        shouldDirty: true,
-                      })
-                      clearFieldError("sex")
-                    }}
-                    className={cn(
-                      "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-                      selected
-                        ? "border-primary bg-primary/10 text-foreground shadow-sm"
-                        : "border-border bg-card text-muted-foreground hover:border-primary/35 hover:text-foreground",
-                    )}
-                  >
-                    {CAT_SEX_LABELS[value]}
-                  </button>
-                )
-              })}
+            <Field data-invalid={!!serverFieldErrors.sex}>
+              <FieldLabel className={ceremonyFieldLabelClassName}>
+                Sex
+              </FieldLabel>
+              <FieldDescription>
+                Optional. Helps us use the right pronouns in your cat&apos;s
+                summary.
+              </FieldDescription>
+              <div
+                className="flex flex-wrap gap-2"
+                role="radiogroup"
+                aria-label="Cat sex"
+              >
+                {CAT_SEX_VALUES.map((value) => {
+                  const selected = sexValue === value
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      disabled={busy}
+                      onClick={() => {
+                        form.setValue("sex", selected ? "" : value, {
+                          shouldDirty: true,
+                        })
+                        clearFieldError("sex")
+                      }}
+                      className={cn(
+                        "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                        selected
+                          ? "border-primary bg-primary/10 text-foreground shadow-sm"
+                          : "border-border bg-card text-muted-foreground hover:border-primary/35 hover:text-foreground"
+                      )}
+                    >
+                      {CAT_SEX_LABELS[value]}
+                    </button>
+                  )
+                })}
+              </div>
+              <FieldError>{serverFieldErrors.sex}</FieldError>
+            </Field>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field data-invalid={!!serverFieldErrors.age}>
+                <FieldLabel
+                  htmlFor="cat-age"
+                  className={ceremonyFieldLabelClassName}
+                >
+                  Age
+                </FieldLabel>
+                <FieldDescription>e.g. &quot;3 years&quot;</FieldDescription>
+                <Input
+                  id="cat-age"
+                  disabled={busy}
+                  maxLength={MAX_CAT_OPTIONAL_FIELD_LENGTH}
+                  className={ceremonyInputClassName}
+                  {...form.register("age", {
+                    onChange: () => clearFieldError("age"),
+                  })}
+                  onFocus={() => clearFieldError("age")}
+                />
+                <FieldError>{serverFieldErrors.age}</FieldError>
+              </Field>
+
+              <Field data-invalid={!!serverFieldErrors.breed}>
+                <FieldLabel
+                  htmlFor="cat-breed"
+                  className={ceremonyFieldLabelClassName}
+                >
+                  Breed
+                </FieldLabel>
+                <FieldDescription>
+                  e.g. &quot;Domestic shorthair&quot;
+                </FieldDescription>
+                <Input
+                  id="cat-breed"
+                  disabled={busy}
+                  maxLength={MAX_CAT_OPTIONAL_FIELD_LENGTH}
+                  className={ceremonyInputClassName}
+                  {...form.register("breed", {
+                    onChange: () => clearFieldError("breed"),
+                  })}
+                  onFocus={() => clearFieldError("breed")}
+                />
+                <FieldError>{serverFieldErrors.breed}</FieldError>
+              </Field>
             </div>
-            <FieldError>{serverFieldErrors.sex}</FieldError>
-          </Field>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field data-invalid={!!serverFieldErrors.age}>
-              <FieldLabel htmlFor="cat-age" className={ceremonyFieldLabelClassName}>
-                Age
-              </FieldLabel>
-              <FieldDescription>e.g. &quot;3 years&quot;</FieldDescription>
-              <Input
-                id="cat-age"
-                disabled={busy}
-                maxLength={MAX_CAT_OPTIONAL_FIELD_LENGTH}
-                className={ceremonyInputClassName}
-              {...form.register("age", {
-                onChange: () => clearFieldError("age"),
-              })}
-              onFocus={() => clearFieldError("age")}
-            />
-              <FieldError>{serverFieldErrors.age}</FieldError>
-            </Field>
-
-            <Field data-invalid={!!serverFieldErrors.breed}>
-              <FieldLabel htmlFor="cat-breed" className={ceremonyFieldLabelClassName}>
-                Breed
-              </FieldLabel>
-              <FieldDescription>e.g. &quot;Domestic shorthair&quot;</FieldDescription>
-              <Input
-                id="cat-breed"
-                disabled={busy}
-                maxLength={MAX_CAT_OPTIONAL_FIELD_LENGTH}
-                className={ceremonyInputClassName}
-              {...form.register("breed", {
-                onChange: () => clearFieldError("breed"),
-              })}
-              onFocus={() => clearFieldError("breed")}
-            />
-              <FieldError>{serverFieldErrors.breed}</FieldError>
-            </Field>
-          </div>
           </div>
         </FieldGroup>
 
         {formError !== null ? (
-          <p className="text-destructive text-sm" role="alert">
+          <p className="text-sm text-destructive" role="alert">
             {formError}
           </p>
         ) : null}
@@ -574,7 +606,7 @@ export function CatProfileForm({
                 ? "Submitting…"
                 : photoSubmitBlocked
                   ? "Photo checks used — start a new ceremony"
-                  : "Submit profile and generate summary"}
+                  : "Submit profile to receive a curated personality summary "}
             </Button>
             <Button
               type="button"
@@ -587,7 +619,7 @@ export function CatProfileForm({
             </Button>
           </div>
           {photoError !== undefined ? (
-            <p className="text-destructive text-sm" role="alert">
+            <p className="text-sm text-destructive" role="alert">
               {photoError}
             </p>
           ) : null}

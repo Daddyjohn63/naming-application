@@ -20,7 +20,10 @@ import {
   normalizeNameForDedupe,
 } from "@workspace/shared/constants/naming-curation"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
-import { ShortlistFavouriteBadge, setFavouriteButtonClassName } from "@/modules/ceremony/ui/components/shortlist-favourite-badge"
+import {
+  ShortlistFavouriteBadge,
+  setFavouriteButtonClassName,
+} from "@/modules/ceremony/ui/components/shortlist-favourite-badge"
 import { ShortlistSavedBadge } from "@/modules/ceremony/ui/components/shortlist-saved-badge"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
@@ -78,26 +81,36 @@ export function StageNameCuration({
   onConfirmContinue,
   confirmLabel = "Continue",
 }: StageNameCurationProps) {
-  const addToCatWorldShortlist = useMutation(api.catWorldNaming.addToCatWorldShortlist)
-  const removeFromCatWorldShortlist = useMutation(
-    api.catWorldNaming.removeFromCatWorldShortlist,
+  const addToCatWorldShortlist = useMutation(
+    api.catWorldNaming.addToCatWorldShortlist
   )
-  const setCatWorldFavourite = useMutation(api.catWorldNaming.setCatWorldFavourite)
-  const regenerateCatWorld = useMutation(api.catWorldNaming.regenerateCatWorldNames)
+  const removeFromCatWorldShortlist = useMutation(
+    api.catWorldNaming.removeFromCatWorldShortlist
+  )
+  const setCatWorldFavourite = useMutation(
+    api.catWorldNaming.setCatWorldFavourite
+  )
+  const regenerateCatWorld = useMutation(
+    api.catWorldNaming.regenerateCatWorldNames
+  )
 
   const addToIneffableShortlist = useMutation(
-    api.ineffableNaming.addToIneffableShortlist,
+    api.ineffableNaming.addToIneffableShortlist
   )
   const removeFromIneffableShortlist = useMutation(
-    api.ineffableNaming.removeFromIneffableShortlist,
+    api.ineffableNaming.removeFromIneffableShortlist
   )
-  const setIneffableFavourite = useMutation(api.ineffableNaming.setIneffableFavourite)
-  const regenerateIneffable = useMutation(api.ineffableNaming.regenerateIneffableNames)
+  const setIneffableFavourite = useMutation(
+    api.ineffableNaming.setIneffableFavourite
+  )
+  const regenerateIneffable = useMutation(
+    api.ineffableNaming.regenerateIneffableNames
+  )
 
   const [savingName, setSavingName] = React.useState<string | null>(null)
   const [removingName, setRemovingName] = React.useState<string | null>(null)
   const [settingFavourite, setSettingFavourite] = React.useState<string | null>(
-    null,
+    null
   )
   const [regenerating, setRegenerating] = React.useState(false)
   const [confirming, setConfirming] = React.useState(false)
@@ -146,7 +159,7 @@ export function StageNameCuration({
   const shortlistRemaining = MAX_SHORTLIST_TOTAL - shortlist.length
 
   const shortlistNormalized = new Set(
-    shortlist.map((entry) => normalizeNameForDedupe(entry.name)),
+    shortlist.map((entry) => normalizeNameForDedupe(entry.name))
   )
 
   const selectedName = state.selectedName
@@ -245,7 +258,7 @@ export function StageNameCuration({
 
   const renderSuggestionEntry = (
     entry: { name: string; rationale: string },
-    batch: { generationIndex: number },
+    batch: { generationIndex: number }
   ) => {
     const normalized = normalizeNameForDedupe(entry.name)
     const onShortlist = shortlistNormalized.has(normalized)
@@ -315,9 +328,14 @@ export function StageNameCuration({
   }
 
   return (
-    <div {...dataComponent("StageNameCuration")} className="flex flex-col gap-6">
+    <div
+      {...dataComponent("StageNameCuration")}
+      className="flex flex-col gap-6"
+    >
       {framingCopy !== undefined ? (
-        <p className="text-muted-foreground text-sm leading-relaxed">{framingCopy}</p>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          {framingCopy}
+        </p>
       ) : null}
 
       {shortlist.length > 0 ? (
@@ -325,8 +343,8 @@ export function StageNameCuration({
           <CardHeader className="border-b">
             <CardTitle className="text-base">Your shortlist</CardTitle>
             <CardDescription>
-              {shortlist.length} of {MAX_SHORTLIST_TOTAL} saved · pick one favourite
-              to continue.
+              {shortlist.length} of {MAX_SHORTLIST_TOTAL} saved · pick one
+              favourite to move onto the next step.
             </CardDescription>
           </CardHeader>
           <ul className="flex flex-col divide-y">
@@ -412,12 +430,14 @@ export function StageNameCuration({
           {continueReady ? (
             <Card className="ceremony-highlight-panel border-primary/30">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Ready for the next stage?</CardTitle>
+                <CardTitle className="text-base">
+                  Ready for the next stage?
+                </CardTitle>
                 <CardDescription>
                   {selectedName !== undefined ? (
                     <>
                       Your favourite is{" "}
-                      <span className="text-foreground font-medium">
+                      <span className="font-medium text-foreground">
                         {selectedName}
                       </span>
                       . Continue when you&apos;re happy with your choice.
@@ -439,7 +459,7 @@ export function StageNameCuration({
             </Card>
           ) : null}
           {!continueReady ? (
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               Save at least one name and pick a favourite to continue.
             </p>
           ) : null}

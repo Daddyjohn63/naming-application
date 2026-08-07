@@ -109,7 +109,7 @@ export function CeremonyUnlockPrompt({
               disabled={!unlockEnabled || unlocking}
               onClick={() => void onBeginUnlock()}
             >
-              {unlocking ? "Opening unlock…" : "Unlock now"}
+              {unlocking ? "Opening unlock…" : "Unlock"}
             </Button>
           </>
         ) : null}
@@ -127,9 +127,7 @@ export function CeremonyUnlockPrompt({
               disabled={paying || unlocking}
               onClick={() => void onBeginUnlock()}
             >
-              {paying || unlocking
-                ? "Unlocking…"
-                : "Unlock now — free during beta"}
+              {paying || unlocking ? "Unlocking…" : "Unlock — free during beta"}
             </Button>
           </>
         ) : null}

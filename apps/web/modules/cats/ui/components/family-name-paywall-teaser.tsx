@@ -54,7 +54,7 @@ export function FamilyNamePaywallTeaser({
           disabled={!unlockEnabled || unlocking}
           onClick={onUnlock}
         >
-          {unlocking ? "Opening unlock…" : "Unlock now"}
+          {unlocking ? "Opening unlock…" : "Unlock"}
         </Button>
       </div>
     </Card>

@@ -42,7 +42,7 @@ export function FamilyNameStylePicker({ cat }: FamilyNameStylePickerProps) {
     setSelected((current) =>
       current.includes(id)
         ? current.filter((item) => item !== id)
-        : [...current, id],
+        : [...current, id]
     )
   }
 
@@ -64,12 +64,16 @@ export function FamilyNameStylePicker({ cat }: FamilyNameStylePickerProps) {
   }
 
   return (
-    <Card {...dataComponent("FamilyNameStylePicker")} className="ceremony-panel">
+    <Card
+      {...dataComponent("FamilyNameStylePicker")}
+      className="ceremony-panel"
+    >
       <CardHeader className="border-b">
         <CardTitle className="text-base">Family name style</CardTitle>
         <CardDescription>
           Pick the flavour for your cat&apos;s family name — the one you call
-          across the room. You can choose more than one style.
+          across the room. You can choose more than one style. Click
+          &quot;Continue&quot; to receive your list of family names.
         </CardDescription>
       </CardHeader>
 
@@ -92,7 +96,7 @@ export function FamilyNameStylePicker({ cat }: FamilyNameStylePickerProps) {
                   "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
                   isSelected
                     ? "border-primary bg-primary/10 text-foreground shadow-sm"
-                    : "border-border bg-card text-muted-foreground hover:border-primary/35 hover:text-foreground",
+                    : "border-border bg-card text-muted-foreground hover:border-primary/35 hover:text-foreground"
                 )}
               >
                 {FAMILY_NAME_STYLE_LABELS[id]}
@@ -119,8 +123,12 @@ export function FamilyNameStylePicker({ cat }: FamilyNameStylePickerProps) {
         ) : null}
 
         <div>
-          <Button type="button" disabled={submitting} onClick={() => void onContinue()}>
-            {submitting ? "Continuing…" : "Continue to family names"}
+          <Button
+            type="button"
+            disabled={submitting}
+            onClick={() => void onContinue()}
+          >
+            {submitting ? "Continuing…" : "Continue"}
           </Button>
         </div>
       </div>

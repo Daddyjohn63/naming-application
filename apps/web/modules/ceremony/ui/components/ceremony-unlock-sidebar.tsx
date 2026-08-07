@@ -44,8 +44,7 @@ function unlockSidebarCopy({
   if (ceremonyComplete) {
     return {
       title: "Ceremony complete",
-      description:
-        "View or download your certificate from the main column.",
+      description: "View or download your certificate from the main column.",
     }
   }
   if (readyForCertificate) {
@@ -94,7 +93,7 @@ function unlockSidebarCopy({
     }
   }
   return {
-    title: "What's next",
+    title: "What's next?",
     description:
       "Your family name is free. As our app is currently in Beta phase you can unlock the cat-world and ineffable names for free, then receive your certificate for free.",
   }
@@ -170,7 +169,7 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
                   disabled={!unlockEnabled || unlocking}
                   onClick={() => void onBeginUnlock()}
                 >
-                  {unlocking ? "Opening unlock…" : "Unlock now"}
+                  {unlocking ? "Opening unlock…" : "Unlock"}
                 </Button>
               </>
             ) : null}
@@ -186,7 +185,7 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
                   disabled={paying}
                   onClick={() => void onStubUnlock()}
                 >
-                  {paying ? "Unlocking…" : "Unlock now — free during beta"}
+                  {paying ? "Unlocking…" : "Unlock — free during beta"}
                 </Button>
               </>
             ) : null}

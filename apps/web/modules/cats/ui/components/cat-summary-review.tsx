@@ -220,7 +220,9 @@ export function CatSummaryReview({
             {saving ? "Saving…" : "Save"}
           </Button>
           <Button type="button" disabled={busy} onClick={() => void onSubmit()}>
-            {submitting ? "Submitting…" : "Submit summary"}
+            {submitting
+              ? "Submitting…"
+              : "Submit summary to move onto the next step"}
           </Button>
           <Button
             type="button"

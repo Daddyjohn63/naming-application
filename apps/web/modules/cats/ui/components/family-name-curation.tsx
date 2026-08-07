@@ -21,7 +21,10 @@ import {
   type FamilyNameStyleId,
 } from "@workspace/shared/constants/family-naming"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
-import { ShortlistFavouriteBadge, setFavouriteButtonClassName } from "@/modules/ceremony/ui/components/shortlist-favourite-badge"
+import {
+  ShortlistFavouriteBadge,
+  setFavouriteButtonClassName,
+} from "@/modules/ceremony/ui/components/shortlist-favourite-badge"
 import { ShortlistSavedBadge } from "@/modules/ceremony/ui/components/shortlist-saved-badge"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
@@ -65,16 +68,18 @@ export function FamilyNameCuration({
 
   const addToShortlist = useMutation(api.familyNaming.addToFamilyShortlist)
   const addCustomToShortlist = useMutation(
-    api.familyNaming.addCustomFamilyNameToShortlist,
+    api.familyNaming.addCustomFamilyNameToShortlist
   )
-  const removeFromShortlist = useMutation(api.familyNaming.removeFromFamilyShortlist)
+  const removeFromShortlist = useMutation(
+    api.familyNaming.removeFromFamilyShortlist
+  )
   const setFavourite = useMutation(api.familyNaming.setFamilyFavourite)
   const regenerateNames = useMutation(api.familyNaming.regenerateFamilyNames)
   const { unlocking, onBeginUnlock } = useCeremonyUnlock(cat)
   const [savingName, setSavingName] = React.useState<string | null>(null)
   const [removingName, setRemovingName] = React.useState<string | null>(null)
   const [settingFavourite, setSettingFavourite] = React.useState<string | null>(
-    null,
+    null
   )
   const [regenerating, setRegenerating] = React.useState(false)
   const [showRegenStyles, setShowRegenStyles] = React.useState(false)
@@ -94,9 +99,7 @@ export function FamilyNameCuration({
       return
     }
     if (state?.familyNameStyles !== undefined) {
-      setRegenStyleSelection(
-        state.familyNameStyles.filter(isFamilyStyleId),
-      )
+      setRegenStyleSelection(state.familyNameStyles.filter(isFamilyStyleId))
     }
   }, [showRegenStyles, state?.familyNameStyles])
 
@@ -119,7 +122,11 @@ export function FamilyNameCuration({
     )
   }
 
-  if (state === null || state.generatedBatches === null || state.generatedBatches.length === 0) {
+  if (
+    state === null ||
+    state.generatedBatches === null ||
+    state.generatedBatches.length === 0
+  ) {
     return (
       <Card {...dataComponent("FamilyNameCuration")} className="ceremony-panel">
         <CardHeader className="border-b">
@@ -140,13 +147,13 @@ export function FamilyNameCuration({
   const shortlistRemaining = MAX_FAMILY_SHORTLIST_TOTAL - shortlist.length
   const customShortlistCount = state.customShortlistCount
   const customShortlistEntry = shortlist.find((entry) =>
-    isCustomFamilyShortlistEntry(entry),
+    isCustomFamilyShortlistEntry(entry)
   )
   const canAddCustomName =
     customShortlistCount < MAX_CUSTOM_FAMILY_NAMES && shortlistRemaining > 0
 
   const shortlistNormalized = new Set(
-    shortlist.map((entry) => normalizeFamilyName(entry.name)),
+    shortlist.map((entry) => normalizeFamilyName(entry.name))
   )
 
   const favouriteNormalized =
@@ -159,7 +166,7 @@ export function FamilyNameCuration({
     setRegenStyleSelection((current) =>
       current.includes(id)
         ? current.filter((item) => item !== id)
-        : [...current, id],
+        : [...current, id]
     )
   }
 
@@ -238,8 +245,7 @@ export function FamilyNameCuration({
   }
 
   const busySaving = savingName !== null || addingCustomName
-  const unlockEnabled =
-    favouriteNormalized !== null && shortlist.length >= 1
+  const unlockEnabled = favouriteNormalized !== null && shortlist.length >= 1
   const showShortlistPanel = !tunnelMode && shortlist.length > 0
   const isCustomFavourite =
     customShortlistEntry !== undefined &&
@@ -247,7 +253,7 @@ export function FamilyNameCuration({
 
   const renderSuggestionEntry = (
     entry: { name: string; rationale: string },
-    batch: { generationIndex: number },
+    batch: { generationIndex: number }
   ) => {
     const normalized = normalizeFamilyName(entry.name)
     const onShortlist = shortlistNormalized.has(normalized)
@@ -322,14 +328,17 @@ export function FamilyNameCuration({
   }
 
   return (
-    <div {...dataComponent("FamilyNameCuration")} className="flex flex-col gap-6">
+    <div
+      {...dataComponent("FamilyNameCuration")}
+      className="flex flex-col gap-6"
+    >
       {showShortlistPanel ? (
         <Card className="ceremony-panel">
           <CardHeader className="border-b">
             <CardTitle className="text-base">Your shortlist</CardTitle>
             <CardDescription>
-              {shortlist.length} of {MAX_FAMILY_SHORTLIST_TOTAL} saved · pick one
-              favourite before unlocking.
+              {shortlist.length} of {MAX_FAMILY_SHORTLIST_TOTAL} saved · pick
+              one favourite to move onto the next step.
             </CardDescription>
           </CardHeader>
           <ul className="flex flex-col divide-y">
@@ -395,7 +404,9 @@ export function FamilyNameCuration({
         <CardHeader className="border-b">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <CardTitle className="text-base">Family name suggestions</CardTitle>
+              <CardTitle className="text-base">
+                Family name suggestions
+              </CardTitle>
               <CardDescription>
                 Save up to {MAX_FAMILY_SHORTLIST_TOTAL} names to your shortlist
                 ({shortlistRemaining}{" "}
@@ -443,7 +454,7 @@ export function FamilyNameCuration({
                       "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
                       isSelected
                         ? "border-primary bg-primary/10 text-foreground"
-                        : "border-border text-muted-foreground hover:border-primary/40",
+                        : "border-border text-muted-foreground hover:border-primary/40"
                     )}
                   >
                     {FAMILY_NAME_STYLE_LABELS[id]}
@@ -537,9 +548,7 @@ export function FamilyNameCuration({
                   className={
                     isCustomFavourite ? undefined : setFavouriteButtonClassName
                   }
-                  disabled={
-                    settingFavourite !== null || removingName !== null
-                  }
+                  disabled={settingFavourite !== null || removingName !== null}
                   onClick={() => void onSetFavourite(customShortlistEntry.name)}
                 >
                   {settingFavourite === customShortlistEntry.name
