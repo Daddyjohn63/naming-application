@@ -49,12 +49,12 @@ export function LandingHero() {
         </div>
 
         <div className="flex items-center justify-center px-4 md:px-6 lg:px-8">
-          <div className="relative aspect-4/5 w-full max-w-sm overflow-hidden rounded-2xl border-4 border-white bg-white shadow-2xl rotate-2 transition-transform hover:rotate-0 duration-300 sm:max-w-md">
+          <div className="relative aspect-3/4 w-full max-w-sm overflow-hidden rounded-2xl border-4 border-white bg-[#fdf9f0] shadow-2xl rotate-2 transition-transform duration-300 hover:rotate-0 sm:max-w-md">
             <Image
-              src="/images/certifcate.png"
-              alt="Example completed naming certificate for a cat called Marmalade, showing all three names"
+              src="/images/certificate-willow.png"
+              alt="Example Completed Cat Profile certificate for a cat called Willow, with their photo, personality summary, and three names"
               fill
-              className="object-cover"
+              className="object-contain"
               sizes="(max-width: 768px) 100vw, 448px"
               priority
             />

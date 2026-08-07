@@ -52,8 +52,8 @@ export function LandingHeroLegacy() {
         <div className="flex items-center justify-center px-4 md:px-6 lg:px-8">
           <div className="relative aspect-4/5 w-full max-w-sm overflow-hidden rounded-2xl border-4 border-white bg-white shadow-2xl rotate-2 transition-transform hover:rotate-0 duration-300 sm:max-w-md">
             <Image
-              src="/images/certifcate.png"
-              alt="Completed Cat Portrait Certificate"
+              src="/images/certificate-willow.png"
+              alt="Completed Cat Profile Certificate"
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 448px"

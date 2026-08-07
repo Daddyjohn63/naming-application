@@ -2,7 +2,7 @@
 
 /**
  * KB-011 — the certificate itself (HTML reproduction of the reference design in
- * `apps/web/public/images/certifcate.png`, with "Portrait" → "Profile" copy).
+ * `apps/web/public/images/certificate-willow.png`).
  *
  * Colours are hardcoded parchment hexes (not theme tokens) so the certificate
  * looks identical in light/dark mode and in the captured PDF. Rendered twice by
