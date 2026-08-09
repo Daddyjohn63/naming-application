@@ -19,6 +19,7 @@ import {
   generateIneffableNamesWithAi,
   normalizeAiError,
 } from "./ai/naming"
+import { describeUnknownError, persistErrorEvent } from "./errorEvents"
 import { internal } from "./_generated/api"
 import { internalAction } from "./_generated/server"
 
@@ -98,6 +99,17 @@ export const generateIneffableNames = internalAction({
         },
       )
     } catch (error) {
+      const described = describeUnknownError(error)
+      await persistErrorEvent(ctx, {
+        source: "convex",
+        severity: "error",
+        area: "ineffableNaming.generateIneffableNames",
+        message: described.message,
+        catId,
+        stack: described.stack,
+        path: "ineffableNamingActions.generateIneffableNames",
+        meta: { generationIndex: String(generationIndex) },
+      })
       await ctx.runMutation(
         internal.ineffableNaming.applyIneffableNameGenerationFailure,
         {

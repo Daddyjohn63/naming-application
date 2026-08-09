@@ -7,6 +7,7 @@
 import { v } from "convex/values"
 
 import { generateFamilyNamesWithAi, normalizeAiError } from "./ai/naming"
+import { describeUnknownError, persistErrorEvent } from "./errorEvents"
 import { internal } from "./_generated/api"
 import { internalAction } from "./_generated/server"
 import { assertFamilyNameStyleIds } from "./familyNaming"
@@ -55,6 +56,17 @@ export const generateFamilyNames = internalAction({
         names: batch.names,
       })
     } catch (error) {
+      const described = describeUnknownError(error)
+      await persistErrorEvent(ctx, {
+        source: "convex",
+        severity: "error",
+        area: "familyNaming.generateFamilyNames",
+        message: described.message,
+        catId,
+        stack: described.stack,
+        path: "familyNamingActions.generateFamilyNames",
+        meta: { generationIndex: String(generationIndex) },
+      })
       await ctx.runMutation(internal.familyNaming.applyFamilyNameGenerationFailure, {
         catId,
         errorMessage: normalizeAiError(error),

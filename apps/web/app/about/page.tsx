@@ -13,6 +13,7 @@ export const metadata = createPageMetadata({
 })
 
 export default function AboutPage() {
+  //throw new Error("error-logging smoke test")
   return (
     <>
       <JsonLd

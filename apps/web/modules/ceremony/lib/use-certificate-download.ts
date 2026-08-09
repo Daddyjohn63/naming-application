@@ -18,6 +18,8 @@ import type { Id } from "@workspace/backend/_generated/dataModel"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
 import { toast } from "@workspace/ui/components/sonner"
 
+import { useReportClientError } from "@/lib/use-report-client-error"
+
 /**
  * Convex storage photos are cross-origin; inlining them as data URLs keeps the
  * PDF capture from silently dropping the image. Falls back to the raw URL so
@@ -105,6 +107,7 @@ export function useCertificateDownload({
 }: UseCertificateDownloadArgs) {
   const generateUploadUrl = useMutation(api.cats.generateUploadUrl)
   const completeCeremony = useMutation(api.certificate.completeCeremony)
+  const reportClientError = useReportClientError()
   const [working, setWorking] = React.useState(false)
 
   const capturePng = React.useCallback(async () => {
@@ -173,6 +176,12 @@ export function useCertificateDownload({
     } catch (error) {
       console.error("Certificate generation failed", error)
       toast.error(getConvexErrorMessage(error))
+      reportClientError({
+        area: "certificate.downloadPdf",
+        error,
+        catId,
+        meta: { operation: "useCertificateDownload.downloadPdf" },
+      })
     } finally {
       setWorking(false)
     }
@@ -184,6 +193,7 @@ export function useCertificateDownload({
     everydayName,
     generateUploadUrl,
     onCeremonyComplete,
+    reportClientError,
     working,
   ])
 
@@ -202,10 +212,16 @@ export function useCertificateDownload({
     } catch (error) {
       console.error("Certificate PNG download failed", error)
       toast.error(getConvexErrorMessage(error))
+      reportClientError({
+        area: "certificate.downloadPng",
+        error,
+        catId,
+        meta: { operation: "useCertificateDownload.downloadPng" },
+      })
     } finally {
       setWorking(false)
     }
-  }, [capturePng, everydayName, working])
+  }, [capturePng, catId, everydayName, reportClientError, working])
 
   return { working, downloadPdf, downloadPng }
 }

@@ -15,6 +15,7 @@ import {
   generateCatSummaryWithAi,
   validateCatPhotoWithAi,
 } from "./ai/naming"
+import { describeUnknownError, persistErrorEvent } from "./errorEvents"
 import { internal } from "./_generated/api"
 import { internalAction } from "./_generated/server"
 import type { Id } from "./_generated/dataModel"
@@ -84,6 +85,17 @@ export const validateCatPhoto = internalAction({
     } catch (error) {
       console.error("Photo validation failed:", error)
       const failure = classifySummaryPipelineError({ error, hasPhoto: true })
+      const described = describeUnknownError(error)
+      await persistErrorEvent(ctx, {
+        source: "convex",
+        severity: "error",
+        area: "catSummary.validateCatPhoto",
+        message: described.message,
+        catId,
+        stack: described.stack,
+        path: "catSummaryActions.validateCatPhoto",
+        meta: { kind: failure.kind },
+      })
 
       if (failure.kind === "photo") {
         // Photo/storage issue — send back to profile and consume one check attempt.
@@ -159,6 +171,17 @@ export const generateCatSummary = internalAction({
     } catch (error) {
       const hasPhoto = cat.photoStorageId !== undefined
       const failure = classifySummaryPipelineError({ error, hasPhoto })
+      const described = describeUnknownError(error)
+      await persistErrorEvent(ctx, {
+        source: "convex",
+        severity: "error",
+        area: "catSummary.generateCatSummary",
+        message: described.message,
+        catId,
+        stack: described.stack,
+        path: "catSummaryActions.generateCatSummary",
+        meta: { kind: failure.kind },
+      })
 
       if (failure.kind === "photo") {
         const priorValidation = cat.photoValidation

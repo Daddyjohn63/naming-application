@@ -9,10 +9,13 @@
 //Clerk webhook is triggered when a user's password is verified
 //Clerk webhook is triggered when a user's profile picture is verified
 import { httpRouter } from "convex/server"
-import { httpAction } from "./_generated/server"
+import { httpAction, type ActionCtx } from "./_generated/server"
 import { internal } from "./_generated/api"
 import type { WebhookEvent } from "@clerk/backend"
 import { Webhook } from "svix"
+
+import { describeUnknownError, persistErrorEvent } from "./errorEvents"
+import { tryRateLimit } from "./lib/rateLimiter"
 
 const http = httpRouter()
 
@@ -20,7 +23,7 @@ http.route({
   path: "/clerk-users-webhook",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    const event = await validateRequest(request)
+    const event = await validateRequest(ctx, request)
     if (!event) {
       return new Response("Error occurred", { status: 400 })
     }
@@ -45,7 +48,10 @@ http.route({
   }),
 })
 
-async function validateRequest(req: Request): Promise<WebhookEvent | null> {
+async function validateRequest(
+  ctx: ActionCtx,
+  req: Request,
+): Promise<WebhookEvent | null> {
   const payloadString = await req.text()
   const svixHeaders = {
     "svix-id": req.headers.get("svix-id")!,
@@ -56,7 +62,29 @@ async function validateRequest(req: Request): Promise<WebhookEvent | null> {
   try {
     return wh.verify(payloadString, svixHeaders) as unknown as WebhookEvent
   } catch (error) {
-    console.error("Error verifying webhook event", error)
+    const described = describeUnknownError(error)
+    console.error("Error verifying webhook event", described.message)
+    const rateLimitKey =
+      typeof svixHeaders["svix-id"] === "string" &&
+      svixHeaders["svix-id"].length > 0
+        ? svixHeaders["svix-id"]
+        : "missing-svix-id"
+    const allowed = await tryRateLimit(
+      ctx,
+      "clerkWebhookVerifyFailed",
+      rateLimitKey,
+    )
+    if (allowed) {
+      await persistErrorEvent(ctx, {
+        source: "convex",
+        severity: "error",
+        area: "clerkWebhook",
+        message: described.message,
+        stack: described.stack,
+        path: "/clerk-users-webhook",
+        meta: { stage: "svix_verify_failed" },
+      })
+    }
     return null
   }
 }
