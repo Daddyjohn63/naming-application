@@ -40,6 +40,7 @@ import {
   useCertificateDownload,
   useCertificatePhotoDataUrl,
 } from "@/modules/ceremony/lib/use-certificate-download"
+import { CertificateRecordingOverlay } from "@/modules/ceremony/ui/components/certificate-recording-overlay"
 import { CertificateSharePanel } from "@/modules/ceremony/ui/components/certificate-share-panel"
 import type { CeremonyCertificateData } from "@/modules/ceremony/ui/components/ceremony-certificate-document"
 import { CeremonyCertificateDocument } from "@/modules/ceremony/ui/components/ceremony-certificate-document"
@@ -223,6 +224,9 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
         onOpenChange={feedback.handleOpenChange}
         onSubmitSuccess={feedback.onSubmitSuccess}
       />
+
+      {/* First generate only — re-downloads keep the quieter “Preparing…” button. */}
+      <CertificateRecordingOverlay open={working && !complete} />
 
       {/* Off-screen fixed-width instance captured for the PDF (consistent on all viewports). */}
       <div
