@@ -602,14 +602,14 @@ export function CatProfileForm({
               }
               className={cn(
                 ceremonyCtaButtonClassName,
-                "h-auto min-h-10 max-w-full whitespace-normal text-center"
+                "h-auto min-h-10 max-w-full text-center whitespace-normal"
               )}
             >
               {submitting
                 ? "Submitting…"
                 : photoSubmitBlocked
                   ? "Photo checks used — start a new ceremony"
-                  : "Submit profile to receive a curated personality summary"}
+                  : "Submit to receive your cat's curated personality summary"}
             </Button>
             <Button
               type="button"
