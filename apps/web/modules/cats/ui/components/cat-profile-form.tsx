@@ -600,13 +600,16 @@ export function CatProfileForm({
                 (isSummaryReviewResubmit && submitsRemaining === 0) ||
                 photoSubmitBlocked
               }
-              className={ceremonyCtaButtonClassName}
+              className={cn(
+                ceremonyCtaButtonClassName,
+                "h-auto min-h-10 max-w-full whitespace-normal text-center"
+              )}
             >
               {submitting
                 ? "Submitting…"
                 : photoSubmitBlocked
                   ? "Photo checks used — start a new ceremony"
-                  : "Submit profile to receive a curated personality summary "}
+                  : "Submit profile to receive a curated personality summary"}
             </Button>
             <Button
               type="button"
