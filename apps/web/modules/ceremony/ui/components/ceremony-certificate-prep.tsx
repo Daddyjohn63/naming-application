@@ -65,6 +65,11 @@ export function CeremonyCertificatePrep({ cat }: CeremonyCertificatePrepProps) {
             {complete ? "View certificate" : "Create certificate"}
           </Link>
         </Button>
+        {!complete ? (
+          <Button variant="outline" asChild className="border-primary/30">
+            <Link href="/dashboard">Save &amp; exit</Link>
+          </Button>
+        ) : null}
       </div>
     </Card>
   )

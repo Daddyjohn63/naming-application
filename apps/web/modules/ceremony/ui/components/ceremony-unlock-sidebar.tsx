@@ -5,7 +5,6 @@ import { Lock } from "lucide-react"
 
 import type { Doc } from "@workspace/backend/_generated/dataModel"
 import { showCeremonyUnlockSidebar } from "@/modules/ceremony/lib/ceremony-layout"
-import { allThreeCeremonyNamesChosen } from "@/modules/ceremony/lib/ceremony-naming-view"
 import { useCeremonyStageContinue } from "@/modules/ceremony/lib/use-ceremony-stage-continue"
 import { useCeremonyUnlock } from "@/modules/ceremony/lib/use-ceremony-unlock"
 import { Button } from "@workspace/ui/components/button"
@@ -24,8 +23,6 @@ type CeremonyUnlockSidebarProps = {
 }
 
 type UnlockSidebarCopyInput = {
-  ceremonyComplete: boolean
-  readyForCertificate: boolean
   step: Doc<"cats">["ceremonyStep"]
   selectedCatWorldName: string | undefined
   selectedIneffableName: string | undefined
@@ -34,26 +31,11 @@ type UnlockSidebarCopyInput = {
 
 /** Ordered precedence for unlock-sidebar title/description copy. */
 function unlockSidebarCopy({
-  ceremonyComplete,
-  readyForCertificate,
   step,
   selectedCatWorldName,
   selectedIneffableName,
   unlocked,
 }: UnlockSidebarCopyInput): { title: string; description: string } {
-  if (ceremonyComplete) {
-    return {
-      title: "Ceremony complete",
-      description: "View or download your certificate from the main column.",
-    }
-  }
-  if (readyForCertificate) {
-    return {
-      title: "Ready for your certificate",
-      description:
-        "Your three names are complete — create your certificate in the main column, or change a favourite from the shortlists under the name cards. Shortlists stay locked.",
-    }
-  }
   if (step === "awaiting_payment") {
     return {
       title: "Complete your unlock",
@@ -68,14 +50,14 @@ function unlockSidebarCopy({
     return {
       title: "Continue your ceremony",
       description:
-        "Choose a cat-world name next. You can still switch your family name favourite from the shortlist above.",
+        "Choose a cat-world name next. You can still switch your family name favourite from its shortlist.",
     }
   }
   if (step === "naming_cat_world" && selectedCatWorldName !== undefined) {
     return {
       title: "Almost there",
       description:
-        "Continue in the main column when you're ready for your ineffable near-name.",
+        "Continue when you're ready for your ineffable near-name.",
     }
   }
   if (step === "naming_ineffable" && selectedIneffableName === undefined) {
@@ -89,7 +71,7 @@ function unlockSidebarCopy({
     return {
       title: "Your naming ceremony",
       description:
-        "Continue naming in the main column. You can change a favourite from your shortlist until the certificate is generated.",
+        "Keep going with your naming — you can change a favourite from your shortlist until the certificate is generated.",
     }
   }
   return {
@@ -102,7 +84,8 @@ function unlockSidebarCopy({
 /**
  * KB-006A — persistent unlock sidebar: teasers, pricing, Unlock now, Save & exit.
  * KB-007 stub unlock on `awaiting_payment`; KB-009/010 continue CTAs after unlock.
- * Certificate create/view lives in the main column only (`CeremonyCertificatePrep`).
+ * Hidden once all three names are chosen — `CeremonyCertificatePrep` then owns
+ * certificate create/view and Save & exit.
  */
 export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
   const { continuingToCatWorld, continueToCatWorld, showContinueToCatWorld } =
@@ -125,12 +108,7 @@ export function CeremonyUnlockSidebar({ cat }: CeremonyUnlockSidebarProps) {
     return null
   }
 
-  const ceremonyComplete = cat.ceremonyStep === "ceremony_complete"
-  const readyForCertificate = allThreeCeremonyNamesChosen(cat)
-
   const { title, description } = unlockSidebarCopy({
-    ceremonyComplete,
-    readyForCertificate,
     step,
     selectedCatWorldName: cat.selectedCatWorldName,
     selectedIneffableName: cat.selectedIneffableName,

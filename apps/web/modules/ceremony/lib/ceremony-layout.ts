@@ -55,9 +55,20 @@ export function usesCeremonyNamingTunnel(
   }
 }
 
-/** Sidebar visible during curation (pre-unlock), checkout, or first paid stage. */
+/**
+ * Sidebar visible during curation (pre-unlock), checkout, or first paid stage.
+ * Hidden once all three names are chosen — `CeremonyCertificatePrep` then owns
+ * the remaining actions, including Save & exit.
+ */
 export function showCeremonyUnlockSidebar(cat: CatNamingFields): boolean {
   if (!hasFamilyFavourite(cat)) {
+    return false
+  }
+  if (
+    cat.selectedFamilyName !== undefined &&
+    cat.selectedCatWorldName !== undefined &&
+    cat.selectedIneffableName !== undefined
+  ) {
     return false
   }
   const unlocked = isCeremonyUnlocked(cat)
