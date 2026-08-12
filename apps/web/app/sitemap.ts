@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }> = [
     { path: "/", changeFrequency: "weekly", priority: 1 },
     { path: "/cat-name-generator", changeFrequency: "monthly", priority: 0.9 },
+    { path: "/unique-cat-names", changeFrequency: "monthly", priority: 0.9 },
     { path: "/about", changeFrequency: "monthly", priority: 0.8 },
     { path: "/examples", changeFrequency: "monthly", priority: 0.8 },
     { path: "/pricing", changeFrequency: "weekly", priority: 0.9 },

@@ -33,12 +33,19 @@ export function CatNameGeneratorDifference() {
           </h2>
           <p className="mt-6 text-lg text-pretty text-muted-foreground">
             If you searched for a cat name generator, you&apos;re in the right
-            place — just with a ceremony behind it.{" "}
+            place — just with a ceremony behind it. Prefer something rarer?{" "}
+            <Link
+              href="/unique-cat-names"
+              className="font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              Explore unique cat names
+            </Link>
+            , or{" "}
             <Link
               href="/about"
               className="font-medium text-foreground underline-offset-4 hover:underline"
             >
-              Read the story behind {APP_NAME}
+              read the story behind {APP_NAME}
             </Link>
             .
           </p>

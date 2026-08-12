@@ -7,6 +7,7 @@ import { APP_NAME } from "@workspace/shared/constants/app"
 
 const SITE_LINKS = [
   { href: "/cat-name-generator", label: "Cat name generator" },
+  { href: "/unique-cat-names", label: "Unique cat names" },
   { href: "/examples", label: "Examples" },
   { href: "/about", label: "About" },
   { href: "/pricing", label: "Pricing" },
