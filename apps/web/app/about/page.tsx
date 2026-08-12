@@ -4,7 +4,7 @@ import { createPageMetadata } from "@/lib/seo/metadata"
 import { APP_NAME } from "@workspace/shared/constants/app"
 
 const title = "About"
-const description = `Meet ${APP_NAME}: a cat naming ceremony inspired by T. S. Eliot and sparked by Andrew Lloyd Webber's Cats — built by people who love cats.`
+const description = `${APP_NAME} is a guided cat naming ceremony: photo and personality in, three names out (family, unique cat-world, ineffable near-name), finished with a keepsake certificate. Free to start; unlock free during beta.`
 
 export const metadata = createPageMetadata({
   title,

@@ -16,6 +16,7 @@ const isPublicRoute = createRouteMatcher([
   // SEO / PWA discovery endpoints must stay crawlable without auth
   "/robots.txt",
   "/sitemap.xml",
+  "/llms.txt",
   "/manifest.webmanifest",
   "/opengraph-image(.*)",
   "/twitter-image(.*)",
