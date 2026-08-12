@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 
 import { dataComponent } from "@/lib/data-component"
 import { APP_NAME } from "@workspace/shared/constants/app"
@@ -67,7 +68,13 @@ export function HowItWorks() {
           <div className="flex flex-col gap-6 lg:sticky lg:top-24 lg:self-start">
             <p className="text-base/7 font-semibold">How it works</p>
             <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-              A guided ceremony, not a name generator
+              A guided ceremony, not a{" "}
+              <Link
+                href="/cat-name-generator"
+                className="underline-offset-4 hover:underline"
+              >
+                name generator
+              </Link>
             </h2>
             <p className="text-lg text-pretty text-muted-foreground">
               You bring the story; {APP_NAME} walks you through the rest —

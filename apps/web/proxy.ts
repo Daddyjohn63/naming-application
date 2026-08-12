@@ -7,6 +7,7 @@ const isPublicRoute = createRouteMatcher([
   "/about(.*)",
   "/pricing(.*)",
   "/examples(.*)",
+  "/cat-name-generator(.*)",
   "/privacy(.*)",
   "/terms(.*)",
   // Opt-in shared certificates (unguessable token; no auth)
