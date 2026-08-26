@@ -14,7 +14,7 @@ import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { useMutation, useQuery } from "convex/react"
 import { format } from "date-fns"
-import { ArrowLeft, BadgeCheck, Download, ImageIcon, PencilLine } from "lucide-react"
+import { ArrowLeft, BadgeCheck, Download, ImageIcon, Images, PencilLine } from "lucide-react"
 
 import { api } from "@workspace/backend/_generated/api"
 import { getConvexErrorMessage } from "@workspace/shared/utils/convex-error"
@@ -44,6 +44,7 @@ import { CertificateRecordingOverlay } from "@/modules/ceremony/ui/components/ce
 import { CertificateSharePanel } from "@/modules/ceremony/ui/components/certificate-share-panel"
 import type { CeremonyCertificateData } from "@/modules/ceremony/ui/components/ceremony-certificate-document"
 import { CeremonyCertificateDocument } from "@/modules/ceremony/ui/components/ceremony-certificate-document"
+import { CeremonyInstagramCardDocument } from "@/modules/ceremony/ui/components/ceremony-instagram-card-document"
 import { CertificateFeedbackBanner, CertificateFeedbackDialog, useCertificateFeedbackState } from "@/modules/feedback/ui/components/certificate-feedback-prompt"
 
 export function CatCertificateView() {
@@ -84,16 +85,19 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
   const photoSrc = useCertificatePhotoDataUrl(cat.photoUrl)
 
   const captureRef = React.useRef<HTMLDivElement | null>(null)
+  const instagramCaptureRef = React.useRef<HTMLDivElement | null>(null)
   const everydayName = cat.selectedFamilyName ?? ""
-  const { working, downloadPdf, downloadPng } = useCertificateDownload({
-    catId: cat._id,
-    everydayName,
-    alreadyComplete: complete,
-    captureRef,
-    onCeremonyComplete: () => {
-      setFeedbackOpenSignal((n) => n + 1)
-    },
-  })
+  const { working, downloadPdf, downloadPng, downloadInstagramCard } =
+    useCertificateDownload({
+      catId: cat._id,
+      everydayName,
+      alreadyComplete: complete,
+      captureRef,
+      instagramCaptureRef,
+      onCeremonyComplete: () => {
+        setFeedbackOpenSignal((n) => n + 1)
+      },
+    })
 
   const feedback = useCertificateFeedbackState({
     ceremonyComplete: complete,
@@ -146,7 +150,7 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
         </h1>
         <p className="text-sm text-muted-foreground">
           {complete
-            ? "Your ceremony is complete. Download as PDF or PNG, or share a private link with friends."
+            ? "Your ceremony is complete. Download as PDF, PNG, or an Instagram card, or share a private link with friends."
             : "Review your cat's completed profile below. You can still adjust the family name before generating."}
         </p>
       </div>
@@ -193,16 +197,28 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
                   : "Generate certificate"}
             </Button>
             {complete ? (
-              <Button
-                type="button"
-                variant="outline"
-                className="border-primary/30"
-                disabled={working}
-                onClick={() => void downloadPng()}
-              >
-                <ImageIcon className="size-4" aria-hidden />
-                Download PNG
-              </Button>
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-primary/30"
+                  disabled={working}
+                  onClick={() => void downloadPng()}
+                >
+                  <ImageIcon className="size-4" aria-hidden />
+                  Download PNG
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-primary/30"
+                  disabled={working}
+                  onClick={() => void downloadInstagramCard()}
+                >
+                  <Images className="size-4" aria-hidden />
+                  Download Instagram Card
+                </Button>
+              </>
             ) : null}
             {feedback.canLeaveFeedback ? (
               <Button
@@ -228,7 +244,7 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
       {/* First generate only — re-downloads keep the quieter “Preparing…” button. */}
       <CertificateRecordingOverlay open={working && !complete} />
 
-      {/* Off-screen fixed-width instance captured for the PDF (consistent on all viewports). */}
+      {/* Off-screen capture nodes for PDF/PNG (800px certificate) and Instagram card. */}
       <div
         aria-hidden
         className="pointer-events-none fixed top-0 left-[-2000px]"
@@ -237,6 +253,10 @@ function CatCertificateBody({ cat }: { cat: CatCeremonyDoc }) {
           ref={captureRef}
           data={certificateData}
           fixed
+        />
+        <CeremonyInstagramCardDocument
+          ref={instagramCaptureRef}
+          data={certificateData}
         />
       </div>
     </div>

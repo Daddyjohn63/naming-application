@@ -26,7 +26,7 @@ const STEPS = [
   {
     title: "Download the certificate",
     description:
-      "Finish with a Completed Cat Profile you can save as PDF or PNG, reopen anytime, and optionally share with a private link.",
+      "Finish with a Completed Cat Profile you can save as PDF, PNG, or an Instagram card, reopen anytime, and optionally share with a private link.",
     phase: "Unlock" as const,
   },
 ] as const

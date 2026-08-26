@@ -6,8 +6,8 @@
  * First generate (AC: `ceremony_complete` only after the PDF path succeeded):
  * capture HTML → build PDF → upload blob to Convex storage → `completeCeremony`.
  * No browser download on first generate — the page then reveals Share with
- * friends plus Download PDF / Download PNG. Re-downloads skip the
- * upload/mutation. PNG download never marks the ceremony complete.
+ * friends plus Download PDF / PNG / Instagram Card. Re-downloads skip the
+ * upload/mutation. PNG and Instagram Card never mark the ceremony complete.
  */
 
 import * as React from "react"
@@ -78,6 +78,10 @@ function certificateFileName(everydayName: string, extension: "pdf" | "png"): st
   return `${certificateSlug(everydayName)}-naming-certificate.${extension}`
 }
 
+function instagramCardFileName(everydayName: string): string {
+  return `${certificateSlug(everydayName)}-instagram-card.png`
+}
+
 function triggerBrowserDownload(dataUrl: string, fileName: string): void {
   const anchor = document.createElement("a")
   anchor.href = dataUrl
@@ -94,6 +98,7 @@ type UseCertificateDownloadArgs = {
   /** Already `ceremony_complete` — re-download only, no upload/mutation. */
   alreadyComplete: boolean
   captureRef: React.RefObject<HTMLDivElement | null>
+  instagramCaptureRef: React.RefObject<HTMLDivElement | null>
   /** Fired after `completeCeremony` succeeds (first generate only). */
   onCeremonyComplete?: () => void
 }
@@ -103,6 +108,7 @@ export function useCertificateDownload({
   everydayName,
   alreadyComplete,
   captureRef,
+  instagramCaptureRef,
   onCeremonyComplete,
 }: UseCertificateDownloadArgs) {
   const generateUploadUrl = useMutation(api.cats.generateUploadUrl)
@@ -126,6 +132,19 @@ export function useCertificateDownload({
       }),
     }
   }, [captureRef])
+
+  const captureInstagramPng = React.useCallback(async () => {
+    const node = instagramCaptureRef.current
+    if (node === null) {
+      throw new Error("Instagram card is not ready to capture yet.")
+    }
+    const { toPng } = await import("html-to-image")
+    return toPng(node, {
+      pixelRatio: 2,
+      cacheBust: true,
+      backgroundColor: "#fdf9f0",
+    })
+  }, [instagramCaptureRef])
 
   const downloadPdf = React.useCallback(async () => {
     if (working) {
@@ -155,7 +174,7 @@ export function useCertificateDownload({
       }
 
       // First generate: persist + complete the ceremony before any download.
-      // The UI then shows Share with friends and Download PDF / PNG.
+      // The UI then shows Share with friends and Download PDF / PNG / Instagram Card.
       const pdfBlob = pdf.output("blob")
       const uploadUrl = await generateUploadUrl({})
       const uploadResponse = await fetch(uploadUrl, {
@@ -223,5 +242,28 @@ export function useCertificateDownload({
     }
   }, [capturePng, catId, everydayName, reportClientError, working])
 
-  return { working, downloadPdf, downloadPng }
+  const downloadInstagramCard = React.useCallback(async () => {
+    if (working) {
+      return
+    }
+    setWorking(true)
+    try {
+      const imageDataUrl = await captureInstagramPng()
+      triggerBrowserDownload(imageDataUrl, instagramCardFileName(everydayName))
+      toast.success("Instagram card downloaded.")
+    } catch (error) {
+      console.error("Instagram card download failed", error)
+      toast.error(getConvexErrorMessage(error))
+      reportClientError({
+        area: "certificate.downloadInstagramCard",
+        error,
+        catId,
+        meta: { operation: "useCertificateDownload.downloadInstagramCard" },
+      })
+    } finally {
+      setWorking(false)
+    }
+  }, [captureInstagramPng, catId, everydayName, reportClientError, working])
+
+  return { working, downloadPdf, downloadPng, downloadInstagramCard }
 }
