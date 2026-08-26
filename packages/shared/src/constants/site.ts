@@ -1,13 +1,13 @@
 import { APP_NAME } from "./app"
 
-/** Canonical production hostname (no protocol, no www). */
+/** Apex hostname (no protocol, no www). Used in display copy and email. */
 export const SITE_DOMAIN = "purrfectlynamed.com"
 
-/** www host for display copy (certificate footer, marketing). */
+/** Live host: Vercel 308s apex → www. Canonicals must match this. */
 export const SITE_WWW_HOST = `www.${SITE_DOMAIN}`
 
 /** Absolute origin used for canonical URLs, Open Graph, and sitemap. */
-export const SITE_URL = `https://${SITE_DOMAIN}`
+export const SITE_URL = `https://${SITE_WWW_HOST}`
 
 /** Short brand line for titles and social cards. */
 export const SITE_TAGLINE = "Discover your cat's three names"
