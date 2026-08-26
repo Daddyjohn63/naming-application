@@ -6,6 +6,7 @@
  * rationales. Off-screen capture only; not shown as an on-page preview.
  */
 
+import type { Ref } from "react"
 import { Crown, PawPrint, Shield, Sparkles } from "lucide-react"
 
 import { SITE_WWW_HOST } from "@workspace/shared/constants/site"
@@ -24,7 +25,7 @@ type CeremonyInstagramCardDocumentProps = {
   data: CeremonyInstagramCardData
   className?: string
   /** Capture node ref (React 19 ref-as-prop). */
-  ref?: React.Ref<HTMLDivElement>
+  ref?: Ref<HTMLDivElement>
 }
 
 export function CeremonyInstagramCardDocument({
