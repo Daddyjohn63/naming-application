@@ -7,6 +7,7 @@ const isPublicRoute = createRouteMatcher([
   "/about(.*)",
   "/pricing(.*)",
   "/examples(.*)",
+  "/blog(.*)",
   "/cat-name-generator(.*)",
   "/unique-cat-names(.*)",
   "/privacy(.*)",
@@ -70,7 +71,7 @@ export default clerkMiddleware(
         ],
       },
     },
-  },
+  }
 )
 
 export const config = {

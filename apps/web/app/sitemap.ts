@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next"
 
 import { SITE_URL } from "@workspace/shared/constants/site"
 
+import { listCategories, listPublishedPosts } from "@/modules/blog/lib/posts"
+
 /** Indexable marketing and legal routes for search engines. */
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date()
@@ -21,10 +23,35 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
   ]
 
-  return routes.map(({ path, changeFrequency, priority }) => ({
+  const staticRoutes = routes.map(({ path, changeFrequency, priority }) => ({
     url: path === "/" ? SITE_URL : `${SITE_URL}${path}`,
     lastModified,
     changeFrequency,
     priority,
   }))
+
+  const posts = listPublishedPosts()
+  const categories = listCategories()
+
+  return [
+    ...staticRoutes,
+    {
+      url: `${SITE_URL}/blog`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    ...posts.map((post) => ({
+      url: `${SITE_URL}/blog/${post.slug}`,
+      lastModified: new Date(`${post.publishedAt}T00:00:00.000Z`),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
+    ...categories.map((category) => ({
+      url: `${SITE_URL}/blog/category/${category.slug}`,
+      lastModified,
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    })),
+  ]
 }

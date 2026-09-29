@@ -7,7 +7,9 @@ import {
 
 import { absoluteUrl } from "@/lib/seo/metadata"
 
-type JsonLdValue = Record<string, unknown> | ReadonlyArray<Record<string, unknown>>
+type JsonLdValue =
+  | Record<string, unknown>
+  | ReadonlyArray<Record<string, unknown>>
 
 type FaqItem = {
   question: string
@@ -89,6 +91,69 @@ export function buildFaqPageJsonLd(faqs: readonly FaqItem[]) {
         text: answer,
       },
     })),
+  } as const
+}
+
+export function buildBreadcrumbListJsonLd(
+  items: readonly { name: string; path: string }[]
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: absoluteUrl(item.path),
+    })),
+  } as const
+}
+
+export function buildBlogPostingJsonLd({
+  title,
+  description,
+  path,
+  publishedAt,
+  image,
+}: {
+  title: string
+  description: string
+  path: string
+  publishedAt: string
+  image?: { url: string; alt: string }
+}) {
+  const pageUrl = absoluteUrl(path)
+  const imageUrl =
+    image === undefined
+      ? undefined
+      : image.url.startsWith("https://")
+        ? image.url
+        : absoluteUrl(image.url)
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: title,
+    description,
+    datePublished: publishedAt,
+    url: pageUrl,
+    mainEntityOfPage: pageUrl,
+    inLanguage: "en-GB",
+    ...(imageUrl
+      ? {
+          image: {
+            "@type": "ImageObject",
+            url: imageUrl,
+            caption: image?.alt,
+          },
+        }
+      : {}),
+    publisher: {
+      "@type": "Organization",
+      name: APP_NAME,
+      url: SITE_URL,
+    },
+    isPartOf: { "@id": `${SITE_URL}/#website` },
   } as const
 }
 
