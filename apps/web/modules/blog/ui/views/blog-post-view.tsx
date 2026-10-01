@@ -1,6 +1,8 @@
 import { formatBlogDate } from "@/modules/blog/lib/format-blog-date"
 import type { BlogPost } from "@/modules/blog/lib/posts"
+import { SocialLinks } from "@/components/social-links"
 import { BlogBreadcrumb } from "@/modules/blog/ui/components/blog-breadcrumb"
+import { BlogPostShare } from "@/modules/blog/ui/components/blog-post-share"
 import { BlogImage } from "@/modules/blog/ui/components/blog-image"
 import { BlogMarkdown } from "@/modules/blog/ui/components/blog-markdown"
 import { BlogShell } from "@/modules/blog/ui/components/blog-shell"
@@ -31,6 +33,22 @@ export function BlogPostView({
     >
       <BlogBreadcrumb current={post.title} />
       <article className="mx-auto mt-6 flex max-w-3xl flex-col gap-5">
+        <div className="flex flex-wrap items-center gap-1">
+          <p className="text-muted-foreground pr-1 text-sm font-medium">
+            Follow
+          </p>
+          <SocialLinks />
+          {isDraft ? null : (
+            <>
+              <div className="bg-border/70 mx-1 h-5 w-px" aria-hidden />
+              <BlogPostShare
+                title={post.title}
+                path={`/blog/${post.slug}`}
+                text={post.excerpt}
+              />
+            </>
+          )}
+        </div>
         {isDraft ? (
           <p
             role="status"

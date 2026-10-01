@@ -375,7 +375,6 @@ function optionalPublishedAt(
     throw new Error(`${sourcePath}: publishedAt must be a YYYY-MM-DD date.`)
   }
 
-  if (!published) return undefined
   return value
 }
 

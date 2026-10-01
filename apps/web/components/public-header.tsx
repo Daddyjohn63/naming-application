@@ -6,9 +6,9 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import * as React from "react"
 
-import { BetaBadge } from "@/components/beta-badge"
 import { LogoLink } from "@/components/logo"
 import { PUBLIC_NAV_LINKS } from "@/components/public-nav"
+import { SocialLinks } from "@/components/social-links"
 import { dataComponent } from "@/lib/data-component"
 import { Button } from "@workspace/ui/components/button"
 import {
@@ -109,20 +109,24 @@ export function PublicHeader() {
     <header
       {...dataComponent("PublicHeader")}
       className={cn(
-        "relative z-10 flex h-24 shrink-0 items-center border-b px-4 md:px-6",
+        "relative z-10 flex h-24 min-w-0 shrink-0 items-center border-b px-4 md:px-6",
         isHome
           ? "border-border/25 bg-background/40 shadow-none backdrop-blur-md supports-backdrop-filter:bg-background/30 dark:border-white/10"
           : "border-border/50 bg-background/95 shadow-[0_1px_0_0_var(--border),0_4px_8px_-2px_rgba(0,0,0,0.06)] supports-backdrop-filter:bg-background/80 supports-backdrop-filter:backdrop-blur-sm dark:border-white/15 dark:shadow-[0_1px_0_0_rgba(255,255,255,0.14),0_8px_20px_-4px_rgba(0,0,0,0.75)]"
       )}
     >
       <div className="flex min-w-0 flex-1 items-center gap-2">
-        <LogoLink href="/" showName onClick={closeMobile} />
-        <BetaBadge />
+        <LogoLink
+          href="/"
+          showName
+          onClick={closeMobile}
+          className="min-w-0 shrink"
+        />
       </div>
 
       <nav
         aria-label="Main"
-        className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 md:flex"
+        className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 lg:flex"
       >
         {PUBLIC_NAV_LINKS.map((item) => (
           <PublicNavLink
@@ -134,8 +138,10 @@ export function PublicHeader() {
         ))}
       </nav>
 
-      <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
-        <div className="hidden items-center gap-2 md:flex">
+      <div className="flex shrink-0 items-center justify-end gap-2 lg:min-w-0 lg:flex-1">
+        <div className="hidden items-center gap-1 lg:flex">
+          <SocialLinks />
+          <div className="bg-border/70 mx-1 h-5 w-px" aria-hidden />
           <PublicHeaderActions />
         </div>
 
@@ -144,7 +150,7 @@ export function PublicHeader() {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="lg:hidden"
               aria-label="Open menu"
             >
               <Menu className="size-5" />
@@ -154,6 +160,12 @@ export function PublicHeader() {
             <SheetHeader className="border-border/40 border-b pb-4 text-left">
               <SheetTitle className="text-base">Menu</SheetTitle>
             </SheetHeader>
+            <div className="px-4 pt-4">
+              <p className="text-muted-foreground px-1 pb-2 text-xs font-medium tracking-wide uppercase">
+                Follow
+              </p>
+              <SocialLinks variant="menu" onNavigate={closeMobile} />
+            </div>
             <nav
               aria-label="Main"
               className="flex flex-col gap-1 px-4 py-2"

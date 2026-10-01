@@ -33,3 +33,19 @@ export const SITE_KEYWORDS = [
 
 /** Default social / OG image alt text. */
 export const SITE_OG_IMAGE_ALT = `${APP_NAME} — ${SITE_TAGLINE}`
+
+/** Public social profiles linked from the site header and blog posts. */
+export const SOCIAL_PROFILES = [
+  {
+    id: "instagram",
+    label: "Instagram",
+    href: "https://www.instagram.com/purrfectlynamed/?hl=en",
+  },
+  {
+    id: "facebook",
+    label: "Facebook",
+    href: "https://www.facebook.com/profile.php?id=61593021847301&locale=en_GB",
+  },
+] as const
+
+export type SocialProfileId = (typeof SOCIAL_PROFILES)[number]["id"]
