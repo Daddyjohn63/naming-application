@@ -7,7 +7,7 @@ published: true
 publishedAt: 2026-10-01
 categories:
   - Naming
-image: https://shiny-wolf-18.convex.cloud/api/storage/kg21ct96sswg8583zwtqjqstzd8fec4y
+image: https://shiny-wolf-18.convex.cloud/api/storage/ed8555b8-498e-4be1-a8b0-aafac0ee8f3a
 imageAlt: Four cats. One sitting at a desk writing, the other three are looking on expectantly.
 ---
 
