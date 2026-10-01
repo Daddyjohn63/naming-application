@@ -30,7 +30,7 @@ export function BlogCategoryView({
         <p className="text-xs font-medium tracking-[0.18em] text-primary uppercase">
           Category
         </p>
-        <h1 className="font-serif text-4xl font-semibold tracking-tight text-balance md:text-5xl">
+        <h1 className="font-sans text-4xl font-semibold tracking-tight text-balance md:text-5xl">
           {category.label}
         </h1>
         <p className="text-base text-primary md:text-lg">

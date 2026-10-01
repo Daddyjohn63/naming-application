@@ -11,7 +11,10 @@ type BlogImageProps = {
   className?: string
 }
 
-/** Local `/blog/…` files use `next/image`. Remote `https` URLs use `img`. */
+/**
+ * Local `/blog/…` files use `next/image`.
+ * Convex storage and other `https` URLs use `img`, including the card `fill` frame.
+ */
 export function BlogImage({
   src,
   alt,
@@ -23,9 +26,13 @@ export function BlogImage({
   className,
 }: BlogImageProps) {
   if (src.startsWith("https://")) {
+    const remoteClassName = fill
+      ? ["absolute inset-0 size-full", className].filter(Boolean).join(" ")
+      : className
+
     return (
       // eslint-disable-next-line @next/next/no-img-element -- remote hosts stay off the image optimizer
-      <img src={src} alt={alt} className={className} />
+      <img src={src} alt={alt} className={remoteClassName} />
     )
   }
 

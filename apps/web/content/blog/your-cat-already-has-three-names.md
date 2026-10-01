@@ -3,12 +3,12 @@ title: Your cat already has three names
 subtitle: A family name, a cat-world name, and the ineffable one you will never quite catch
 excerpt: Every cat is owed three names. Here is what each one is for, and how a naming ceremony helps you find them.
 description: What T. S. Eliot's three cat names mean in practice, and how Naming Buddy turns a photo and a personality into a family name, a unique cat-world name, and a keepsake certificate.
-published: true
+published: false
 publishedAt: 2026-09-28
 categories:
   - Naming
   - Guides
-image: /blog/three-names.jpg
+image: https://quirky-chickadee-155.eu-west-1.convex.cloud/api/storage/3b652186-aba7-46b5-9a9d-dd284b02d915
 imageAlt: A cat sitting in a patch of window light, looking just past the camera.
 ---
 

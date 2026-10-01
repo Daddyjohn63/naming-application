@@ -7,17 +7,17 @@ import { BlogImage } from "@/modules/blog/ui/components/blog-image"
 
 const components: Components = {
   h1: ({ children }) => (
-    <h2 className="mt-10 mb-4 font-serif text-3xl font-semibold tracking-tight">
+    <h2 className="mt-10 mb-4 font-sans text-3xl font-semibold tracking-tight">
       {children}
     </h2>
   ),
   h2: ({ children }) => (
-    <h2 className="mt-10 mb-4 font-serif text-2xl font-semibold tracking-tight">
+    <h2 className="mt-10 mb-4 font-sans text-2xl font-semibold tracking-tight">
       {children}
     </h2>
   ),
   h3: ({ children }) => (
-    <h3 className="mt-8 mb-3 font-serif text-xl font-semibold tracking-tight">
+    <h3 className="mt-8 mb-3 font-sans text-xl font-semibold tracking-tight">
       {children}
     </h3>
   ),

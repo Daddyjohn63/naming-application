@@ -6,6 +6,7 @@ import { BlogMarkdown } from "@/modules/blog/ui/components/blog-markdown"
 import { BlogShell } from "@/modules/blog/ui/components/blog-shell"
 import type { BlogCategory } from "@workspace/shared/utils/blog-slug"
 import { Badge } from "@workspace/ui/components/badge"
+import { Button } from "@workspace/ui/components/button"
 import Link from "next/link"
 
 type BlogPostViewProps = {
@@ -59,7 +60,7 @@ export function BlogPostView({
             </time>
           ) : null}
         </div>
-        <h1 className="font-serif text-4xl font-semibold tracking-tight text-balance md:text-5xl">
+        <h1 className="font-sans text-4xl font-semibold tracking-tight text-balance md:text-5xl">
           {post.title}
         </h1>
         {post.subtitle ? (
@@ -79,6 +80,14 @@ export function BlogPostView({
           />
         ) : null}
         <BlogMarkdown source={post.body} />
+        <div className="mt-4 border-t border-border/60 pt-8">
+          <p className="mb-4 font-serif text-xl text-primary italic">
+            Your cat already knows their name.
+          </p>
+          <Button size="lg" asChild>
+            <Link href="/sign-up">Start the naming ceremony</Link>
+          </Button>
+        </div>
       </article>
     </BlogShell>
   )

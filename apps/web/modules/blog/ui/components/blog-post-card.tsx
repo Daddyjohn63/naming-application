@@ -93,7 +93,7 @@ function FeaturedPostCard({
           <CardTitle>
             <Link
               href={`/blog/${post.slug}`}
-              className="font-serif text-3xl leading-tight font-semibold tracking-tight"
+              className="font-sans text-3xl leading-tight font-semibold tracking-tight"
             >
               {post.title}
             </Link>
@@ -124,7 +124,7 @@ function QuietPostCard({ post }: { post: BlogPostCardModel }) {
             <CardTitle>
               <Link
                 href={`/blog/${post.slug}`}
-                className="font-serif text-2xl leading-tight font-semibold tracking-tight"
+                className="font-sans text-2xl leading-tight font-semibold tracking-tight"
               >
                 {post.title}
               </Link>

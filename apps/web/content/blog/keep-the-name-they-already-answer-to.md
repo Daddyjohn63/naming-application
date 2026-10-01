@@ -1,7 +1,7 @@
 ---
 title: Keep the name they already answer to
 excerpt: A household nickname can stay. The ceremony spends its care on the other two.
-published: true
+published: false
 publishedAt: 2026-09-12
 categories:
   - Naming
