@@ -7,7 +7,7 @@ published: true
 publishedAt: 2026-10-01
 categories:
   - Naming
-image: https://quirky-chickadee-155.eu-west-1.convex.cloud/api/storage/3b652186-aba7-46b5-9a9d-dd284b02d915
+image: https://shiny-wolf-18.convex.cloud/api/storage/kg21ct96sswg8583zwtqjqstzd8fec4y
 imageAlt: Four cats. One sitting at a desk writing, the other three are looking on expectantly.
 ---
 
