@@ -55,7 +55,7 @@ export function LogoLink({
         <span
           className={cn(
             "bg-linear-to-r from-primary via-chart-2 to-chart-3 bg-clip-text",
-            "text-2xl font-semibold tracking-tight text-transparent whitespace-nowrap"
+            "min-w-0 truncate text-2xl font-semibold tracking-tight text-transparent"
           )}
         >
           {APP_NAME}

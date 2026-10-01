@@ -9,6 +9,13 @@ import {
   SITE_URL,
 } from "@workspace/shared/constants/site"
 
+type PageSocialImage = {
+  url: string
+  alt: string
+  width?: number
+  height?: number
+}
+
 type CreatePageMetadataOptions = {
   /** Short page title; root template appends `| ${APP_NAME}` unless `absoluteTitle`. */
   title: string
@@ -20,6 +27,8 @@ type CreatePageMetadataOptions = {
   absoluteTitle?: boolean
   robots?: Metadata["robots"]
   openGraphType?: "website" | "article"
+  /** Replaces the site default `/opengraph-image` on Open Graph and Twitter. */
+  image?: PageSocialImage
 }
 
 /** Absolute URL for a site path. */
@@ -41,11 +50,24 @@ export function createPageMetadata({
   absoluteTitle = false,
   robots,
   openGraphType = "website",
+  image,
 }: CreatePageMetadataOptions): Metadata {
   const url = absoluteUrl(path)
-  const documentTitle = absoluteTitle
-    ? { absolute: title }
-    : title
+  const documentTitle = absoluteTitle ? { absolute: title } : title
+  const socialTitle = absoluteTitle ? title : `${title} | ${APP_NAME}`
+  const openGraphImage = image
+    ? {
+        url: image.url,
+        alt: image.alt,
+        ...(image.width !== undefined ? { width: image.width } : {}),
+        ...(image.height !== undefined ? { height: image.height } : {}),
+      }
+    : {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: SITE_OG_IMAGE_ALT,
+      }
 
   return {
     title: documentTitle,
@@ -55,29 +77,22 @@ export function createPageMetadata({
       canonical: url,
     },
     openGraph: {
-      title: absoluteTitle ? title : `${title} | ${APP_NAME}`,
+      title: socialTitle,
       description,
       url,
       siteName: APP_NAME,
       locale: "en_GB",
       type: openGraphType,
-      images: [
-        {
-          url: "/opengraph-image",
-          width: 1200,
-          height: 630,
-          alt: SITE_OG_IMAGE_ALT,
-        },
-      ],
+      images: [openGraphImage],
     },
     twitter: {
       card: "summary_large_image",
-      title: absoluteTitle ? title : `${title} | ${APP_NAME}`,
+      title: socialTitle,
       description,
       images: [
         {
-          url: "/opengraph-image",
-          alt: SITE_OG_IMAGE_ALT,
+          url: openGraphImage.url,
+          alt: openGraphImage.alt,
         },
       ],
     },

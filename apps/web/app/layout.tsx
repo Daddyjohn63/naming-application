@@ -40,7 +40,7 @@ export default function RootLayout({
     >
       <body
         {...dataComponent("RootLayout")}
-        className="flex min-h-svh flex-col"
+        className="flex min-h-svh min-w-0 flex-col overflow-x-clip"
       >
         <ConsentManager>
           <ClerkProvider>
