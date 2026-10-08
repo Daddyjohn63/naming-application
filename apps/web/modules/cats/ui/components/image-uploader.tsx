@@ -73,7 +73,7 @@ export function CatPhotoUploader({
         htmlFor={id}
         aria-disabled={disabled}
         className={`group relative mt-1 flex aspect-square w-full max-w-xs cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border border-border/80 shadow-sm transition-all ${
-          previewUrl === null ? "border-dashed bg-muted/20" : "bg-card"
+          previewUrl === null ? "border-dashed bg-muted/20" : "bg-muted"
         } ${disabled ? "pointer-events-none opacity-60" : ""}`}
       >
         <div
@@ -140,7 +140,7 @@ export function CatPhotoUploader({
           <img
             src={previewUrl}
             alt="Uploaded cat photo preview"
-            className="size-full object-cover"
+            className="size-full object-contain"
           />
         ) : null}
       </label>

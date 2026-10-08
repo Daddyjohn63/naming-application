@@ -107,7 +107,7 @@ export function CeremonyCertificateDocument({
             <img
               src={data.photoSrc}
               alt={`Photo of ${data.everydayName}`}
-              className="aspect-4/5 w-full rounded-lg object-cover"
+              className="mx-auto block max-h-[420px] w-full rounded-lg object-contain"
               crossOrigin="anonymous"
             />
           </div>

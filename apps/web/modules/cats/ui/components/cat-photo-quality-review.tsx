@@ -72,7 +72,7 @@ export function CatPhotoQualityReview({
               src={cat.photoUrl}
               alt="Your cat"
               fill
-              className="object-cover"
+              className="object-contain"
               sizes="(max-width: 768px) 100vw, 320px"
               unoptimized
             />

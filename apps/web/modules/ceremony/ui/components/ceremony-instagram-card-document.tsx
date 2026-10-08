@@ -70,12 +70,12 @@ export function CeremonyInstagramCardDocument({
 
       <div className="mt-[18px] flex min-h-0 flex-1 justify-center">
         {data.photoSrc !== undefined ? (
-          <div className="aspect-4/5 h-full max-w-full rounded-[22px] border border-[#e7dcc4] bg-white p-2.5 shadow-sm">
+          <div className="aspect-4/5 h-full max-w-full rounded-[22px] border border-[#e7dcc4] bg-[#faf4e6] p-2.5 shadow-sm">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={data.photoSrc}
               alt={`Photo of ${data.everydayName}`}
-              className="h-full w-full rounded-[14px] object-cover"
+              className="h-full w-full rounded-[14px] bg-[#faf4e6] object-contain"
               crossOrigin="anonymous"
             />
           </div>
