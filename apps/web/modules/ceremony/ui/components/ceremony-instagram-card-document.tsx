@@ -68,17 +68,15 @@ export function CeremonyInstagramCardDocument({
         </div>
       </header>
 
-      <div className="mt-[18px] flex min-h-0 flex-1 justify-center">
+      <div className="mt-[18px] flex min-h-0 w-full flex-1 items-center justify-center">
         {data.photoSrc !== undefined ? (
-          <div className="aspect-4/5 h-full max-w-full rounded-[22px] border border-[#e7dcc4] bg-[#faf4e6] p-2.5 shadow-sm">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={data.photoSrc}
-              alt={`Photo of ${data.everydayName}`}
-              className="h-full w-full rounded-[14px] bg-[#faf4e6] object-contain"
-              crossOrigin="anonymous"
-            />
-          </div>
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={data.photoSrc}
+            alt={`Photo of ${data.everydayName}`}
+            className="max-h-full min-h-0 max-w-full min-w-0 rounded-[22px] border-[10px] border-[#faf4e6] object-contain shadow-[0_0_0_1px_#e7dcc4]"
+            crossOrigin="anonymous"
+          />
         ) : (
           <div className="flex aspect-4/5 h-full max-w-full flex-col items-center justify-center gap-2 rounded-[22px] border border-dashed border-[#dcc9a3] bg-[#faf4e6] text-[#b09b72]">
             <PawPrint aria-hidden className="size-12" />
