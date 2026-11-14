@@ -11,7 +11,7 @@ categories:
   - Cat-World-Name
   - Ineffable-Name
 image: https://shiny-wolf-18.convex.cloud/api/storage/bc99dfe2-b03d-4c51-8587-3ff7e6c05cf2
-imageAlt: A silver tabby cat sits beside a woman in a flowing white dress on a wooden bench in a sunlit rose garden.
+imageAlt: A silver tabby cat sits beside a woman in a flowing white dress on a wooden bench in a sunlit rose garden. The cat is contemplating their name.
 ---
 
 You call him Biscuit.
