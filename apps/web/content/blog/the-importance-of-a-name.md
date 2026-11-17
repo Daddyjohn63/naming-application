@@ -10,7 +10,7 @@ categories:
   - Family-name
   - Cat-World-Name
   - Ineffable-Name
-image: https://shiny-wolf-18.convex.cloud/api/storage/8442cc9e-81f9-4567-b50e-a595e02e0c59
+image: https://shiny-wolf-18.convex.cloud/api/storage/2593d6ad-a1f3-4931-8a8f-7837404a8f68
 imageAlt: A silver tabby cat sits beside a woman in a flowing white dress on a wooden bench in a sunlit rose garden. The cat is contemplating their name.
 ---
 
